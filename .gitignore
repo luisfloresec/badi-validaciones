@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.env
+.env.*
+coverage/
+.DS_Store
+.vscode/
+.idea/
+*.log
+
+backend/badi-api/node_modules/
+backend/badi-api/dist/
+
+frontend/badi-web/node_modules/
+frontend/badi-web/dist/
+frontend/badi-web/.angular/
+
