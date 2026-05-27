@@ -33,6 +33,12 @@ export class OrganizationsController {
     return this.organizationsService.findByRuc(ruc);
   }
 
+  /** GET /organizations/:id/full-detail — Detalle completo de la organización */
+  @Get(':id/full-detail')
+  getFullDetail(@Param('id', ParseUUIDPipe) id: string) {
+    return this.organizationsService.getFullDetail(id);
+  }
+
   /** GET /organizations/:id — Obtener organización por UUID */
   @Get(':id')
   findOne(@Param('id', ParseUUIDPipe) id: string) {

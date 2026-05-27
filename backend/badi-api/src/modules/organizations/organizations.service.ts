@@ -9,6 +9,9 @@ import { In, Repository } from 'typeorm';
 import { Organization } from './entities/organization.entity';
 import { OrganizationType } from '../organization-types/entities/organization-type.entity';
 import { Catalog } from '../catalogs/entities/catalog.entity';
+import { Representative } from '../representatives/entities/representative.entity';
+import { AttendedGroup } from '../attended-groups/entities/attended-group.entity';
+import { Leader } from '../leaders/entities/leader.entity';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { UpdateOrganizationDto } from './dto/update-organization.dto';
 
@@ -23,6 +26,15 @@ export class OrganizationsService {
 
     @InjectRepository(Catalog)
     private readonly catalogsRepository: Repository<Catalog>,
+
+    @InjectRepository(Representative)
+    private readonly repsRepository: Repository<Representative>,
+
+    @InjectRepository(AttendedGroup)
+    private readonly groupsRepository: Repository<AttendedGroup>,
+
+    @InjectRepository(Leader)
+    private readonly leadersRepository: Repository<Leader>,
   ) {}
 
   /**
@@ -154,6 +166,118 @@ export class OrganizationsService {
       throw new NotFoundException(`Organización con RUC ${ruc} no encontrada.`);
     }
     return org;
+  }
+
+  /**
+   * Obtiene el detalle completo de una organización (datos generales, catálogos,
+   * representantes, grupos atendidos, dirigentes y placeholder para documentos).
+   */
+  async getFullDetail(id: string): Promise<any> {
+    const org = await this.orgsRepository.findOne({
+      where: { id },
+      relations: {
+        tipoOrganizacion: true,
+        accionSocial: true,
+        segmento: true,
+        frecuenciaRetiro: true,
+        transporte: true,
+      },
+    });
+
+    if (!org) {
+      throw new NotFoundException(`Organización con id ${id} no encontrada.`);
+    }
+
+    if (org.estado === 'Inactiva') {
+      throw new ConflictException('La organización está inactiva.');
+    }
+
+    const representantesRaw = await this.repsRepository.find({
+      where: { organizacion: { id }, estado: 'Activo' },
+    });
+
+    const representantes = representantesRaw.map((rep) => ({
+      id: rep.id,
+      nombres: rep.nombres,
+      apellidos: rep.apellidos,
+      cedula: rep.cedula,
+      telefono: rep.telefono,
+      email: rep.email,
+      cargo: rep.cargo,
+      esPrincipal: rep.esPrincipal,
+      estado: rep.estado,
+      fechaRegistro: rep.fechaRegistro,
+      fechaActualizacion: rep.fechaActualizacion,
+    }));
+
+    const gruposAtendidosRaw = await this.groupsRepository.find({
+      where: { organizacion: { id }, estado: 'Activo' },
+    });
+
+    const gruposAtendidos = await Promise.all(
+      gruposAtendidosRaw.map(async (grupo) => {
+        const dirigentesRaw = await this.leadersRepository.find({
+          where: { grupoAtendido: { id: grupo.id }, estado: 'Activo' },
+        });
+
+        const dirigentes = dirigentesRaw.map((dir) => ({
+          id: dir.id,
+          representanteId: dir.representante ? dir.representante.id : null,
+          nombres: dir.nombres,
+          apellidos: dir.apellidos,
+          cedula: dir.cedula,
+          telefono: dir.telefono,
+          email: dir.email,
+          estado: dir.estado,
+          fechaRegistro: dir.fechaRegistro,
+          fechaActualizacion: dir.fechaActualizacion,
+        }));
+
+        return {
+          grupo: {
+            id: grupo.id,
+            nombre: grupo.nombre,
+            grupoEtario: grupo.grupoEtario,
+            vulnerabilidad: grupo.vulnerabilidad,
+            numeroPersonas: grupo.numeroPersonas,
+            observaciones: grupo.observaciones,
+            estado: grupo.estado,
+            fechaRegistro: grupo.fechaRegistro,
+            fechaActualizacion: grupo.fechaActualizacion,
+          },
+          dirigentes,
+        };
+      }),
+    );
+
+    return {
+      organizacion: {
+        id: org.id,
+        ruc: org.ruc,
+        razonSocial: org.razonSocial,
+        nombreComercial: org.nombreComercial,
+        email: org.email,
+        ciudad: org.ciudad,
+        sectorBarrio: org.sectorBarrio,
+        direccion: org.direccion,
+        referenciaDireccion: org.referenciaDireccion,
+        cuotaRecuperacionEstimada: org.cuotaRecuperacionEstimada,
+        totalPersonasAtendidas: org.totalPersonasAtendidas,
+        redesSociales: org.redesSociales,
+        observaciones: org.observaciones,
+        estado: org.estado,
+        fechaRegistro: org.fechaRegistro,
+        fechaActualizacion: org.fechaActualizacion,
+        tipoOrganizacion: org.tipoOrganizacion,
+        accionSocial: org.accionSocial,
+        segmento: org.segmento,
+        frecuenciaRetiro: org.frecuenciaRetiro,
+        transporte: org.transporte,
+      },
+      representantes,
+      gruposAtendidos,
+      documentos: [],
+    };
   }
 
   /**
