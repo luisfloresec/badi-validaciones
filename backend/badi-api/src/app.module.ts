@@ -10,6 +10,7 @@ import { CatalogsModule } from './modules/catalogs/catalogs.module';
 import { OrganizationTypesModule } from './modules/organization-types/organization-types.module';
 import { OrganizationsModule } from './modules/organizations/organizations.module';
 import { RepresentativesModule } from './modules/representatives/representatives.module';
+import { AttendedGroupsModule } from './modules/attended-groups/attended-groups.module';
 
 @Module({
   imports: [
@@ -45,6 +46,8 @@ import { RepresentativesModule } from './modules/representatives/representatives
     OrganizationsModule,
 
     RepresentativesModule,
+
+    AttendedGroupsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
