@@ -8,6 +8,7 @@ import { UsersModule } from './modules/users/users.module';
 import { UserRolesModule } from './modules/user-roles/user-roles.module';
 import { CatalogsModule } from './modules/catalogs/catalogs.module';
 import { OrganizationTypesModule } from './modules/organization-types/organization-types.module';
+import { OrganizationsModule } from './modules/organizations/organizations.module';
 
 @Module({
   imports: [
@@ -39,6 +40,8 @@ import { OrganizationTypesModule } from './modules/organization-types/organizati
     CatalogsModule,
 
     OrganizationTypesModule,
+
+    OrganizationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
