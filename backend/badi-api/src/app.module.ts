@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { RolesModule } from './modules/roles/roles.module';
 import { UsersModule } from './modules/users/users.module';
 import { UserRolesModule } from './modules/user-roles/user-roles.module';
+import { CatalogsModule } from './modules/catalogs/catalogs.module';
 
 @Module({
   imports: [
@@ -33,6 +34,8 @@ import { UserRolesModule } from './modules/user-roles/user-roles.module';
     UsersModule,
 
     UserRolesModule,
+
+    CatalogsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
