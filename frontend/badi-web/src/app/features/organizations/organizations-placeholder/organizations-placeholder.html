@@ -35,7 +35,7 @@
   <!-- Error -->
   <div class="state-container state-error" *ngIf="!loading && error">
     <mat-icon class="state-icon">cloud_off</mat-icon>
-    <p><strong>No se pudo conectar con el servidor.</strong></p>
+    <p><strong>{{ error }}</strong></p>
     <p class="state-hint">Verifica que el backend esté ejecutándose en http://localhost:3000</p>
     <button mat-stroked-button (click)="loadOrganizations()">
       <mat-icon>refresh</mat-icon> Reintentar

@@ -1,0 +1,296 @@
+<div class="page-container">
+  
+  <!-- Breadcrumb -->
+  <div class="breadcrumb">
+    <a (click)="goBack()">Organizaciones</a>
+    <mat-icon>chevron_right</mat-icon>
+    <span *ngIf="!detail">Detalle</span>
+    <span *ngIf="detail" class="current-page">{{ detail.organizacion.razonSocial }}</span>
+  </div>
+  
+  <!-- Loading -->
+  <div class="state-container" *ngIf="loading">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Cargando información de la organización...</p>
+  </div>
+
+  <!-- Error -->
+  <div class="state-container state-error" *ngIf="!loading && error">
+    <mat-icon class="state-icon">cloud_off</mat-icon>
+    <p><strong>{{ error }}</strong></p>
+    <p class="state-hint">Verifica que la organización exista y el servidor esté activo.</p>
+    <button mat-stroked-button (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon> Volver al listado
+    </button>
+  </div>
+
+  <!-- Contenido principal -->
+  <ng-container *ngIf="!loading && !error && detail">
+    
+    <!-- 1. Cabecera -->
+    <div class="detail-header-card badi-card">
+      <div class="top-actions">
+        <button mat-button class="btn-back" (click)="goBack()">
+          <mat-icon>arrow_back</mat-icon> Volver a Organizaciones
+        </button>
+        <div class="action-buttons">
+          <button mat-stroked-button disabled>
+            <mat-icon>edit</mat-icon> Editar organización
+          </button>
+          <button mat-flat-button class="btn-primary" disabled>
+            <mat-icon>attach_file</mat-icon> Asociar documento
+          </button>
+        </div>
+      </div>
+
+      <div class="org-identity">
+        <div class="identity-main">
+          <h1>{{ detail.organizacion.razonSocial }}</h1>
+          <div class="identity-badges">
+            <span class="badge badge-ruc">RUC: {{ detail.organizacion.ruc }}</span>
+            <span class="badge badge-tipo">{{ detail.organizacion.tipoOrganizacion.nombre || 'No especificado' }}</span>
+            <span class="estado-chip" [ngClass]="getEstadoClass(detail.organizacion.estado)">
+              {{ detail.organizacion.estado }}
+            </span>
+          </div>
+          <p class="identity-location">
+            <mat-icon>location_on</mat-icon> 
+            {{ detail.organizacion.ciudad }}, {{ detail.organizacion.direccion }}
+          </p>
+        </div>
+        <div class="identity-stats">
+          <div class="stat-box">
+            <span class="stat-value">{{ detail.organizacion.totalPersonasAtendidas }}</span>
+            <span class="stat-label">Personas atendidas</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-value">{{ formatCurrency(detail.organizacion.cuotaRecuperacionEstimada) }}</span>
+            <span class="stat-label">Cuota estimada</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Información General -->
+    <div class="badi-card section-card">
+      <div class="badi-card-header">
+        <mat-icon class="badi-card-icon">business</mat-icon>
+        <h2>Información General</h2>
+      </div>
+      <div class="info-grid">
+        <div class="info-item">
+          <label>Razón social</label>
+          <span>{{ detail.organizacion.razonSocial }}</span>
+        </div>
+        <div class="info-item">
+          <label>Email de contacto</label>
+          <span>{{ detail.organizacion.email || 'No especificado' }}</span>
+        </div>
+        <div class="info-item">
+          <label>Ciudad</label>
+          <span>{{ detail.organizacion.ciudad }}</span>
+        </div>
+        <div class="info-item">
+          <label>Sector / Barrio</label>
+          <span>{{ detail.organizacion.sectorBarrio || 'No especificado' }}</span>
+        </div>
+        <div class="info-item full-width">
+          <label>Dirección</label>
+          <span>{{ detail.organizacion.direccion }}</span>
+        </div>
+        <div class="info-item full-width">
+          <label>Referencia de dirección</label>
+          <span>{{ detail.organizacion.referenciaDireccion || 'No especificado' }}</span>
+        </div>
+        <div class="info-item">
+          <label>Acción social</label>
+          <span>{{ detail.organizacion.accionSocial.nombre || 'No especificado' }}</span>
+        </div>
+        <div class="info-item">
+          <label>Segmento</label>
+          <span>{{ detail.organizacion.segmento.nombre || 'No especificado' }}</span>
+        </div>
+        <div class="info-item">
+          <label>Frecuencia de retiro</label>
+          <span>{{ detail.organizacion.frecuenciaRetiro?.nombre || 'No especificado' }}</span>
+        </div>
+        <div class="info-item">
+          <label>Transporte</label>
+          <span>{{ detail.organizacion.transporte?.nombre || 'No especificado' }}</span>
+        </div>
+        <div class="info-item full-width">
+          <label>Observaciones</label>
+          <span>{{ detail.organizacion.observaciones || 'No especificado' }}</span>
+        </div>
+        <div class="info-item meta-item">
+          <label>Fecha de registro</label>
+          <span>{{ detail.organizacion.fechaRegistro | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+        <div class="info-item meta-item">
+          <label>Última actualización</label>
+          <span>{{ detail.organizacion.fechaActualizacion ? (detail.organizacion.fechaActualizacion | date:'dd/MM/yyyy HH:mm') : '—' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Representantes -->
+    <div class="badi-card section-card">
+      <div class="section-header-flex">
+        <div class="badi-card-header mb-0">
+          <mat-icon class="badi-card-icon">person</mat-icon>
+          <h2>Representantes</h2>
+        </div>
+        <button mat-button class="btn-primary-text" disabled>
+          <mat-icon>add</mat-icon> Agregar representante
+        </button>
+      </div>
+      
+      <div class="table-wrapper mt-3" *ngIf="detail.representantes.length > 0; else noReps">
+        <table class="badi-table">
+          <thead>
+            <tr>
+              <th>Nombres y Apellidos</th>
+              <th>Cédula</th>
+              <th>Teléfono</th>
+              <th>Email</th>
+              <th class="text-center">Principal</th>
+              <th class="text-center">Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let rep of detail.representantes">
+              <td class="col-primary">{{ rep.nombres }} {{ rep.apellidos }}</td>
+              <td class="col-mono">{{ rep.cedula || '—' }}</td>
+              <td>{{ rep.telefono || '—' }}</td>
+              <td>{{ rep.email || '—' }}</td>
+              <td class="text-center">
+                <mat-icon *ngIf="rep.esPrincipal" class="icon-success">check_circle</mat-icon>
+                <span *ngIf="!rep.esPrincipal">—</span>
+              </td>
+              <td class="text-center">
+                <span class="estado-chip" [ngClass]="getEstadoClass(rep.estado)">{{ rep.estado }}</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <ng-template #noReps>
+        <p class="empty-text">No hay representantes registrados todavía.</p>
+      </ng-template>
+    </div>
+
+    <!-- 4. Grupos Atendidos y Dirigentes -->
+    <!-- Se muestran si es GAD o si tienen datos registrados -->
+    <div class="badi-card section-card" *ngIf="isGad() || detail.gruposAtendidos.length > 0">
+      <div class="section-header-flex">
+        <div class="badi-card-header mb-0">
+          <mat-icon class="badi-card-icon">groups</mat-icon>
+          <h2>Grupos Atendidos y Dirigentes</h2>
+        </div>
+        <button *ngIf="isGad()" mat-button class="btn-primary-text" disabled>
+          <mat-icon>add</mat-icon> Agregar grupo atendido
+        </button>
+      </div>
+
+      <div class="groups-list mt-3" *ngIf="detail.gruposAtendidos.length > 0; else noGroups">
+        <div class="group-item" *ngFor="let item of detail.gruposAtendidos">
+          <div class="group-header">
+            <div class="group-info">
+              <h3>{{ item.grupo.nombre }}</h3>
+              <div class="group-badges">
+                <span class="badge">{{ item.grupo.grupoEtario.nombre || 'Edad no espec.' }}</span>
+                <span class="badge">{{ item.grupo.vulnerabilidad.nombre || 'Vuln. no espec.' }}</span>
+                <span class="estado-chip" [ngClass]="getEstadoClass(item.grupo.estado)">{{ item.grupo.estado }}</span>
+              </div>
+              <p class="group-desc">{{ item.grupo.observaciones || 'Sin observaciones' }}</p>
+            </div>
+            <div class="group-stats">
+              <mat-icon>people</mat-icon>
+              <span>{{ item.grupo.numeroPersonas }} personas</span>
+            </div>
+          </div>
+
+          <!-- Dirigentes del grupo -->
+          <div class="leaders-section">
+            <div class="leaders-header">
+              <h4>Dirigentes asociados</h4>
+              <button *ngIf="isGad()" mat-button class="btn-primary-text btn-small" disabled>
+                <mat-icon>add</mat-icon> Agregar dirigente
+              </button>
+            </div>
+            
+            <div class="table-wrapper" *ngIf="item.dirigentes.length > 0; else noLeaders">
+              <table class="badi-table table-small">
+                <thead>
+                  <tr>
+                    <th>Nombres y Apellidos</th>
+                    <th>Cédula</th>
+                    <th>Teléfono</th>
+                    <th>Email</th>
+                    <th>Rep. Asociado</th>
+                    <th class="text-center">Estado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let dir of item.dirigentes">
+                    <td class="col-primary">{{ dir.nombres }} {{ dir.apellidos }}</td>
+                    <td class="col-mono">{{ dir.cedula || '—' }}</td>
+                    <td>{{ dir.telefono || '—' }}</td>
+                    <td>{{ dir.email || '—' }}</td>
+                    <td>{{ getRepresentativeName(dir.representanteId) }}</td>
+                    <td class="text-center">
+                      <span class="estado-chip" [ngClass]="getEstadoClass(dir.estado)">{{ dir.estado }}</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <ng-template #noLeaders>
+              <p class="empty-text small">No hay dirigentes asociados a este grupo.</p>
+            </ng-template>
+          </div>
+        </div>
+      </div>
+      <ng-template #noGroups>
+        <p class="empty-text mt-3">No hay grupos atendidos registrados todavía.</p>
+      </ng-template>
+    </div>
+
+    <!-- 5. Documentos asociados -->
+    <div class="badi-card section-card">
+      <div class="section-header-flex">
+        <div class="badi-card-header mb-0">
+          <mat-icon class="badi-card-icon">description</mat-icon>
+          <h2>Documentos asociados</h2>
+        </div>
+        <button mat-button class="btn-primary-text" disabled>
+          <mat-icon>attach_file</mat-icon> Asociar documento
+        </button>
+      </div>
+      
+      <div class="table-wrapper mt-3" *ngIf="detail.documentos.length > 0; else noDocs">
+        <table class="badi-table">
+          <thead>
+            <tr>
+              <th>Tipo de documento</th>
+              <th>Nombre del documento</th>
+              <th>Fecha de carga</th>
+              <th class="text-center">Estado</th>
+              <th class="text-center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Preparado para cuando haya documentos reales -->
+          </tbody>
+        </table>
+      </div>
+      <ng-template #noDocs>
+        <div class="state-container compact">
+          <mat-icon class="state-icon">folder_off</mat-icon>
+          <p>Sin documentos registrados todavía.</p>
+        </div>
+      </ng-template>
+    </div>
+
+  </ng-container>
+</div>

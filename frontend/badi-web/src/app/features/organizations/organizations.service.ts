@@ -31,7 +31,7 @@ export interface OrganizationSummary {
   sectorBarrio: string | null;
   direccion: string;
   referenciaDireccion: string | null;
-  cuotaRecuperacionEstimada: number | null;
+  cuotaRecuperacionEstimada: string | number | null;
   totalPersonasAtendidas: number;
   redesSociales: Record<string, any> | null;
   observaciones: string | null;

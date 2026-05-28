@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -7,6 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { finalize } from 'rxjs/operators';
 import {
   OrganizationsService,
   OrganizationSummary
@@ -34,11 +35,12 @@ export class OrganizationsPlaceholderComponent implements OnInit {
   searchTerm = '';
 
   loading = true;
-  error = false;
+  error: string | null = null;
 
   constructor(
     private orgService: OrganizationsService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -47,18 +49,27 @@ export class OrganizationsPlaceholderComponent implements OnInit {
 
   loadOrganizations(): void {
     this.loading = true;
-    this.error = false;
-    this.orgService.getAll().subscribe({
-      next: (data) => {
-        this.organizations = data;
-        this.applyFilter();
+    this.error = null;
+
+    this.orgService.getAll()
+      .pipe(finalize(() => {
         this.loading = false;
-      },
-      error: () => {
-        this.error = true;
-        this.loading = false;
-      }
-    });
+        this.cdr.detectChanges();
+      }))
+      .subscribe({
+        next: (data) => {
+          this.organizations = data ?? [];
+          this.applyFilter();
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error('Error loading organizations:', err);
+          this.error = 'No se pudieron cargar las organizaciones.';
+          this.organizations = [];
+          this.filtered = [];
+          this.cdr.detectChanges();
+        }
+      });
   }
 
   applyFilter(): void {

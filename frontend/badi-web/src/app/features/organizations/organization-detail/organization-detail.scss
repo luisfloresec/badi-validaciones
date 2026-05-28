@@ -1,0 +1,197 @@
+$green: #015641;
+$green-bg: #f1faf7;
+$g9: #111827;
+$g7: #374151;
+$g5: #6b7280;
+$g3: #d1d5db;
+$g1: #f3f4f6;
+$border: #e5e7eb;
+$divider: #f3f4f6;
+
+.page-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+// Breadcrumb
+.breadcrumb {
+  display: flex; align-items: center; gap: 6px; font-size: 13px; color: $g5; margin-bottom: -10px;
+  a { color: $green; font-weight: 500; cursor: pointer; text-decoration: none; &:hover { text-decoration: underline; } }
+  mat-icon { font-size: 16px; width: 16px; height: 16px; }
+  .current-page { color: $g7; font-weight: 500; }
+}
+
+// Botones y acciones
+.btn-primary {
+  background-color: $green !important; color: #fff !important;
+  mat-icon { margin-right: 4px; }
+}
+.btn-primary-text {
+  color: $green !important; font-weight: 500;
+  mat-icon { font-size: 18px; width: 18px; height: 18px; margin-right: 4px; }
+  &.btn-small { font-size: 13px; line-height: 24px; padding: 0 8px; }
+}
+
+// Secciones
+.section-card {
+  padding: 0; // Removes default padding to let headers touch edges if needed, or we use standard padding
+}
+.section-header-flex {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 24px 0;
+  .mb-0 { margin-bottom: 0 !important; }
+}
+.mt-3 { margin-top: 16px; }
+
+// Cabecera de Organización
+.detail-header-card {
+  display: flex; flex-direction: column; gap: 20px;
+  
+  .top-actions {
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;
+    border-bottom: 1px solid $divider; padding-bottom: 16px;
+    
+    .btn-back {
+      color: $g5; font-weight: 500; margin-left: -8px;
+      mat-icon { font-size: 20px; width: 20px; height: 20px; margin-right: 4px; }
+      &:hover { background: $g1; }
+    }
+    .action-buttons { display: flex; gap: 12px; }
+  }
+
+  .org-identity {
+    display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 24px;
+    
+    .identity-main {
+      display: flex; flex-direction: column; gap: 12px; max-width: 700px;
+      
+      h1 { margin: 0; font-size: 26px; font-weight: 700; color: $g9; line-height: 1.2; }
+      
+      .identity-badges {
+        display: flex; align-items: center; flex-wrap: wrap; gap: 8px;
+        .badge {
+          font-size: 12px; font-weight: 500; padding: 3px 10px; border-radius: 12px; background: $g1; color: $g7;
+          &.badge-ruc { font-family: 'Roboto Mono', monospace; letter-spacing: 0.5px; background: #e0e7ff; color: #3730a3; }
+        }
+      }
+      .identity-location {
+        display: flex; align-items: center; margin: 0; color: $g5; font-size: 14px;
+        mat-icon { font-size: 18px; width: 18px; height: 18px; margin-right: 4px; color: $g5; }
+      }
+    }
+    
+    .identity-stats {
+      display: flex; gap: 16px;
+      .stat-box {
+        display: flex; flex-direction: column; align-items: flex-end; padding: 12px 16px;
+        background: $green-bg; border-radius: 10px; border: 1px solid rgba($green, 0.1);
+        .stat-value { font-size: 24px; font-weight: 700; color: $green; line-height: 1; }
+        .stat-label { font-size: 12px; color: $g7; margin-top: 4px; font-weight: 500; }
+      }
+    }
+  }
+}
+
+// Info Grid
+.info-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px;
+  padding: 0 24px 24px; margin-top: 16px;
+  
+  .info-item {
+    display: flex; flex-direction: column; gap: 4px;
+    label { font-size: 12px; color: $g5; font-weight: 500; text-transform: uppercase; letter-spacing: 0.3px; }
+    span { font-size: 14px; color: $g9; line-height: 1.4; word-break: break-word; }
+    &.full-width { grid-column: 1 / -1; }
+    &.meta-item {
+      padding-top: 12px; border-top: 1px dashed $divider;
+      label { color: #9ca3af; }
+      span { font-size: 13px; color: $g5; font-family: 'Roboto Mono', monospace; }
+    }
+  }
+}
+
+// Tablas estándar
+.table-wrapper {
+  overflow-x: auto;
+  &::-webkit-scrollbar { height: 4px; }
+  &::-webkit-scrollbar-thumb { background: $g3; border-radius: 4px; }
+}
+
+.badi-table {
+  width: 100%; border-collapse: collapse; font-size: 13px;
+  th {
+    text-align: left; font-size: 11px; font-weight: 600; color: $g5;
+    text-transform: uppercase; letter-spacing: 0.4px; padding: 12px 24px;
+    border-bottom: 1px solid $border; white-space: nowrap; background: #fafafa;
+  }
+  td { padding: 14px 24px; color: $g7; border-bottom: 1px solid $divider; white-space: nowrap; }
+  tbody tr { transition: background-color 0.15s ease; &:hover { background: $g1; } }
+  tbody tr:last-child td { border-bottom: none; }
+  
+  .col-primary { font-weight: 500; color: $g9; white-space: normal; min-width: 160px; }
+  .col-mono { font-family: 'Roboto Mono', monospace; font-size: 12px; letter-spacing: 0.3px; }
+  .icon-success { color: #059669; font-size: 20px; width: 20px; height: 20px; }
+  
+  &.table-small {
+    font-size: 12.5px;
+    th { padding: 8px 16px; font-size: 10.5px; background: transparent; }
+    td { padding: 10px 16px; }
+  }
+}
+
+// Listado de Grupos Atendidos
+.groups-list {
+  display: flex; flex-direction: column;
+  .group-item {
+    border-top: 1px solid $divider; padding: 20px 24px;
+    &:first-child { border-top: none; }
+  }
+  
+  .group-header {
+    display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; margin-bottom: 20px;
+    
+    .group-info {
+      h3 { margin: 0 0 8px; font-size: 16px; font-weight: 600; color: $g9; }
+      .group-badges {
+        display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 8px;
+        .badge { font-size: 11px; padding: 2px 8px; border-radius: 12px; background: #e5e7eb; color: $g7; }
+      }
+      .group-desc { margin: 0; font-size: 13px; color: $g5; line-height: 1.4; max-width: 600px; }
+    }
+    
+    .group-stats {
+      display: flex; align-items: center; gap: 6px; background: $g1; padding: 6px 12px; border-radius: 8px;
+      mat-icon { font-size: 18px; width: 18px; height: 18px; color: $g5; }
+      span { font-size: 13px; font-weight: 600; color: $g7; }
+    }
+  }
+
+  .leaders-section {
+    background: #fafafa; border-radius: 8px; border: 1px solid $divider; padding: 16px;
+    .leaders-header {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
+      h4 { margin: 0; font-size: 13px; font-weight: 600; color: $g5; text-transform: uppercase; letter-spacing: 0.3px; }
+    }
+  }
+}
+
+// Estados
+.empty-text { padding: 24px; margin: 0; color: $g5; font-size: 14px; text-align: center; font-style: italic; }
+.empty-text.small { padding: 12px; font-size: 13px; }
+
+.state-container {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 48px 24px; text-align: center; color: $g5;
+  &.compact { padding: 32px 24px; }
+  p { margin: 4px 0; }
+  strong { color: $g7; }
+  .state-icon { font-size: 48px; width: 48px; height: 48px; color: $g5; margin-bottom: 12px; }
+  .state-hint { font-size: 13px; }
+  &.state-error .state-icon { color: #dc2626; }
+}
+
+@media (max-width: 768px) {
+  .detail-header-card .org-identity { flex-direction: column; }
+  .info-grid { grid-template-columns: 1fr; }
+}
