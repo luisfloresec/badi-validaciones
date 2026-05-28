@@ -1,0 +1,58 @@
+<div class="sidebar-container">
+  <div class="sidebar-header">
+    <img src="assets/logo-badi.png" alt="Logo BADI" class="logo-badi" />
+  </div>
+  
+  <div class="sidebar-menu-area">
+    <div class="nav-section-label">MÓDULO GESTIÓN SOCIAL</div>
+    
+    <mat-nav-list class="sidebar-nav">
+      <a mat-list-item routerLink="/dashboard" routerLinkActive="active">
+        <mat-icon matListItemIcon>dashboard</mat-icon>
+        <span matListItemTitle>Panel de Control</span>
+      </a>
+      <a mat-list-item routerLink="/organizations" routerLinkActive="active">
+        <mat-icon matListItemIcon>corporate_fare</mat-icon>
+        <span matListItemTitle>Organizaciones</span>
+      </a>
+      <a mat-list-item routerLink="/schedule" routerLinkActive="active">
+        <mat-icon matListItemIcon>calendar_today</mat-icon>
+        <span matListItemTitle>Cronograma</span>
+      </a>
+      
+      <div class="nav-divider"></div>
+      <div class="nav-section-label sub-section">DOCUMENTACIÓN</div>
+      
+      <a mat-list-item routerLink="/documents" routerLinkActive="active">
+        <mat-icon matListItemIcon>folder</mat-icon>
+        <span matListItemTitle>Repositorio Global</span>
+      </a>
+
+      <div class="nav-divider"></div>
+      <div class="nav-section-label sub-section">SISTEMA</div>
+
+      <a mat-list-item routerLink="/users" routerLinkActive="active">
+        <mat-icon matListItemIcon>people</mat-icon>
+        <span matListItemTitle>Usuarios</span>
+      </a>
+      <a mat-list-item routerLink="/roles" routerLinkActive="active">
+        <mat-icon matListItemIcon>admin_panel_settings</mat-icon>
+        <span matListItemTitle>Roles</span>
+      </a>
+      <a mat-list-item routerLink="/audit" routerLinkActive="active">
+        <mat-icon matListItemIcon>history</mat-icon>
+        <span matListItemTitle>Auditoría</span>
+      </a>
+    </mat-nav-list>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="user-profile">
+      <div class="avatar">DS</div>
+      <div class="user-info">
+        <strong>Daniela Sanchez</strong>
+        <span>GESTORA SOCIAL</span>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,16 @@
+<mat-sidenav-container class="app-container">
+  <mat-sidenav mode="side" opened class="sidenav">
+    <app-sidebar></app-sidebar>
+  </mat-sidenav>
+
+  <mat-sidenav-content class="content-area">
+    <app-topbar></app-topbar>
+    <main class="main-content">
+      <router-outlet></router-outlet>
+      <div class="empty-state">
+        <h2>Bienvenido a BADI</h2>
+        <p>Seleccione una opción del menú para comenzar.</p>
+      </div>
+    </main>
+  </mat-sidenav-content>
+</mat-sidenav-container>
