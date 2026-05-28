@@ -1,14 +1,22 @@
 <mat-toolbar class="topbar">
-  <div class="breadcrumb">
-    <span>BADI</span>
+  <div class="topbar-title">
+    <mat-icon class="title-icon">{{ currentTitle === 'Panel de Control' ? 'dashboard' :
+      currentTitle === 'Organizaciones' ? 'corporate_fare' :
+      currentTitle === 'Cronograma' ? 'calendar_today' :
+      currentTitle === 'Repositorio Global' ? 'folder' :
+      currentTitle === 'Usuarios' ? 'people' :
+      currentTitle === 'Roles' ? 'admin_panel_settings' :
+      currentTitle === 'Auditoría' ? 'history' : 'apps' }}</mat-icon>
+    <span class="title-text">{{ currentTitle }}</span>
   </div>
   
   <span class="spacer"></span>
   
   <div class="user-actions">
-    <button mat-icon-button aria-label="Notificaciones">
-      <mat-icon>notifications</mat-icon>
+    <button mat-icon-button aria-label="Notificaciones" class="notification-btn">
+      <mat-icon>notifications_none</mat-icon>
     </button>
+    <div class="topbar-divider"></div>
     <div class="user-profile">
       <span class="user-name">Daniela Sánchez</span>
       <div class="avatar">DS</div>

@@ -1,44 +1,68 @@
+/* ──────────────────────────────────────
+   Sidebar — Sistema BADI
+   ────────────────────────────────────── */
+
 .sidebar-container {
   display: flex;
   flex-direction: column;
   height: 100vh;
   width: 260px;
-  /* Ancho fijo */
-  background-color: #016b50;
+  background-color: #015641;
   color: white;
   overflow: hidden;
-  /* Cortar desbordamiento horizontal global */
 }
 
+/* ── Header / Logo ────────────────── */
 .sidebar-header {
-  height: 100px;
-  min-height: 100px;
-  padding: 0 16px;
-  background-color: #015641;
+  padding: 20px 16px 14px;
+  background-color: #013d2f;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   overflow: hidden;
 
   .logo-badi {
-    width: 400px;
-    max-width: 400px;
-    max-height: 150px;
+    width: 180px;
+    max-width: 180px;
+    max-height: 62px;
     object-fit: contain;
     display: block;
   }
+
+  .sidebar-subtitle {
+    margin-top: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.55);
+    letter-spacing: 0.4px;
+    text-align: center;
+  }
 }
 
+/* ── Zona central: menú ───────────── */
 .sidebar-menu-area {
   flex: 1;
   overflow-y: auto;
-  /* Scroll vertical exclusivo de la zona central */
   overflow-x: hidden;
-  padding: 16px 12px;
-  background-color: #016b50;
+  padding: 16px;
+  background-color: #015641;
+
+  /* Scrollbar discreta */
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+  }
 }
 
+/* ── Etiquetas de sección ─────────── */
 .nav-section-label {
   font-size: 11px;
   font-weight: 700;
@@ -48,59 +72,70 @@
   padding: 0 8px;
 
   &.sub-section {
-    margin-top: 16px;
-    color: rgba(255, 255, 255, 0.65);
+    margin-top: 4px;
+    color: rgba(255, 255, 255, 0.5);
   }
 }
 
+/* ── Separador ────────────────────── */
 .nav-divider {
   height: 1px;
   background-color: rgba(255, 255, 255, 0.1);
   margin: 12px 0;
 }
 
+/* ── Lista de navegación ──────────── */
 .sidebar-nav {
   padding-top: 0;
   overflow: hidden;
 
   ::ng-deep {
 
-    /* Resetear las clases core de Material para garantizar color blanco */
+    /* Texto de los ítems */
     .mdc-list-item__primary-text,
     .mat-mdc-list-item-title {
       color: rgba(255, 255, 255, 0.86) !important;
       font-size: 14px;
+      font-weight: 400;
     }
 
+    /* Cada ítem del menú */
     .mdc-list-item {
-      margin-bottom: 4px;
-      border-radius: 10px;
+      margin-bottom: 2px;
+      border-radius: 8px;
       padding: 0 12px !important;
-      height: 48px !important;
-      min-height: 48px;
+      height: 44px !important;
+      min-height: 44px;
+      transition: background-color 0.2s ease;
 
       &:hover {
         background-color: #01785a !important;
       }
 
+      /* ── Ítem activo ── */
       &.active {
-        background-color: #ffffff !important;
+        background-color: rgba(255, 255, 255, 0.12) !important;
+        border-left: 3px solid #f5b700;
 
         .mdc-list-item__primary-text,
         .mat-mdc-list-item-title {
-          color: #015641 !important;
+          color: #ffffff !important;
           font-weight: 600;
         }
 
         .mat-icon {
-          color: #015641 !important;
+          color: #f5b700 !important;
         }
       }
     }
 
+    /* Íconos */
     .mat-icon {
-      color: rgba(255, 255, 255, 0.86) !important;
+      color: rgba(255, 255, 255, 0.7) !important;
       margin-right: 12px;
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
     }
 
     .mdc-list-item__content {
@@ -109,16 +144,15 @@
   }
 }
 
+/* ── Footer / usuario ─────────────── */
 .sidebar-footer {
-  height: 96px;
-  min-height: 96px;
-  padding: 0 16px;
-  background-color: #015641;
+  padding: 16px;
+  background-color: #013d2f;
   display: flex;
   align-items: center;
   flex-shrink: 0;
   overflow: hidden;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 
   .user-profile {
     display: flex;
@@ -127,8 +161,8 @@
     width: 100%;
 
     .avatar {
-      width: 44px;
-      height: 44px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
       background-color: #ffffff;
       color: #015641;
@@ -136,10 +170,9 @@
       align-items: center;
       justify-content: center;
       font-weight: 700;
-      font-size: 16px;
+      font-size: 14px;
       border: 2px solid #f5b700;
       flex-shrink: 0;
-      /* Previene deformación */
     }
 
     .user-info {
@@ -147,10 +180,9 @@
       flex-direction: column;
       flex: 1;
       min-width: 0;
-      /* Crítico para el text-overflow dentro de flexbox */
 
       strong {
-        font-size: 14px;
+        font-size: 13px;
         color: #ffffff;
         white-space: nowrap;
         text-overflow: ellipsis;
@@ -161,7 +193,7 @@
       span {
         font-size: 10px;
         color: #f5b700;
-        font-weight: 700;
+        font-weight: 600;
         letter-spacing: 0.5px;
         white-space: nowrap;
         text-overflow: ellipsis;

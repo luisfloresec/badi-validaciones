@@ -1,3 +1,39 @@
+/* ──────────────────────────────────────
+   Paleta BADI — Custom Properties
+   ────────────────────────────────────── */
+:root {
+  /* Verdes institucionales */
+  --badi-green-900: #013d2f;
+  --badi-green-800: #014936;
+  --badi-green-700: #015641;
+  --badi-green-600: #016b50;
+  --badi-green-500: #01785a;
+  --badi-green-100: #d9eee7;
+  --badi-green-050: #f1faf7;
+
+  /* Dorado / acento */
+  --badi-gold: #f5b700;
+
+  /* Neutrales */
+  --gray-900: #111827;
+  --gray-700: #374151;
+  --gray-500: #6b7280;
+  --gray-300: #d1d5db;
+  --gray-100: #f3f4f6;
+  --gray-050: #f9fafb;
+
+  /* Estados */
+  --state-active: #015641;
+  --state-inactive: #6b7280;
+  --state-pending: #d97706;
+  --state-approved: #059669;
+  --state-rejected: #dc2626;
+  --state-scheduled: #2563eb;
+}
+
+/* ──────────────────────────────────────
+   Reset global
+   ────────────────────────────────────── */
 *,
 *::before,
 *::after {
@@ -11,5 +47,51 @@ body {
   margin: 0;
   overflow-x: hidden;
   font-family: Roboto, "Helvetica Neue", sans-serif;
-  background-color: #f9fafb;
+  background-color: var(--gray-050);
 }
+
+/* ──────────────────────────────────────
+   Encabezado de página reutilizable
+   ────────────────────────────────────── */
+.page-header {
+  h1 { margin: 0 0 4px; font-size: 24px; font-weight: 700; color: var(--gray-900); }
+  p  { margin: 0; color: var(--gray-500); font-size: 14px; }
+}
+
+/* ──────────────────────────────────────
+   Card base reutilizable
+   ────────────────────────────────────── */
+.badi-card {
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px 0 rgba(0,0,0,0.05);
+  padding: 20px 24px;
+}
+
+.badi-card-header {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 18px;
+  .badi-card-icon { font-size: 20px; width: 20px; height: 20px; color: var(--badi-green-700);
+    &.icon-warning { color: var(--state-pending); }
+  }
+  h2 { margin: 0; font-size: 16px; font-weight: 600; color: var(--gray-900); }
+}
+
+/* ──────────────────────────────────────
+   Utilidades de alineación
+   ────────────────────────────────────── */
+.text-right  { text-align: right !important; }
+.text-center { text-align: center !important; }
+
+/* ──────────────────────────────────────
+   Chips de estado reutilizables
+   ────────────────────────────────────── */
+.estado-chip {
+  display: inline-block; padding: 3px 10px; border-radius: 12px;
+  font-size: 12px; font-weight: 600; white-space: nowrap;
+}
+.estado-programada   { background: rgba(37,99,235,0.1);  color: #2563eb; }
+.estado-pendiente    { background: rgba(217,119,6,0.1);  color: #d97706; }
+.estado-completada   { background: rgba(5,150,105,0.1);  color: #059669; }
+.estado-cancelada    { background: rgba(220,38,38,0.08); color: #dc2626; }
+.estado-reprogramada { background: rgba(124,58,237,0.1); color: #7c3aed; }

@@ -1,3 +1,7 @@
+/* ──────────────────────────────────────
+   App Shell — Sistema BADI
+   ────────────────────────────────────── */
+
 .app-container {
   height: 100vh;
   width: 100vw;
@@ -6,9 +10,9 @@
 }
 
 .sidenav {
-  width: 260px; /* Ancho fijo */
+  width: 260px;
   border-right: none;
-  overflow: hidden; /* Evitar scroll en el sidenav root */
+  overflow: hidden;
 }
 
 .content-area {
@@ -22,22 +26,6 @@
 .main-content {
   flex: 1;
   padding: 24px;
-  overflow-y: auto; /* Solo el contenido principal tiene scroll */
+  overflow-y: auto;
   overflow-x: hidden;
-  position: relative;
-}
-
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  color: #6b7280;
-  text-align: center;
-  
-  h2 {
-    color: #374151;
-    margin-bottom: 8px;
-  }
 }

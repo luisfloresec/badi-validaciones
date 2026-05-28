@@ -1,12 +1,123 @@
-<div class="page-container">
+<div class="dashboard-container">
+
+  <!-- ── Encabezado ──────────────────── -->
   <div class="page-header">
     <h1>Dashboard</h1>
-    <p>Resumen general del sistema BADI</p>
+    <p>Resumen operativo de Gestión Social del BADI</p>
   </div>
-  
-  <div class="page-content">
-    <div class="placeholder-card">
-      <p>Esta vista será conectada posteriormente con el backend de Dashboard.</p>
+
+  <!-- ── KPIs ────────────────────────── -->
+  <div class="kpi-grid">
+    <div class="kpi-card" *ngFor="let kpi of kpis">
+      <div class="kpi-icon-wrapper">
+        <mat-icon>{{ kpi.icon }}</mat-icon>
+      </div>
+      <div class="kpi-content">
+        <span class="kpi-value">{{ kpi.value }}</span>
+        <span class="kpi-label">{{ kpi.label }}</span>
+        <span class="kpi-description">{{ kpi.description }}</span>
+      </div>
     </div>
   </div>
+
+  <!-- ── Resumen semanal ─────────────── -->
+  <div class="badi-card">
+    <div class="badi-card-header">
+      <mat-icon class="badi-card-icon">date_range</mat-icon>
+      <h2>Resumen semanal</h2>
+    </div>
+    <div class="resumen-grid">
+      <div class="resumen-item" *ngFor="let item of resumenSemanal">
+        <mat-icon class="resumen-icon">{{ item.icon }}</mat-icon>
+        <div class="resumen-content">
+          <span class="resumen-value">{{ item.value }}</span>
+          <span class="resumen-label">{{ item.label }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Sección inferior: 2 columnas ── -->
+  <div class="bottom-grid">
+
+    <!-- Próximas entregas -->
+    <div class="badi-card card-wide">
+      <div class="badi-card-header">
+        <mat-icon class="badi-card-icon">local_shipping</mat-icon>
+        <h2>Próximas entregas</h2>
+      </div>
+      <div class="table-wrapper">
+        <table class="entregas-table">
+          <thead>
+            <tr>
+              <th>Razón social</th>
+              <th class="text-right">Kilos</th>
+              <th class="text-right">Usuarios</th>
+              <th class="text-right">Cuota recup.</th>
+              <th class="text-center">Hora</th>
+              <th class="text-center">Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let e of proximasEntregas">
+              <td class="col-razon">{{ e.razonSocial }}</td>
+              <td class="text-right">{{ e.kilos }} kg</td>
+              <td class="text-right">{{ e.usuarios }}</td>
+              <td class="text-right">${{ e.cuotaRecuperacion.toFixed(2) }}</td>
+              <td class="text-center">{{ e.hora }}</td>
+              <td class="text-center">
+                <span class="estado-chip" [ngClass]="getEstadoClass(e.estado)">
+                  {{ e.estado }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Columna derecha: alertas + actividad -->
+    <div class="side-column">
+
+      <!-- Alertas de gestión -->
+      <div class="badi-card">
+        <div class="badi-card-header">
+          <mat-icon class="badi-card-icon icon-warning">warning_amber</mat-icon>
+          <h2>Alertas de gestión</h2>
+        </div>
+        <ul class="alert-list">
+          <li *ngFor="let alerta of alertas" [class.alert-zero]="alerta.count === 0">
+            <mat-icon class="alert-icon" [class.alert-icon-active]="alerta.count > 0">
+              {{ alerta.icon }}
+            </mat-icon>
+            <span class="alert-label">{{ alerta.label }}</span>
+            <span class="alert-count" [class.alert-count-active]="alerta.count > 0">
+              {{ alerta.count }}
+            </span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Actividad reciente -->
+      <div class="badi-card">
+        <div class="badi-card-header">
+          <mat-icon class="badi-card-icon">update</mat-icon>
+          <h2>Actividad reciente</h2>
+        </div>
+        <ul class="activity-list">
+          <li *ngFor="let act of actividadReciente">
+            <div class="activity-icon-wrapper">
+              <mat-icon>{{ act.icon }}</mat-icon>
+            </div>
+            <div class="activity-content">
+              <span class="activity-tipo">{{ act.tipo }}</span>
+              <span class="activity-detalle">{{ act.detalle }}</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
 </div>
