@@ -87,7 +87,7 @@
               <button mat-icon-button (click)="viewDetail(org.id)" matTooltip="Ver detalle">
                 <mat-icon>visibility</mat-icon>
               </button>
-              <button mat-icon-button disabled matTooltip="Editar">
+              <button mat-icon-button matTooltip="Editar" (click)="editOrganization(org.id)">
                 <mat-icon>edit</mat-icon>
               </button>
             </td>

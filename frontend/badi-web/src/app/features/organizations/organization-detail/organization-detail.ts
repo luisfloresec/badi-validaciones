@@ -75,6 +75,12 @@ export class OrganizationDetailComponent implements OnInit {
     this.router.navigate(['/organizations']);
   }
 
+  editOrganization(): void {
+    if (this.detail?.organizacion?.id) {
+      this.router.navigate(['/organizations', this.detail.organizacion.id, 'edit']);
+    }
+  }
+
   isGad(): boolean {
     return this.detail?.organizacion?.tipoOrganizacion?.nombre === 'GAD';
   }

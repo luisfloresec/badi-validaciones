@@ -1,30 +1,28 @@
 <div class="page-container">
   
+  <!-- Breadcrumb -->
   <div class="breadcrumb">
     <a (click)="goBack()">Organizaciones</a>
     <mat-icon>chevron_right</mat-icon>
-    <span class="current-page">Nueva Organización</span>
+    <span class="current-page">{{ isEditMode ? 'Editar' : 'Nueva' }} Organización</span>
   </div>
 
   <div class="page-header">
-    <div class="header-main">
-      <h1>Registrar Nueva Organización</h1>
-      <p>Complete la información base de la organización.</p>
-    </div>
+    <h1>{{ isEditMode ? 'Editar Organización' : 'Registrar Nueva Organización' }}</h1>
+    <p>{{ isEditMode ? 'Modifica los datos de la organización.' : 'Completa el formulario para ingresar una organización al sistema.' }}</p>
   </div>
 
-  <!-- Loading Catalogos -->
-  <div class="state-container" *ngIf="loadingCatalogs">
-    <mat-spinner diameter="40"></mat-spinner>
-    <p>Cargando información del sistema...</p>
+  <!-- Loading Catalogos / Datos -->
+  <div class="state-container compact" *ngIf="loadingCatalogs">
+    <mat-spinner diameter="30"></mat-spinner>
+    <p>Cargando datos necesarios...</p>
   </div>
 
-  <!-- Error Catalogos -->
-  <div class="state-container state-error" *ngIf="!loadingCatalogs && error && !orgForm.dirty">
+  <!-- Error Catalogos / Datos -->
+  <div class="state-container state-error compact" *ngIf="!loadingCatalogs && error">
     <mat-icon class="state-icon">cloud_off</mat-icon>
     <p><strong>{{ error }}</strong></p>
-    <p class="state-hint">Verifica tu conexión e intenta de nuevo.</p>
-    <button mat-stroked-button (click)="loadCatalogs()">
+    <button mat-stroked-button (click)="loadData()">
       <mat-icon>refresh</mat-icon> Reintentar
     </button>
   </div>
@@ -241,7 +239,7 @@
       <button mat-flat-button class="btn-primary" type="submit" [disabled]="saving">
         <mat-spinner *ngIf="saving" diameter="20" class="spinner-btn"></mat-spinner>
         <mat-icon *ngIf="!saving">save</mat-icon>
-        <span>Guardar Organización</span>
+        <span>{{ isEditMode ? 'Guardar Cambios' : 'Guardar Organización' }}</span>
       </button>
     </div>
 

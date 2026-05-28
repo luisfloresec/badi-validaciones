@@ -1,8 +1,8 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormArray, AbstractControl, ValidationErrors } from '@angular/forms';
-import { Router } from '@angular/router';
-import { forkJoin } from 'rxjs';
+import { Router, ActivatedRoute } from '@angular/router';
+import { forkJoin, of } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -48,6 +48,8 @@ function uniqueSocialNetworkValidator(control: AbstractControl): ValidationError
 export class OrganizationFormComponent implements OnInit {
 
   orgForm: FormGroup;
+  isEditMode = false;
+  orgId: string | null = null;
 
   // Catálogos
   organizationTypes: OrganizationTypeRef[] = [];
@@ -77,6 +79,7 @@ export class OrganizationFormComponent implements OnInit {
     private fb: FormBuilder,
     private orgService: OrganizationsService,
     private router: Router,
+    private route: ActivatedRoute,
     private cdr: ChangeDetectorRef
   ) {
     this.orgForm = this.fb.group({
@@ -100,7 +103,11 @@ export class OrganizationFormComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.loadCatalogs();
+    this.orgId = this.route.snapshot.paramMap.get('id');
+    if (this.orgId) {
+      this.isEditMode = true;
+    }
+    this.loadData();
   }
 
   // --- Dynamic Form Methods for Social Networks ---
@@ -108,10 +115,10 @@ export class OrganizationFormComponent implements OnInit {
     return this.orgForm.get('redesSociales') as FormArray;
   }
 
-  addSocialNetwork(): void {
+  addSocialNetwork(tipoStr = '', valorStr = ''): void {
     const socialGroup = this.fb.group({
-      tipo: ['', Validators.required],
-      valor: [{ value: '', disabled: true }, [Validators.required, this.whitespaceValidator]]
+      tipo: [tipoStr, Validators.required],
+      valor: [{ value: valorStr, disabled: !tipoStr }, [Validators.required, this.whitespaceValidator]]
     });
 
     // Escuchar cambios en tipo para habilitar/deshabilitar valor
@@ -145,17 +152,20 @@ export class OrganizationFormComponent implements OnInit {
     return null;
   }
 
-  // --- Catalog Loading ---
-  loadCatalogs(): void {
+  // --- Data Loading ---
+  loadData(): void {
     this.loadingCatalogs = true;
     this.error = null;
+
+    const orgReq = this.isEditMode && this.orgId ? this.orgService.getFullDetail(this.orgId) : of(null);
 
     forkJoin({
       types: this.orgService.getOrganizationTypes(),
       accionSocial: this.orgService.getCatalogsByType('accion_social'),
       segmento: this.orgService.getCatalogsByType('segmento'),
       frecuencia: this.orgService.getCatalogsByType('frecuencia_retiro'),
-      transporte: this.orgService.getCatalogsByType('transporte')
+      transporte: this.orgService.getCatalogsByType('transporte'),
+      orgDetail: orgReq
     })
     .pipe(finalize(() => {
       this.loadingCatalogs = false;
@@ -168,14 +178,55 @@ export class OrganizationFormComponent implements OnInit {
         this.segmentoList = results.segmento;
         this.frecuenciaRetiroList = results.frecuencia;
         this.transporteList = results.transporte;
+        
+        if (this.isEditMode && results.orgDetail) {
+          this.patchOrganization(results.orgDetail.organizacion);
+        }
+        
         this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error('Error loading catalogs:', err);
-        this.error = 'No se pudieron cargar los catálogos del sistema.';
+        console.error('Error loading data:', err);
+        this.error = 'No se pudieron cargar los datos necesarios del sistema.';
         this.cdr.detectChanges();
       }
     });
+  }
+
+  patchOrganization(org: any): void {
+    this.orgForm.patchValue({
+      tipoOrganizacionId: org.tipoOrganizacion?.id || null,
+      ruc: org.ruc,
+      razonSocial: org.razonSocial,
+      email: org.email,
+      ciudad: org.ciudad,
+      sectorBarrio: org.sectorBarrio,
+      direccion: org.direccion,
+      referenciaDireccion: org.referenciaDireccion,
+      accionSocialId: org.accionSocial?.id || null,
+      segmentoId: org.segmento?.id || null,
+      frecuenciaRetiroId: org.frecuenciaRetiro?.id || null,
+      cuotaRecuperacionEstimada: org.cuotaRecuperacionEstimada ? Number(org.cuotaRecuperacionEstimada) : null,
+      totalPersonasAtendidas: org.totalPersonasAtendidas,
+      transporteId: org.transporte?.id || null,
+      observaciones: org.observaciones
+    });
+
+    if (org.redesSociales && Object.keys(org.redesSociales).length > 0) {
+      Object.entries(org.redesSociales).forEach(([key, value]) => {
+        let mappedType = key;
+        if (key.startsWith('otro_')) mappedType = 'otro';
+        
+        // Clean prefix for UI binding
+        const prefix = this.getPrefix(mappedType);
+        let valStr = value as string;
+        if (prefix && valStr.startsWith(prefix)) {
+          valStr = valStr.substring(prefix.length);
+        }
+
+        this.addSocialNetwork(mappedType, valStr);
+      });
+    }
   }
 
   // --- Form Submission ---
@@ -207,15 +258,11 @@ export class OrganizationFormComponent implements OnInit {
       
       // Cleanup por red social
       if (key === 'whatsapp') {
-        // Dejar solo números
         rawVal = rawVal.replace(/[^0-9]/g, '');
       } else if (key === 'pagina_web') {
-        // Quitar https:// si el usuario lo tipeó
         rawVal = rawVal.replace(/^https?:\/\//i, '');
       } else if (key === 'facebook' || key === 'instagram' || key === 'tiktok' || key === 'x_twitter') {
-        // Quitar URLs completas si el usuario las pega
         rawVal = rawVal.replace(/^https?:\/\/(www\.)?(facebook\.com|instagram\.com|tiktok\.com|x\.com|twitter\.com)\/(@)?/i, '');
-        // Quitar @ si lo tipeó en tiktok/x_twitter extra
         if (key === 'tiktok' || key === 'x_twitter') {
           rawVal = rawVal.replace(/^@/, '');
         }
@@ -252,30 +299,37 @@ export class OrganizationFormComponent implements OnInit {
       observaciones: formValue.observaciones || null
     };
 
-    console.log('payload a enviar:', payload);
+    const request$ = this.isEditMode && this.orgId
+      ? this.orgService.updateOrganization(this.orgId, payload)
+      : this.orgService.createOrganization(payload);
 
-    this.orgService.createOrganization(payload)
+    request$
       .pipe(finalize(() => {
         this.saving = false;
         this.cdr.detectChanges();
       }))
       .subscribe({
-        next: (response) => {
-          if (response && response.id) {
-            this.router.navigate(['/organizations', response.id]);
+        next: (response: any) => {
+          const redirectId = this.isEditMode ? this.orgId : response?.id;
+          if (redirectId) {
+            this.router.navigate(['/organizations', redirectId]);
           } else {
             this.router.navigate(['/organizations']);
           }
         },
         error: (err) => {
-          console.error('Error creating organization:', err);
-          this.error = err?.error?.message || 'No se pudo registrar la organización. Revisa los datos ingresados.';
+          console.error('Error saving organization:', err);
+          this.error = err?.error?.message || 'No se pudo guardar la organización. Revisa los datos ingresados.';
           this.cdr.detectChanges();
         }
       });
   }
 
   goBack(): void {
-    this.router.navigate(['/organizations']);
+    if (this.isEditMode && this.orgId) {
+      this.router.navigate(['/organizations', this.orgId]);
+    } else {
+      this.router.navigate(['/organizations']);
+    }
   }
 }

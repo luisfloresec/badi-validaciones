@@ -133,4 +133,8 @@ export class OrganizationsService {
   createOrganization(payload: any): Observable<{ id: string }> {
     return this.http.post<{ id: string }>(this.apiUrl, payload);
   }
+
+  updateOrganization(id: string, payload: any): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/${id}`, payload);
+  }
 }

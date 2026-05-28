@@ -89,6 +89,10 @@ export class OrganizationsPlaceholderComponent implements OnInit {
     this.router.navigate(['/organizations', id]);
   }
 
+  editOrganization(id: string): void {
+    this.router.navigate(['/organizations', id, 'edit']);
+  }
+
   createOrganization(): void {
     this.router.navigate(['/organizations/new']);
   }

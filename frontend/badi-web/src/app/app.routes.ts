@@ -16,9 +16,15 @@ export const routes: Routes = [
     component: AppShellComponent,
     children: [
       { path: 'dashboard', component: DashboardPlaceholderComponent },
-      { path: 'organizations', component: OrganizationsPlaceholderComponent },
-      { path: 'organizations/new', component: OrganizationFormComponent },
-      { path: 'organizations/:id', component: OrganizationDetailComponent },
+      {
+        path: 'organizations',
+        children: [
+          { path: '', component: OrganizationsPlaceholderComponent },
+          { path: 'new', component: OrganizationFormComponent },
+          { path: ':id/edit', component: OrganizationFormComponent },
+          { path: ':id', component: OrganizationDetailComponent },
+        ]
+      },
       { path: 'users', component: UsersPlaceholderComponent },
       { path: 'roles', component: RolesPlaceholderComponent },
       { path: 'documents', component: DocumentsPlaceholderComponent },
