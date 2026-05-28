@@ -89,6 +89,10 @@ export class OrganizationsPlaceholderComponent implements OnInit {
     this.router.navigate(['/organizations', id]);
   }
 
+  createOrganization(): void {
+    this.router.navigate(['/organizations/new']);
+  }
+
   getEstadoClass(estado: string): string {
     const map: Record<string, string> = {
       'Registrada': 'estado-registrada',

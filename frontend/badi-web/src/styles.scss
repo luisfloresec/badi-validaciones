@@ -95,3 +95,41 @@ body {
 .estado-completada   { background: rgba(5,150,105,0.1);  color: #059669; }
 .estado-cancelada    { background: rgba(220,38,38,0.08); color: #dc2626; }
 .estado-reprogramada { background: rgba(124,58,237,0.1); color: #7c3aed; }
+
+/* ──────────────────────────────────────
+   Angular Material / CDK Overlays Fixes
+   ────────────────────────────────────── */
+.cdk-overlay-pane {
+  z-index: 1000;
+}
+
+.mat-mdc-select-panel {
+  background: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 10px !important;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18) !important;
+  padding: 6px 0 !important;
+}
+
+.mat-mdc-option {
+  background: #ffffff !important;
+  color: #111827 !important;
+  min-height: 42px !important;
+}
+
+.mat-mdc-option:hover {
+  background: #f1faf7 !important;
+}
+
+.mat-mdc-option.mdc-list-item--selected {
+  background: #e7f6ef !important;
+}
+
+.mat-mdc-option .mdc-list-item__primary-text {
+  color: #111827 !important;
+}
+
+.mat-mdc-option.mdc-list-item--selected .mdc-list-item__primary-text {
+  color: #015641 !important;
+  font-weight: 600;
+}

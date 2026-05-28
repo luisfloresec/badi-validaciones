@@ -107,4 +107,44 @@ export class OrganizationDetailComponent implements OnInit {
   
     return `$${numericValue.toFixed(2)}`;
   }
+
+  hasSocialNetworks(): boolean {
+    if (!this.detail?.organizacion?.redesSociales) return false;
+    const redes = this.detail.organizacion.redesSociales;
+    return Object.keys(redes).length > 0;
+  }
+
+  getSocialNetworks(): { label: string; value: string; isUrl: boolean }[] {
+    if (!this.detail?.organizacion?.redesSociales) return [];
+
+    const mapLabels: Record<string, string> = {
+      facebook: 'Facebook',
+      instagram: 'Instagram',
+      whatsapp: 'WhatsApp',
+      pagina_web: 'Página web',
+      tiktok: 'TikTok',
+      x_twitter: 'X / Twitter'
+    };
+
+    return Object.entries(this.detail.organizacion.redesSociales).map(([key, value]) => {
+      let label = mapLabels[key] || 'Otro';
+      
+      // Manejar "Otro" dinámico o desconocidos (ej: otro_1, otro_2)
+      if (!mapLabels[key] && key.startsWith('otro')) {
+        label = 'Otro';
+      } else if (!mapLabels[key]) {
+        // Capitalizar y quitar guiones bajos si es algo totalmente desconocido
+        label = key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      }
+
+      // Validar si parece URL
+      const isUrl = /^(http|https):\/\/[^ "]+$/.test(value as string);
+
+      return {
+        label,
+        value: value as string,
+        isUrl
+      };
+    });
+  }
 }

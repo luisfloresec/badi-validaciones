@@ -1,0 +1,250 @@
+<div class="page-container">
+  
+  <div class="breadcrumb">
+    <a (click)="goBack()">Organizaciones</a>
+    <mat-icon>chevron_right</mat-icon>
+    <span class="current-page">Nueva Organización</span>
+  </div>
+
+  <div class="page-header">
+    <div class="header-main">
+      <h1>Registrar Nueva Organización</h1>
+      <p>Complete la información base de la organización.</p>
+    </div>
+  </div>
+
+  <!-- Loading Catalogos -->
+  <div class="state-container" *ngIf="loadingCatalogs">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Cargando información del sistema...</p>
+  </div>
+
+  <!-- Error Catalogos -->
+  <div class="state-container state-error" *ngIf="!loadingCatalogs && error && !orgForm.dirty">
+    <mat-icon class="state-icon">cloud_off</mat-icon>
+    <p><strong>{{ error }}</strong></p>
+    <p class="state-hint">Verifica tu conexión e intenta de nuevo.</p>
+    <button mat-stroked-button (click)="loadCatalogs()">
+      <mat-icon>refresh</mat-icon> Reintentar
+    </button>
+  </div>
+
+  <!-- Formulario -->
+  <form [formGroup]="orgForm" (ngSubmit)="onSubmit()" *ngIf="!loadingCatalogs">
+    
+    <!-- Error al Guardar -->
+    <div class="error-banner" *ngIf="error && orgForm.dirty">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ error }}</span>
+    </div>
+
+    <!-- 1. Datos Generales -->
+    <div class="badi-card section-card">
+      <div class="badi-card-header">
+        <mat-icon class="badi-card-icon">business</mat-icon>
+        <h2>Datos Generales</h2>
+      </div>
+      <div class="form-grid">
+        
+        <mat-form-field appearance="outline" class="col-half">
+          <mat-label>Tipo de organización</mat-label>
+          <mat-select formControlName="tipoOrganizacionId">
+            <mat-option *ngFor="let tipo of organizationTypes" [value]="tipo.id">
+              {{ tipo.nombre }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="orgForm.get('tipoOrganizacionId')?.hasError('required')">El tipo es obligatorio</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="col-half">
+          <mat-label>RUC</mat-label>
+          <input matInput formControlName="ruc" placeholder="13 dígitos" maxlength="13">
+          <mat-error *ngIf="orgForm.get('ruc')?.hasError('required')">El RUC es obligatorio</mat-error>
+          <mat-error *ngIf="orgForm.get('ruc')?.hasError('pattern')">Debe contener exactamente 13 números</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="col-full">
+          <mat-label>Razón social</mat-label>
+          <input matInput formControlName="razonSocial" placeholder="Ej: Fundación de Ayuda BADI">
+          <mat-error *ngIf="orgForm.get('razonSocial')?.hasError('required')">La razón social es obligatoria</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="col-half">
+          <mat-label>Email de contacto (Opcional)</mat-label>
+          <input matInput formControlName="email" type="email" placeholder="correo@ejemplo.com">
+          <mat-error *ngIf="orgForm.get('email')?.hasError('email')">Formato de email inválido</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="col-full">
+          <mat-label>Observaciones generales (Opcional)</mat-label>
+          <textarea matInput formControlName="observaciones" rows="2"></textarea>
+        </mat-form-field>
+
+      </div>
+    </div>
+
+    <!-- 2. Ubicación -->
+    <div class="badi-card section-card">
+      <div class="badi-card-header">
+        <mat-icon class="badi-card-icon">location_on</mat-icon>
+        <h2>Ubicación</h2>
+      </div>
+      <div class="form-grid">
+        
+        <mat-form-field appearance="outline" class="col-half">
+          <mat-label>Ciudad</mat-label>
+          <input matInput formControlName="ciudad" placeholder="Ej: Ibarra">
+          <mat-error *ngIf="orgForm.get('ciudad')?.hasError('required')">La ciudad es obligatoria</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="col-half">
+          <mat-label>Sector / Barrio (Opcional)</mat-label>
+          <input matInput formControlName="sectorBarrio" placeholder="Ej: Los Ceibos">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="col-full">
+          <mat-label>Dirección exacta</mat-label>
+          <input matInput formControlName="direccion" placeholder="Calle principal y secundaria">
+          <mat-error *ngIf="orgForm.get('direccion')?.hasError('required')">La dirección es obligatoria</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="col-full">
+          <mat-label>Referencia de dirección (Opcional)</mat-label>
+          <input matInput formControlName="referenciaDireccion" placeholder="Ej: Frente al parque central">
+        </mat-form-field>
+
+      </div>
+    </div>
+
+    <!-- 3. Gestión Social -->
+    <div class="badi-card section-card">
+      <div class="badi-card-header">
+        <mat-icon class="badi-card-icon">volunteer_activism</mat-icon>
+        <h2>Gestión Social y Retiro</h2>
+      </div>
+      <div class="form-grid">
+        
+        <mat-form-field appearance="outline" class="col-half">
+          <mat-label>Acción social</mat-label>
+          <mat-select formControlName="accionSocialId">
+            <mat-option *ngFor="let item of accionSocialList" [value]="item.id">
+              {{ item.nombre }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="orgForm.get('accionSocialId')?.hasError('required')">Obligatorio</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="col-half">
+          <mat-label>Segmento</mat-label>
+          <mat-select formControlName="segmentoId">
+            <mat-option *ngFor="let item of segmentoList" [value]="item.id">
+              {{ item.nombre }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="orgForm.get('segmentoId')?.hasError('required')">Obligatorio</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="col-half">
+          <mat-label>Total personas atendidas</mat-label>
+          <input matInput formControlName="totalPersonasAtendidas" type="number" min="0">
+          <mat-error *ngIf="orgForm.get('totalPersonasAtendidas')?.hasError('required')">Obligatorio</mat-error>
+          <mat-error *ngIf="orgForm.get('totalPersonasAtendidas')?.hasError('min')">No puede ser negativo</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="col-half">
+          <mat-label>Cuota de recuperación estimada ($) (Opcional)</mat-label>
+          <input matInput formControlName="cuotaRecuperacionEstimada" type="number" min="0" step="0.01">
+          <mat-error *ngIf="orgForm.get('cuotaRecuperacionEstimada')?.hasError('min')">No puede ser negativo</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="col-half">
+          <mat-label>Frecuencia de retiro (Opcional)</mat-label>
+          <mat-select formControlName="frecuenciaRetiroId">
+            <mat-option *ngFor="let item of frecuenciaRetiroList" [value]="item.id">
+              {{ item.nombre }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="col-half">
+          <mat-label>Transporte (Opcional)</mat-label>
+          <mat-select formControlName="transporteId">
+            <mat-option *ngFor="let item of transporteList" [value]="item.id">
+              {{ item.nombre }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+      </div>
+    </div>
+
+    <!-- 4. Redes Sociales -->
+    <div class="badi-card section-card">
+      <div class="section-header-flex">
+        <div class="badi-card-header mb-0">
+          <mat-icon class="badi-card-icon">public</mat-icon>
+          <h2>Redes Sociales</h2>
+        </div>
+        <button mat-button class="btn-primary-text" type="button" (click)="addSocialNetwork()">
+          <mat-icon>add</mat-icon> Agregar red social
+        </button>
+      </div>
+      
+      <div class="social-networks-container" formArrayName="redesSociales">
+        
+        <div class="error-banner" *ngIf="socialNetworks.hasError('duplicateNetwork') && socialNetworks.touched">
+          <mat-icon>error_outline</mat-icon>
+          <span>Has agregado la misma red social más de una vez. Usa "Otro" si necesitas más enlaces libres.</span>
+        </div>
+
+        <div class="social-row" *ngFor="let control of socialNetworks.controls; let i = index" [formGroupName]="i">
+          
+          <mat-form-field appearance="outline" class="social-select">
+            <mat-label>Tipo</mat-label>
+            <mat-select formControlName="tipo">
+              <mat-option *ngFor="let type of socialNetworkTypes" [value]="type.value">
+                {{ type.label }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="control.get('tipo')?.hasError('required')">Elige un tipo</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="social-input">
+            <mat-label>Enlace o referencia</mat-label>
+            <span matTextPrefix *ngIf="getPrefix(control.get('tipo')?.value)">
+              {{ getPrefix(control.get('tipo')?.value) }}&nbsp;
+            </span>
+            <input matInput formControlName="valor" placeholder="Ej: fundacion_badi">
+            <mat-error *ngIf="control.get('valor')?.hasError('required')">Campo obligatorio o vacío</mat-error>
+          </mat-form-field>
+
+          <button mat-icon-button color="warn" type="button" class="btn-remove" (click)="removeSocialNetwork(i)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+
+        <p class="empty-text" *ngIf="socialNetworks.length === 0">
+          No se han agregado redes sociales. Usa el botón "Agregar red social" para incluir canales digitales.
+        </p>
+      </div>
+    </div>
+
+    <!-- Error Global Validación -->
+    <div class="error-banner" *ngIf="formError">
+      <mat-icon>warning</mat-icon>
+      <span>{{ formError }}</span>
+    </div>
+
+    <!-- Actions -->
+    <div class="form-actions">
+      <button mat-stroked-button type="button" (click)="goBack()" [disabled]="saving">Cancelar</button>
+      <button mat-flat-button class="btn-primary" type="submit" [disabled]="saving">
+        <mat-spinner *ngIf="saving" diameter="20" class="spinner-btn"></mat-spinner>
+        <mat-icon *ngIf="!saving">save</mat-icon>
+        <span>Guardar Organización</span>
+      </button>
+    </div>
+
+  </form>
+
+</div>

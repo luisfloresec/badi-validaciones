@@ -109,6 +109,8 @@ export interface OrganizationFullDetail {
 export class OrganizationsService {
 
   private readonly apiUrl = 'http://localhost:3000/organizations';
+  private readonly catalogUrl = 'http://localhost:3000/catalogs';
+  private readonly typesUrl = 'http://localhost:3000/organization-types';
 
   constructor(private http: HttpClient) {}
 
@@ -118,5 +120,17 @@ export class OrganizationsService {
 
   getFullDetail(id: string): Observable<OrganizationFullDetail> {
     return this.http.get<OrganizationFullDetail>(`${this.apiUrl}/${id}/full-detail`);
+  }
+
+  getOrganizationTypes(): Observable<OrganizationTypeRef[]> {
+    return this.http.get<OrganizationTypeRef[]>(this.typesUrl);
+  }
+
+  getCatalogsByType(tipoCatalogo: string): Observable<CatalogRef[]> {
+    return this.http.get<CatalogRef[]>(`${this.catalogUrl}/type/${tipoCatalogo}`);
+  }
+
+  createOrganization(payload: any): Observable<{ id: string }> {
+    return this.http.post<{ id: string }>(this.apiUrl, payload);
   }
 }

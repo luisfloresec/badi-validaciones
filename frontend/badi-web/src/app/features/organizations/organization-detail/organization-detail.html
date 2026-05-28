@@ -122,6 +122,20 @@
           <label>Observaciones</label>
           <span>{{ detail.organizacion.observaciones || 'No especificado' }}</span>
         </div>
+        
+        <div class="info-item full-width">
+          <label>Redes sociales</label>
+          <div *ngIf="hasSocialNetworks(); else noSocials" class="socials-list">
+            <div *ngFor="let social of getSocialNetworks()" class="social-link-item">
+              <strong>{{ social.label }}:</strong> 
+              <a *ngIf="social.isUrl" [href]="social.value" target="_blank">{{ social.value }}</a>
+              <span *ngIf="!social.isUrl">{{ social.value }}</span>
+            </div>
+          </div>
+          <ng-template #noSocials>
+            <span>No especificado</span>
+          </ng-template>
+        </div>
         <div class="info-item meta-item">
           <label>Fecha de registro</label>
           <span>{{ detail.organizacion.fechaRegistro | date:'dd/MM/yyyy HH:mm' }}</span>

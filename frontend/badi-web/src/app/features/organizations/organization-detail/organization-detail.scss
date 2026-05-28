@@ -109,6 +109,15 @@ $divider: #f3f4f6;
       span { font-size: 13px; color: $g5; font-family: 'Roboto Mono', monospace; }
     }
   }
+
+  .socials-list {
+    display: flex; flex-direction: column; gap: 6px; margin-top: 4px;
+    .social-link-item {
+      font-size: 14px; color: $g9;
+      strong { font-weight: 500; margin-right: 4px; color: $g7; }
+      a { color: $green; text-decoration: none; &:hover { text-decoration: underline; } }
+    }
+  }
 }
 
 // Tablas estándar
