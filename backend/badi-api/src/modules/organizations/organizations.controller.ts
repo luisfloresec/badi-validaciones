@@ -12,6 +12,8 @@ import { OrganizationsService } from './organizations.service';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { UpdateOrganizationDto } from './dto/update-organization.dto';
 
+import { ReplaceRepresentativeDto } from './dto/replace-representative.dto';
+
 @Controller('organizations')
 export class OrganizationsController {
   constructor(private readonly organizationsService: OrganizationsService) {}
@@ -65,5 +67,14 @@ export class OrganizationsController {
   @Patch(':id/activate')
   activate(@Param('id', ParseUUIDPipe) id: string) {
     return this.organizationsService.activate(id);
+  }
+
+  /** POST /organizations/:id/representatives/replace — Reemplazar representante activo */
+  @Post(':id/representatives/replace')
+  replaceRepresentative(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ReplaceRepresentativeDto,
+  ) {
+    return this.organizationsService.replaceRepresentative(id, dto);
   }
 }

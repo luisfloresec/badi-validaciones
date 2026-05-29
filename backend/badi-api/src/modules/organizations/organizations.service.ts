@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Not, Repository } from 'typeorm';
+import { DataSource, In, Not, Repository } from 'typeorm';
 import { Organization } from './entities/organization.entity';
 import { OrganizationType } from '../organization-types/entities/organization-type.entity';
 import { Catalog } from '../catalogs/entities/catalog.entity';
@@ -14,6 +14,7 @@ import { AttendedGroup } from '../attended-groups/entities/attended-group.entity
 import { Leader } from '../leaders/entities/leader.entity';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { UpdateOrganizationDto } from './dto/update-organization.dto';
+import { ReplaceRepresentativeDto } from './dto/replace-representative.dto';
 
 @Injectable()
 export class OrganizationsService {
@@ -35,6 +36,8 @@ export class OrganizationsService {
 
     @InjectRepository(Leader)
     private readonly leadersRepository: Repository<Leader>,
+
+    private readonly dataSource: DataSource,
   ) {}
 
   /**
@@ -417,5 +420,57 @@ export class OrganizationsService {
 
     org.estado = 'Registrada';
     return this.orgsRepository.save(org);
+  }
+
+  /**
+   * Reemplaza el representante activo de una organización (transaccional).
+   */
+  async replaceRepresentative(orgId: string, dto: ReplaceRepresentativeDto): Promise<Representative> {
+    const org = await this.orgsRepository.findOne({
+      where: { id: orgId }
+    });
+
+    if (!org) {
+      throw new NotFoundException(`Organización con ID ${orgId} no encontrada.`);
+    }
+
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      // 1. Desactivar el representante principal activo si existe
+      const activeReps = await queryRunner.manager.find(Representative, {
+        where: { organizacion: { id: orgId }, estado: 'Activo', esPrincipal: true },
+      });
+
+      for (const activeRep of activeReps) {
+        activeRep.estado = 'Inactivo';
+        activeRep.esPrincipal = false;
+        await queryRunner.manager.save(Representative, activeRep);
+      }
+
+      // 2. Crear el nuevo representante activo
+      const newRep = new Representative();
+      newRep.organizacion = org;
+      newRep.nombres = dto.nombres;
+      newRep.apellidos = dto.apellidos;
+      newRep.cedula = dto.cedula;
+      if (dto.telefono) newRep.telefono = dto.telefono;
+      if (dto.email) newRep.email = dto.email;
+      // newRep.cargo is left unassigned (or undefined) which TypeORM handles nicely
+      newRep.esPrincipal = true;
+      newRep.estado = 'Activo';
+
+      const savedRep = await queryRunner.manager.save(Representative, newRep);
+
+      await queryRunner.commitTransaction();
+      return savedRep;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
   }
 }
