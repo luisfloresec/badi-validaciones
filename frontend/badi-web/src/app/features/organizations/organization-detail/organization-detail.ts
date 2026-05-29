@@ -13,6 +13,7 @@ import {
 
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/components/confirm-dialog/confirm-dialog';
+import { RepresentativeFormDialogComponent } from './representative-form-dialog/representative-form-dialog';
 
 @Component({
   selector: 'app-organization-detail',
@@ -164,6 +165,51 @@ export class OrganizationDetailComponent implements OnInit {
       }
     });
   }
+
+  get activeRepresentative() {
+    if (!this.detail?.representantes) return null;
+    return this.detail.representantes.find(r => r.estado === 'Activo' && r.esPrincipal === true) || null;
+  }
+
+  openRepresentativeForm(mode: 'create' | 'replace'): void {
+    if (!this.detail) return;
+    
+    const dialogRef = this.dialog.open(RepresentativeFormDialogComponent, {
+      width: '600px',
+      disableClose: true,
+      data: {
+        organizationId: this.detail.organizacion.id,
+        mode
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadDetail(this.detail!.organizacion.id);
+      }
+    });
+  }
+
+  editRepresentative(): void {
+    if (!this.detail || !this.activeRepresentative) return;
+
+    const dialogRef = this.dialog.open(RepresentativeFormDialogComponent, {
+      width: '600px',
+      disableClose: true,
+      data: {
+        organizationId: this.detail.organizacion.id,
+        mode: 'edit',
+        representativeData: this.activeRepresentative
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadDetail(this.detail!.organizacion.id);
+      }
+    });
+  }
+
   isGad(): boolean {
     return this.detail?.organizacion?.tipoOrganizacion?.nombre === 'GAD';
   }

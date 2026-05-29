@@ -154,9 +154,21 @@
           <mat-icon class="badi-card-icon">person</mat-icon>
           <h2>Representantes</h2>
         </div>
-        <button mat-button class="btn-primary-text" disabled>
-          <mat-icon>add</mat-icon> Agregar representante
-        </button>
+        <div class="action-buttons-inline" *ngIf="detail.organizacion.estado !== 'Inactiva'">
+          <ng-container *ngIf="activeRepresentative">
+            <button mat-button class="btn-secondary-text" (click)="editRepresentative()">
+              <mat-icon>edit</mat-icon> Editar datos
+            </button>
+            <button mat-button class="btn-primary-text" (click)="openRepresentativeForm('replace')">
+              <mat-icon>swap_horiz</mat-icon> Reemplazar representante
+            </button>
+          </ng-container>
+          <ng-container *ngIf="!activeRepresentative">
+            <button mat-button class="btn-primary-text" (click)="openRepresentativeForm('create')">
+              <mat-icon>add</mat-icon> Agregar representante
+            </button>
+          </ng-container>
+        </div>
       </div>
       
       <div class="table-wrapper mt-3" *ngIf="detail.representantes.length > 0; else noReps">

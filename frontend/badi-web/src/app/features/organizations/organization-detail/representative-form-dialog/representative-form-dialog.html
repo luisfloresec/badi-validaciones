@@ -1,0 +1,81 @@
+<div class="dialog-container">
+  <div class="dialog-header">
+    <h2 mat-dialog-title>
+      <ng-container *ngIf="data.mode === 'create'">Agregar representante</ng-container>
+      <ng-container *ngIf="data.mode === 'edit'">Editar representante</ng-container>
+      <ng-container *ngIf="data.mode === 'replace'">Reemplazar representante</ng-container>
+    </h2>
+    <button mat-icon-button class="close-button" mat-dialog-close [disabled]="loading">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="dialog-content" mat-dialog-content>
+    <div class="warning-banner" *ngIf="data.mode === 'replace'">
+      <mat-icon class="warning-icon">warning</mat-icon>
+      <div class="warning-text">
+        Esta acción reemplazará al representante activo actual. El registro anterior quedará como histórico.
+      </div>
+    </div>
+
+    <div class="error-banner" *ngIf="error">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ error }}</span>
+    </div>
+
+    <form [formGroup]="form" class="badi-form">
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Nombres</mat-label>
+          <input matInput formControlName="nombres" placeholder="Ej. Juan Pérez" />
+          <mat-error *ngIf="form.get('nombres')?.hasError('required')">Los nombres son obligatorios.</mat-error>
+          <mat-error *ngIf="form.get('nombres')?.hasError('maxlength')">Máximo 100 caracteres.</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Apellidos</mat-label>
+          <input matInput formControlName="apellidos" placeholder="Ej. Gómez Silva" />
+          <mat-error *ngIf="form.get('apellidos')?.hasError('required')">Los apellidos son obligatorios.</mat-error>
+          <mat-error *ngIf="form.get('apellidos')?.hasError('maxlength')">Máximo 100 caracteres.</mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Cédula</mat-label>
+          <input matInput formControlName="cedula" placeholder="Ej. 1712345678" />
+          <mat-error *ngIf="form.get('cedula')?.hasError('required')">La cédula es obligatoria.</mat-error>
+          <mat-error *ngIf="form.get('cedula')?.hasError('pattern')">Debe contener 10 dígitos.</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Teléfono (Opcional)</mat-label>
+          <input matInput formControlName="telefono" placeholder="Ej. 0991234567" />
+          <mat-error *ngIf="form.get('telefono')?.hasError('maxlength')">Máximo 20 caracteres.</mat-error>
+        </mat-form-field>
+      </div>
+
+      <mat-form-field appearance="outline" class="w-100">
+        <mat-label>Correo electrónico (Opcional)</mat-label>
+        <input matInput formControlName="email" type="email" placeholder="Ej. correo@dominio.com" />
+        <mat-error *ngIf="form.get('email')?.hasError('email')">Formato de correo inválido.</mat-error>
+        <mat-error *ngIf="form.get('email')?.hasError('maxlength')">Máximo 120 caracteres.</mat-error>
+      </mat-form-field>
+    </form>
+  </div>
+
+  <div class="dialog-actions" mat-dialog-actions>
+    <button mat-button mat-dialog-close [disabled]="loading">Cancelar</button>
+    <button mat-flat-button color="primary" 
+            (click)="onSubmit()" 
+            [disabled]="form.invalid || loading"
+            class="submit-btn">
+      <mat-spinner *ngIf="loading" diameter="20" class="spinner-btn"></mat-spinner>
+      <span *ngIf="!loading">
+        <ng-container *ngIf="data.mode === 'create'">Guardar representante</ng-container>
+        <ng-container *ngIf="data.mode === 'edit'">Guardar cambios</ng-container>
+        <ng-container *ngIf="data.mode === 'replace'">Reemplazar representante</ng-container>
+      </span>
+    </button>
+  </div>
+</div>

@@ -155,4 +155,12 @@ export class OrganizationsService {
   activateOrganization(id: string): Observable<any> {
     return this.http.patch(`${this.apiUrl}/${id}/activate`, {});
   }
+
+  replaceRepresentative(id: string, payload: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${id}/representatives/replace`, payload);
+  }
+
+  updateRepresentative(id: string, payload: any): Observable<any> {
+    return this.http.patch(`http://localhost:3000/representatives/${id}`, payload);
+  }
 }
