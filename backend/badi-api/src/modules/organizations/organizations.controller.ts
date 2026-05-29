@@ -6,6 +6,7 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { OrganizationsService } from './organizations.service';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
@@ -21,10 +22,10 @@ export class OrganizationsController {
     return this.organizationsService.create(createDto);
   }
 
-  /** GET /organizations — Listar organizaciones activas y registradas */
+  /** GET /organizations — Listar organizaciones (por defecto no inactivas) */
   @Get()
-  findAll() {
-    return this.organizationsService.findAll();
+  findAll(@Query('includeInactive') includeInactive?: string) {
+    return this.organizationsService.findAll(includeInactive === 'true');
   }
 
   /** GET /organizations/ruc/:ruc — Buscar organización por RUC */
@@ -58,5 +59,11 @@ export class OrganizationsController {
   @Patch(':id/deactivate')
   deactivate(@Param('id', ParseUUIDPipe) id: string) {
     return this.organizationsService.deactivate(id);
+  }
+
+  /** PATCH /organizations/:id/activate — Reactivar organización */
+  @Patch(':id/activate')
+  activate(@Param('id', ParseUUIDPipe) id: string) {
+    return this.organizationsService.activate(id);
   }
 }

@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { In, Not, Repository } from 'typeorm';
 import { Organization } from './entities/organization.entity';
 import { OrganizationType } from '../organization-types/entities/organization-type.entity';
 import { Catalog } from '../catalogs/entities/catalog.entity';
@@ -150,9 +150,12 @@ export class OrganizationsService {
   /**
    * Lista organizaciones con estado Registrada o Activa.
    */
-  async findAll(): Promise<Organization[]> {
+  async findAll(includeInactive: boolean = false): Promise<Organization[]> {
+    if (includeInactive) {
+      return this.orgsRepository.find();
+    }
     return this.orgsRepository.find({
-      where: { estado: In(['Registrada', 'Activa']) },
+      where: { estado: Not('Inactiva') },
     });
   }
 
@@ -393,6 +396,26 @@ export class OrganizationsService {
     }
 
     org.estado = 'Inactiva';
+    return this.orgsRepository.save(org);
+  }
+
+  /**
+   * Reactiva una organización (Soft-Undelete).
+   * Lanza error si no existe o si no está inactiva.
+   */
+  async activate(id: string): Promise<Organization> {
+    const org = await this.orgsRepository.findOne({ where: { id } });
+    if (!org) {
+      throw new NotFoundException(`Organización con ID ${id} no encontrada.`);
+    }
+
+    if (org.estado !== 'Inactiva') {
+      throw new ConflictException(
+        `La organización ya se encuentra activa o registrada (Estado actual: ${org.estado}).`,
+      );
+    }
+
+    org.estado = 'Registrada';
     return this.orgsRepository.save(org);
   }
 }
