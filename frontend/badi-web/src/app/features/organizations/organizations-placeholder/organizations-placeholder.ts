@@ -7,11 +7,15 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatDialog } from '@angular/material/dialog';
 import { finalize } from 'rxjs/operators';
 import {
   OrganizationsService,
   OrganizationSummary
 } from '../organizations.service';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/components/confirm-dialog/confirm-dialog';
 
 @Component({
   selector: 'app-organizations-placeholder',
@@ -23,7 +27,8 @@ import {
     MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatSlideToggleModule
   ],
   templateUrl: './organizations-placeholder.html',
   styleUrl: './organizations-placeholder.scss'
@@ -33,6 +38,7 @@ export class OrganizationsPlaceholderComponent implements OnInit {
   organizations: OrganizationSummary[] = [];
   filtered: OrganizationSummary[] = [];
   searchTerm = '';
+  showInactive = false;
 
   loading = true;
   error: string | null = null;
@@ -40,7 +46,8 @@ export class OrganizationsPlaceholderComponent implements OnInit {
   constructor(
     private orgService: OrganizationsService,
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -51,7 +58,7 @@ export class OrganizationsPlaceholderComponent implements OnInit {
     this.loading = true;
     this.error = null;
 
-    this.orgService.getAll()
+    this.orgService.getAll(this.showInactive)
       .pipe(finalize(() => {
         this.loading = false;
         this.cdr.detectChanges();
@@ -70,6 +77,10 @@ export class OrganizationsPlaceholderComponent implements OnInit {
           this.cdr.detectChanges();
         }
       });
+  }
+
+  toggleInactive(): void {
+    this.loadOrganizations();
   }
 
   applyFilter(): void {
@@ -95,6 +106,75 @@ export class OrganizationsPlaceholderComponent implements OnInit {
 
   createOrganization(): void {
     this.router.navigate(['/organizations/new']);
+  }
+
+  deactivateOrganization(id: string, razonSocial: string): void {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '450px',
+      data: {
+        title: 'Desactivar organización',
+        message: `¿Está seguro de desactivar la organización "${razonSocial}"? Esta acción no eliminará el registro, solo cambiará su estado a Inactiva.`,
+        secondaryText: 'Podrá consultar el registro posteriormente, pero no se considerará activo para la gestión operativa.',
+        confirmText: 'Desactivar',
+        cancelText: 'Cancelar',
+        confirmColor: 'warn'
+      } as ConfirmDialogData
+    });
+
+    dialogRef.afterClosed().subscribe(confirm => {
+      if (confirm) {
+        this.loading = true;
+        this.error = null;
+        
+        this.orgService.deactivateOrganization(id)
+          .pipe(finalize(() => {}))
+          .subscribe({
+            next: () => {
+              this.loadOrganizations();
+            },
+            error: (err) => {
+              console.error('Error deactivating organization:', err);
+              this.error = err?.error?.message || 'No se pudo desactivar la organización. Por favor intente de nuevo.';
+              this.loading = false;
+              this.cdr.detectChanges();
+            }
+          });
+      }
+    });
+  }
+
+  activateOrganization(id: string, razonSocial: string): void {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '450px',
+      data: {
+        title: 'Reactivar organización',
+        message: `¿Está seguro de reactivar esta organización? El registro volverá a estar disponible para la gestión operativa.`,
+        confirmText: 'Reactivar organización',
+        cancelText: 'Cancelar',
+        confirmColor: 'primary'
+      } as ConfirmDialogData
+    });
+
+    dialogRef.afterClosed().subscribe(confirm => {
+      if (confirm) {
+        this.loading = true;
+        this.error = null;
+        
+        this.orgService.activateOrganization(id)
+          .pipe(finalize(() => {}))
+          .subscribe({
+            next: () => {
+              this.loadOrganizations();
+            },
+            error: (err) => {
+              console.error('Error activating organization:', err);
+              this.error = err?.error?.message || 'No se pudo reactivar la organización. Por favor intente de nuevo.';
+              this.loading = false;
+              this.cdr.detectChanges();
+            }
+          });
+      }
+    });
   }
 
   getEstadoClass(estado: string): string {

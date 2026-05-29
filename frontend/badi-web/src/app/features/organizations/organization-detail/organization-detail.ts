@@ -11,6 +11,9 @@ import {
   OrganizationFullDetail
 } from '../organizations.service';
 
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/components/confirm-dialog/confirm-dialog';
+
 @Component({
   selector: 'app-organization-detail',
   standalone: true,
@@ -28,13 +31,15 @@ export class OrganizationDetailComponent implements OnInit {
 
   detail: OrganizationFullDetail | null = null;
   loading = true;
+  deactivating = false;
   error: string | null = null;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private orgService: OrganizationsService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -81,6 +86,84 @@ export class OrganizationDetailComponent implements OnInit {
     }
   }
 
+  deactivateOrganization(): void {
+    if (!this.detail?.organizacion) return;
+
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '450px',
+      data: {
+        title: 'Desactivar organización',
+        message: `¿Está seguro de desactivar esta organización? Esta acción no eliminará el registro, pero cambiará su estado a Inactiva.`,
+        secondaryText: 'Podrá consultar el registro posteriormente, pero no se considerará activo para la gestión operativa.',
+        confirmText: 'Desactivar organización',
+        cancelText: 'Cancelar',
+        confirmColor: 'warn'
+      } as ConfirmDialogData
+    });
+
+    dialogRef.afterClosed().subscribe(confirm => {
+      if (confirm) {
+        this.deactivating = true;
+        this.error = null;
+        
+        this.orgService.deactivateOrganization(this.detail!.organizacion.id)
+          .pipe(finalize(() => {
+            this.deactivating = false;
+            this.cdr.detectChanges();
+          }))
+          .subscribe({
+            next: () => {
+              this.router.navigate(['/organizations']);
+            },
+            error: (err) => {
+              console.error('Error deactivating organization:', err);
+              this.error = err?.error?.message || 'No se pudo desactivar la organización. Por favor intente de nuevo.';
+              this.cdr.detectChanges();
+              window.scrollTo(0, 0); // Scroll top to see the error banner if any
+            }
+          });
+      }
+    });
+  }
+
+  activateOrganization(): void {
+    if (!this.detail) return;
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '450px',
+      data: {
+        title: 'Reactivar organización',
+        message: `¿Está seguro de reactivar esta organización? El registro volverá a estar disponible para la gestión operativa.`,
+        confirmText: 'Reactivar organización',
+        cancelText: 'Cancelar',
+        confirmColor: 'primary'
+      } as ConfirmDialogData
+    });
+
+    dialogRef.afterClosed().subscribe(confirm => {
+      if (confirm) {
+        this.deactivating = true; // reusing the same spinner variable
+        this.error = null;
+        this.cdr.detectChanges();
+        
+        this.orgService.activateOrganization(this.detail!.organizacion.id)
+          .pipe(finalize(() => {
+            this.deactivating = false;
+            this.cdr.detectChanges();
+          }))
+          .subscribe({
+            next: () => {
+              this.router.navigate(['/organizations']);
+            },
+            error: (err) => {
+              console.error('Error activating organization:', err);
+              this.error = err?.error?.message || 'No se pudo reactivar la organización. Por favor intente de nuevo.';
+              this.cdr.detectChanges();
+              window.scrollTo(0, 0); // Scroll top to see the error banner if any
+            }
+          });
+      }
+    });
+  }
   isGad(): boolean {
     return this.detail?.organizacion?.tipoOrganizacion?.nombre === 'GAD';
   }

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 /* ──────────────────────────────────────
@@ -114,10 +114,20 @@ export class OrganizationsService {
 
   constructor(private http: HttpClient) {}
 
-  getAll(): Observable<OrganizationSummary[]> {
-    return this.http.get<OrganizationSummary[]>(this.apiUrl);
+  /**
+   * Obtiene la lista de organizaciones activas y registradas.
+   */
+  getAll(includeInactive: boolean = false): Observable<OrganizationSummary[]> {
+    let params = new HttpParams();
+    if (includeInactive) {
+      params = params.set('includeInactive', 'true');
+    }
+    return this.http.get<OrganizationSummary[]>(this.apiUrl, { params });
   }
 
+  /**
+   * Obtiene el detalle completo de una organización.
+   */
   getFullDetail(id: string): Observable<OrganizationFullDetail> {
     return this.http.get<OrganizationFullDetail>(`${this.apiUrl}/${id}/full-detail`);
   }
@@ -136,5 +146,13 @@ export class OrganizationsService {
 
   updateOrganization(id: string, payload: any): Observable<any> {
     return this.http.patch(`${this.apiUrl}/${id}`, payload);
+  }
+
+  deactivateOrganization(id: string): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/${id}/deactivate`, {});
+  }
+
+  activateOrganization(id: string): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/${id}/activate`, {});
   }
 }

@@ -306,5 +306,39 @@
       </ng-template>
     </div>
 
+    <!-- 6. Acciones Administrativas -->
+    <div class="badi-card section-card admin-card">
+      <div class="badi-card-header mb-0">
+        <mat-icon class="badi-card-icon color-warn">admin_panel_settings</mat-icon>
+        <h2>Acciones administrativas</h2>
+      </div>
+      
+      <div class="admin-action-row mt-3">
+        <div class="admin-info">
+          <h3>Desactivar organización</h3>
+          <p>La organización dejará de estar disponible para la gestión operativa pero mantendrá su historial.</p>
+        </div>
+        <div class="admin-btn">
+          <button mat-stroked-button color="warn" 
+                  *ngIf="detail.organizacion.estado !== 'Inactiva'" 
+                  (click)="deactivateOrganization()"
+                  [disabled]="deactivating">
+            <mat-spinner *ngIf="deactivating" diameter="18" class="spinner-btn"></mat-spinner>
+            <mat-icon *ngIf="!deactivating">block</mat-icon>
+            <span>Desactivar organización</span>
+          </button>
+          
+          <button mat-stroked-button color="primary" 
+                  *ngIf="detail.organizacion.estado === 'Inactiva'" 
+                  (click)="activateOrganization()"
+                  [disabled]="deactivating">
+            <mat-spinner *ngIf="deactivating" diameter="18" class="spinner-btn"></mat-spinner>
+            <mat-icon *ngIf="!deactivating">restore</mat-icon>
+            <span>Reactivar organización</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
   </ng-container>
 </div>

@@ -1,0 +1,21 @@
+mat-dialog-content {
+  p {
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    color: #333;
+    line-height: 1.5;
+
+    &.secondary-text {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 0;
+    }
+  }
+}
+
+h2[mat-dialog-title] {
+  margin: 0;
+  font-weight: 500;
+  color: #1a1a1a;
+  padding-bottom: 16px;
+}

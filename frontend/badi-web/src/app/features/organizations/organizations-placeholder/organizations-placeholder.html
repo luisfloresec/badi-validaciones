@@ -24,6 +24,10 @@
         <mat-icon>close</mat-icon>
       </button>
     </mat-form-field>
+
+    <mat-slide-toggle class="inactive-toggle" [(ngModel)]="showInactive" (change)="toggleInactive()">
+      Mostrar inactivas
+    </mat-slide-toggle>
   </div>
 
   <!-- Loading -->
@@ -87,9 +91,23 @@
               <button mat-icon-button (click)="viewDetail(org.id)" matTooltip="Ver detalle">
                 <mat-icon>visibility</mat-icon>
               </button>
-              <button mat-icon-button matTooltip="Editar" (click)="editOrganization(org.id)">
-                <mat-icon>edit</mat-icon>
-              </button>
+              
+              <ng-container *ngIf="org.estado !== 'Inactiva'">
+                <button mat-icon-button matTooltip="Editar" (click)="editOrganization(org.id)">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" matTooltip="Desactivar" 
+                        (click)="deactivateOrganization(org.id, org.razonSocial)">
+                  <mat-icon>block</mat-icon>
+                </button>
+              </ng-container>
+
+              <ng-container *ngIf="org.estado === 'Inactiva'">
+                <button mat-icon-button color="primary" matTooltip="Reactivar organización" 
+                        (click)="activateOrganization(org.id, org.razonSocial)">
+                  <mat-icon>restore</mat-icon>
+                </button>
+              </ng-container>
             </td>
           </tr>
         </tbody>
