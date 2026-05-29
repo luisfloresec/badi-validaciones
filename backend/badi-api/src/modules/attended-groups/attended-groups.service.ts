@@ -5,12 +5,15 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, DataSource } from 'typeorm';
 import { AttendedGroup } from './entities/attended-group.entity';
 import { Organization } from '../organizations/entities/organization.entity';
 import { Catalog } from '../catalogs/entities/catalog.entity';
+import { Leader } from '../leaders/entities/leader.entity';
+import { Representative } from '../representatives/entities/representative.entity';
 import { CreateAttendedGroupDto } from './dto/create-attended-group.dto';
 import { UpdateAttendedGroupDto } from './dto/update-attended-group.dto';
+import { ReplaceLeaderDto } from './dto/replace-leader.dto';
 
 @Injectable()
 export class AttendedGroupsService {
@@ -23,6 +26,8 @@ export class AttendedGroupsService {
 
     @InjectRepository(Catalog)
     private readonly catalogsRepository: Repository<Catalog>,
+
+    private readonly dataSource: DataSource,
   ) {}
 
   /**
@@ -197,5 +202,86 @@ export class AttendedGroupsService {
 
     group.estado = 'Inactivo';
     return this.attendedGroupsRepository.save(group);
+  }
+
+  /**
+   * Reemplaza o asigna el dirigente activo de un grupo atendido (transaccional).
+   * Inactiva al dirigente actual y crea uno nuevo.
+   */
+  async replaceLeader(groupId: string, dto: ReplaceLeaderDto): Promise<Leader> {
+    const group = await this.attendedGroupsRepository.findOne({
+      where: { id: groupId },
+      relations: { organizacion: true },
+    });
+
+    if (!group) {
+      throw new NotFoundException(`Grupo atendido con ID ${groupId} no encontrado.`);
+    }
+
+    if (group.estado === 'Inactivo') {
+      throw new ConflictException('No se puede asignar un dirigente a un grupo inactivo.');
+    }
+
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      // 1. Inactivar el dirigente actual del grupo si existe
+      const activeLeaders = await queryRunner.manager.find(Leader, {
+        where: { grupoAtendido: { id: groupId }, estado: 'Activo' },
+      });
+
+      for (const leader of activeLeaders) {
+        leader.estado = 'Inactivo';
+        await queryRunner.manager.save(Leader, leader);
+      }
+
+      // 2. Crear el nuevo dirigente
+      const newLeader = new Leader();
+      newLeader.grupoAtendido = group;
+      newLeader.estado = 'Activo';
+
+      if (dto.useActiveRepresentative) {
+        // Buscar el representante activo principal de la organización de este grupo
+        const activeRep = await queryRunner.manager.findOne(Representative, {
+          where: { organizacion: { id: group.organizacion.id }, estado: 'Activo', esPrincipal: true },
+        });
+
+        if (!activeRep) {
+          throw new ConflictException(
+            'No se encontró un representante activo principal en la organización para asociarlo como dirigente.',
+          );
+        }
+
+        newLeader.representante = activeRep;
+        newLeader.nombres = activeRep.nombres;
+        newLeader.apellidos = activeRep.apellidos;
+        newLeader.cedula = activeRep.cedula;
+        newLeader.telefono = activeRep.telefono;
+        newLeader.email = activeRep.email;
+      } else {
+        // Usar los datos manuales del DTO
+        if (!dto.nombres || !dto.apellidos) {
+          throw new BadRequestException('Nombres y apellidos son requeridos para un nuevo dirigente.');
+        }
+
+        newLeader.nombres = dto.nombres;
+        newLeader.apellidos = dto.apellidos;
+        if (dto.cedula) newLeader.cedula = dto.cedula;
+        if (dto.telefono) newLeader.telefono = dto.telefono;
+        if (dto.email) newLeader.email = dto.email;
+      }
+
+      const savedLeader = await queryRunner.manager.save(Leader, newLeader);
+
+      await queryRunner.commitTransaction();
+      return savedLeader;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
   }
 }

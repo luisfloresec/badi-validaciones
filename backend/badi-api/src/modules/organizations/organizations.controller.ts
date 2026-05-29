@@ -13,6 +13,7 @@ import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { UpdateOrganizationDto } from './dto/update-organization.dto';
 
 import { ReplaceRepresentativeDto } from './dto/replace-representative.dto';
+import { CreateAttendedGroupWithLeaderDto } from './dto/create-group-with-leader.dto';
 
 @Controller('organizations')
 export class OrganizationsController {
@@ -76,5 +77,14 @@ export class OrganizationsController {
     @Body() dto: ReplaceRepresentativeDto,
   ) {
     return this.organizationsService.replaceRepresentative(id, dto);
+  }
+
+  /** POST /organizations/:id/attended-groups/with-leader — Crear grupo con dirigente */
+  @Post(':id/attended-groups/with-leader')
+  createAttendedGroupWithLeader(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: CreateAttendedGroupWithLeaderDto,
+  ) {
+    return this.organizationsService.createAttendedGroupWithLeader(id, dto);
   }
 }

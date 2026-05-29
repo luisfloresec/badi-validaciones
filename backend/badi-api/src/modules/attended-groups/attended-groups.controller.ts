@@ -10,6 +10,7 @@ import {
 import { AttendedGroupsService } from './attended-groups.service';
 import { CreateAttendedGroupDto } from './dto/create-attended-group.dto';
 import { UpdateAttendedGroupDto } from './dto/update-attended-group.dto';
+import { ReplaceLeaderDto } from './dto/replace-leader.dto';
 
 @Controller('attended-groups')
 export class AttendedGroupsController {
@@ -56,5 +57,14 @@ export class AttendedGroupsController {
   @Patch(':id/deactivate')
   deactivate(@Param('id', ParseUUIDPipe) id: string) {
     return this.attendedGroupsService.deactivate(id);
+  }
+
+  /** POST /attended-groups/:id/leaders/replace — Reemplazar/Asignar dirigente */
+  @Post(':id/leaders/replace')
+  replaceLeader(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: ReplaceLeaderDto,
+  ) {
+    return this.attendedGroupsService.replaceLeader(id, dto);
   }
 }

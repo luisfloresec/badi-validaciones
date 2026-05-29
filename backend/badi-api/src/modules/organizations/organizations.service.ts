@@ -15,6 +15,7 @@ import { Leader } from '../leaders/entities/leader.entity';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { UpdateOrganizationDto } from './dto/update-organization.dto';
 import { ReplaceRepresentativeDto } from './dto/replace-representative.dto';
+import { CreateAttendedGroupWithLeaderDto } from './dto/create-group-with-leader.dto';
 
 @Injectable()
 export class OrganizationsService {
@@ -466,6 +467,105 @@ export class OrganizationsService {
 
       await queryRunner.commitTransaction();
       return savedRep;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  /**
+   * Crea un grupo atendido y su dirigente inicial en una sola transacción.
+   */
+  async createAttendedGroupWithLeader(
+    orgId: string,
+    dto: CreateAttendedGroupWithLeaderDto,
+  ): Promise<any> {
+    const org = await this.orgsRepository.findOne({ where: { id: orgId } });
+    if (!org) {
+      throw new NotFoundException(`Organización con ID ${orgId} no encontrada.`);
+    }
+
+    if (org.estado === 'Inactiva') {
+      throw new ConflictException('No se puede crear un grupo en una organización inactiva.');
+    }
+
+    const grupoEtario = await this.dataSource.getRepository(Catalog).findOne({
+      where: { id: dto.grupoEtarioId },
+    });
+    if (!grupoEtario) {
+      throw new NotFoundException('Catálogo de grupo etario no encontrado.');
+    }
+
+    const vulnerabilidad = await this.dataSource.getRepository(Catalog).findOne({
+      where: { id: dto.vulnerabilidadId },
+    });
+    if (!vulnerabilidad) {
+      throw new NotFoundException('Catálogo de vulnerabilidad no encontrado.');
+    }
+
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      // 1. Crear el grupo atendido
+      const newGroup = new AttendedGroup();
+      newGroup.organizacion = org;
+      newGroup.nombre = dto.nombre;
+      newGroup.grupoEtario = grupoEtario;
+      newGroup.vulnerabilidad = vulnerabilidad;
+      newGroup.numeroPersonas = dto.numeroPersonas;
+      if (dto.observaciones) newGroup.observaciones = dto.observaciones;
+      newGroup.estado = 'Activo';
+
+      const savedGroup = await queryRunner.manager.save(AttendedGroup, newGroup);
+
+      // 2. Crear el dirigente
+      const newLeader = new Leader();
+      newLeader.grupoAtendido = savedGroup;
+      newLeader.estado = 'Activo';
+
+      if (dto.useActiveRepresentative) {
+        // Buscar el representante activo principal
+        const activeRep = await queryRunner.manager.findOne(Representative, {
+          where: { organizacion: { id: orgId }, estado: 'Activo', esPrincipal: true },
+        });
+
+        if (!activeRep) {
+          throw new ConflictException(
+            'No se encontró un representante activo principal para asociarlo como dirigente.',
+          );
+        }
+
+        newLeader.representante = activeRep;
+        newLeader.nombres = activeRep.nombres;
+        newLeader.apellidos = activeRep.apellidos;
+        newLeader.cedula = activeRep.cedula;
+        newLeader.telefono = activeRep.telefono;
+        newLeader.email = activeRep.email;
+      } else {
+        // Usar los datos manuales del DTO
+        if (!dto.nombres || !dto.apellidos) {
+          throw new BadRequestException('Nombres y apellidos son requeridos para un nuevo dirigente.');
+        }
+
+        newLeader.nombres = dto.nombres;
+        newLeader.apellidos = dto.apellidos;
+        if (dto.cedula) newLeader.cedula = dto.cedula;
+        if (dto.telefono) newLeader.telefono = dto.telefono;
+        if (dto.email) newLeader.email = dto.email;
+      }
+
+      const savedLeader = await queryRunner.manager.save(Leader, newLeader);
+
+      await queryRunner.commitTransaction();
+
+      return {
+        grupo: savedGroup,
+        dirigente: savedLeader,
+      };
     } catch (error) {
       await queryRunner.rollbackTransaction();
       throw error;
