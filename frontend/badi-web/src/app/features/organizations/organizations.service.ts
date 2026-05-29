@@ -163,4 +163,30 @@ export class OrganizationsService {
   updateRepresentative(id: string, payload: any): Observable<any> {
     return this.http.patch(`http://localhost:3000/representatives/${id}`, payload);
   }
+
+  createAttendedGroupWithLeader(organizationId: string, payload: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${organizationId}/attended-groups/with-leader`, payload);
+  }
+
+  updateAttendedGroup(groupId: string, payload: any): Observable<any> {
+    return this.http.patch(`http://localhost:3000/attended-groups/${groupId}`, payload);
+  }
+
+  deactivateAttendedGroup(groupId: string): Observable<any> {
+    return this.http.patch(`http://localhost:3000/attended-groups/${groupId}/deactivate`, {});
+  }
+
+  // --- DIRIGENTES ---
+
+  updateLeader(leaderId: string, payload: any): Observable<any> {
+    return this.http.patch(`http://localhost:3000/leaders/${leaderId}`, payload);
+  }
+
+  deactivateLeader(leaderId: string): Observable<any> {
+    return this.http.patch(`http://localhost:3000/leaders/${leaderId}/deactivate`, {});
+  }
+
+  replaceLeader(groupId: string, payload: any): Observable<any> {
+    return this.http.post(`http://localhost:3000/attended-groups/${groupId}/leaders/replace`, payload);
+  }
 }

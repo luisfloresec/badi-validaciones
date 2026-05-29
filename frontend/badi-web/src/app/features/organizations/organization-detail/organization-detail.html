@@ -213,68 +213,136 @@
           <mat-icon class="badi-card-icon">groups</mat-icon>
           <h2>Grupos Atendidos y Dirigentes</h2>
         </div>
-        <button *ngIf="isGad()" mat-button class="btn-primary-text" disabled>
+        <button *ngIf="isGad()" mat-button class="btn-primary-text" 
+                (click)="openGroupForm('create')" 
+                [disabled]="detail.organizacion.estado === 'Inactiva'">
           <mat-icon>add</mat-icon> Agregar grupo atendido
         </button>
       </div>
 
       <div class="groups-list mt-3" *ngIf="detail.gruposAtendidos.length > 0; else noGroups">
-        <div class="group-item" *ngFor="let item of detail.gruposAtendidos">
-          <div class="group-header">
-            <div class="group-info">
-              <h3>{{ item.grupo.nombre }}</h3>
-              <div class="group-badges">
-                <span class="badge">{{ item.grupo.grupoEtario.nombre || 'Edad no espec.' }}</span>
-                <span class="badge">{{ item.grupo.vulnerabilidad.nombre || 'Vuln. no espec.' }}</span>
-                <span class="estado-chip" [ngClass]="getEstadoClass(item.grupo.estado)">{{ item.grupo.estado }}</span>
-              </div>
-              <p class="group-desc">{{ item.grupo.observaciones || 'Sin observaciones' }}</p>
+        <div class="group-item-card" *ngFor="let item of detail.gruposAtendidos">
+          
+          <!-- Cabecera del Grupo -->
+          <div class="group-header-row">
+            <div class="group-title-area">
+              <h3 class="group-title">{{ item.grupo.nombre }}</h3>
+              <span class="estado-chip" [ngClass]="getEstadoClass(item.grupo.estado)">{{ item.grupo.estado }}</span>
             </div>
-            <div class="group-stats">
-              <mat-icon>people</mat-icon>
-              <span>{{ item.grupo.numeroPersonas }} personas</span>
+            
+            <div class="group-header-actions">
+              <div class="group-people-badge">
+                <mat-icon>people</mat-icon>
+                <span>{{ item.grupo.numeroPersonas }}</span>
+              </div>
+              <div class="action-buttons-mini" *ngIf="item.grupo.estado !== 'Inactiva'">
+                <button mat-icon-button color="primary" matTooltip="Editar grupo" (click)="openGroupForm('edit', item.grupo)">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" matTooltip="Desactivar grupo" (click)="deactivateGroup(item.grupo.id)">
+                  <mat-icon>block</mat-icon>
+                </button>
+              </div>
             </div>
           </div>
 
-          <!-- Dirigentes del grupo -->
-          <div class="leaders-section">
-            <div class="leaders-header">
-              <h4>Dirigentes asociados</h4>
-              <button *ngIf="isGad()" mat-button class="btn-primary-text btn-small" disabled>
+          <!-- Datos del Grupo -->
+          <div class="group-attributes">
+            <div class="attr-block">
+              <span class="attr-label">Grupo Etario</span>
+              <span class="attr-val chip-info">{{ item.grupo.grupoEtario.nombre || 'No espec.' }}</span>
+            </div>
+            <div class="attr-block">
+              <span class="attr-label">Vulnerabilidad</span>
+              <span class="attr-val chip-info">{{ item.grupo.vulnerabilidad.nombre || 'No espec.' }}</span>
+            </div>
+            <div class="attr-block w-full">
+              <span class="attr-label">Observaciones</span>
+              <span class="attr-val desc-text">{{ item.grupo.observaciones || 'Sin observaciones' }}</span>
+            </div>
+          </div>
+
+          <!-- Dirigente Activo (Subcard) -->
+          <div class="leader-subcard">
+            <div class="leader-subcard-header">
+              <h4>Dirigente Activo</h4>
+              <button *ngIf="isGad() && !getActiveLeader(item) && item.grupo.estado !== 'Inactiva'" mat-button class="btn-primary-text btn-small" (click)="openLeaderForm(item.grupo.id, 'create')">
                 <mat-icon>add</mat-icon> Agregar dirigente
               </button>
             </div>
-            
-            <div class="table-wrapper" *ngIf="item.dirigentes.length > 0; else noLeaders">
-              <table class="badi-table table-small">
+
+            <div class="leader-empty-state" *ngIf="!getActiveLeader(item)">
+              <p>Este grupo no tiene dirigente activo.</p>
+            </div>
+
+            <div class="leader-active-info" *ngIf="getActiveLeader(item) as activeLeader">
+              <div class="leader-grid">
+                <div class="attr-block">
+                  <span class="attr-label">Nombres y Apellidos</span>
+                  <span class="l-val">{{ activeLeader.nombres }} {{ activeLeader.apellidos }}</span>
+                </div>
+                <div class="attr-block">
+                  <span class="attr-label">Cédula</span>
+                  <span class="l-val">{{ activeLeader.cedula || '—' }}</span>
+                </div>
+                <div class="attr-block">
+                  <span class="attr-label">Contacto</span>
+                  <span class="l-val">
+                    <ng-container *ngIf="activeLeader.telefono || activeLeader.email; else noContact">
+                      {{ activeLeader.telefono }} <span *ngIf="activeLeader.telefono && activeLeader.email">|</span> {{ activeLeader.email }}
+                    </ng-container>
+                    <ng-template #noContact>—</ng-template>
+                  </span>
+                </div>
+                <div class="attr-block" *ngIf="activeLeader.representanteId">
+                  <span class="attr-label">Vínculo</span>
+                  <span class="l-badge-rep">Usa representante</span>
+                </div>
+              </div>
+              
+              <div class="leader-btn-actions" *ngIf="item.grupo.estado !== 'Inactiva'">
+                <button mat-stroked-button class="btn-xs outline" (click)="openLeaderForm(item.grupo.id, 'edit', activeLeader)">
+                  <mat-icon>edit</mat-icon> Editar datos
+                </button>
+                <button mat-stroked-button class="btn-xs outline" (click)="openLeaderForm(item.grupo.id, 'replace')">
+                  <mat-icon>swap_horiz</mat-icon> Reemplazar
+                </button>
+                <button mat-stroked-button color="warn" class="btn-xs warn" (click)="deactivateLeader(activeLeader.id)">
+                  <mat-icon>person_off</mat-icon> Inactivar
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Histórico de dirigentes inactivos -->
+          <div class="inactive-leaders-subcard" *ngIf="item.dirigentes.length > (getActiveLeader(item) ? 1 : 0)">
+            <h5>Histórico de Dirigentes</h5>
+            <div class="table-wrapper">
+              <table class="badi-table table-xs">
                 <thead>
                   <tr>
                     <th>Nombres y Apellidos</th>
                     <th>Cédula</th>
-                    <th>Teléfono</th>
-                    <th>Email</th>
-                    <th>Rep. Asociado</th>
+                    <th>Vínculo</th>
                     <th class="text-center">Estado</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let dir of item.dirigentes">
-                    <td class="col-primary">{{ dir.nombres }} {{ dir.apellidos }}</td>
-                    <td class="col-mono">{{ dir.cedula || '—' }}</td>
-                    <td>{{ dir.telefono || '—' }}</td>
-                    <td>{{ dir.email || '—' }}</td>
-                    <td>{{ getRepresentativeName(dir.representanteId) }}</td>
-                    <td class="text-center">
-                      <span class="estado-chip" [ngClass]="getEstadoClass(dir.estado)">{{ dir.estado }}</span>
-                    </td>
-                  </tr>
+                  <ng-container *ngFor="let dir of item.dirigentes">
+                    <tr *ngIf="dir.estado === 'Inactivo'" class="inactive-row">
+                      <td class="col-primary">{{ dir.nombres }} {{ dir.apellidos }}</td>
+                      <td class="col-mono">{{ dir.cedula || '—' }}</td>
+                      <td>{{ dir.representanteId ? 'Usó rep. de org.' : '—' }}</td>
+                      <td class="text-center">
+                        <span class="estado-chip estado-inactiva">Inactivo</span>
+                      </td>
+                    </tr>
+                  </ng-container>
                 </tbody>
               </table>
             </div>
-            <ng-template #noLeaders>
-              <p class="empty-text small">No hay dirigentes asociados a este grupo.</p>
-            </ng-template>
           </div>
+
         </div>
       </div>
       <ng-template #noGroups>

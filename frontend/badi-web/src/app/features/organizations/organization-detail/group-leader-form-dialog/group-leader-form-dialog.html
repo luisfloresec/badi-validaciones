@@ -1,0 +1,127 @@
+<div class="dialog-container">
+  <div class="dialog-header">
+    <h2 mat-dialog-title>
+      <ng-container *ngIf="data.mode === 'create'">Agregar Grupo Atendido</ng-container>
+      <ng-container *ngIf="data.mode === 'edit'">Editar Grupo Atendido</ng-container>
+    </h2>
+    <button mat-icon-button class="close-button" mat-dialog-close [disabled]="loading">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="dialog-content" mat-dialog-content>
+    <div class="error-banner" *ngIf="error">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ error }}</span>
+    </div>
+
+    <form [formGroup]="form" class="badi-form">
+      <h3 class="section-subtitle">Datos del Grupo</h3>
+      
+      <mat-form-field appearance="outline" class="w-100">
+        <mat-label>Nombre del Grupo</mat-label>
+        <input matInput formControlName="nombre" placeholder="Ej. Niños del Sur" />
+        <mat-error *ngIf="form.get('nombre')?.hasError('required')">El nombre es obligatorio.</mat-error>
+        <mat-error *ngIf="form.get('nombre')?.hasError('maxlength')">Máximo 150 caracteres.</mat-error>
+      </mat-form-field>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Grupo Etario</mat-label>
+          <mat-select formControlName="grupoEtarioId">
+            <mat-option *ngFor="let g of gruposEtarios" [value]="g.id">{{ g.nombre }}</mat-option>
+          </mat-select>
+          <mat-error *ngIf="form.get('grupoEtarioId')?.hasError('required')">Requerido.</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Vulnerabilidad</mat-label>
+          <mat-select formControlName="vulnerabilidadId">
+            <mat-option *ngFor="let v of vulnerabilidades" [value]="v.id">{{ v.nombre }}</mat-option>
+          </mat-select>
+          <mat-error *ngIf="form.get('vulnerabilidadId')?.hasError('required')">Requerido.</mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Número de personas</mat-label>
+          <input matInput type="number" formControlName="numeroPersonas" min="1" />
+          <mat-error *ngIf="form.get('numeroPersonas')?.hasError('required')">Requerido.</mat-error>
+          <mat-error *ngIf="form.get('numeroPersonas')?.hasError('min')">Debe ser al menos 1.</mat-error>
+        </mat-form-field>
+      </div>
+
+      <mat-form-field appearance="outline" class="w-100">
+        <mat-label>Observaciones (Opcional)</mat-label>
+        <textarea matInput formControlName="observaciones" rows="2"></textarea>
+      </mat-form-field>
+
+      <!-- SECCION DIRIGENTE INICIAL (Solo en CREATE) -->
+      <ng-container *ngIf="data.mode === 'create'">
+        <mat-divider class="my-3"></mat-divider>
+        <h3 class="section-subtitle">Dirigente Inicial</h3>
+        
+        <mat-radio-group formControlName="leaderOption" class="leader-options">
+          <mat-radio-button value="use_active" *ngIf="data.hasActiveRepresentative">
+            Usar representante activo de la organización
+          </mat-radio-button>
+          <mat-radio-button value="new_leader">
+            Registrar dirigente nuevo
+          </mat-radio-button>
+        </mat-radio-group>
+
+        <!-- Formulario nuevo dirigente -->
+        <div class="new-leader-form" *ngIf="form.get('leaderOption')?.value === 'new_leader'">
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Nombres</mat-label>
+              <input matInput formControlName="nombres" />
+              <mat-error *ngIf="form.get('nombres')?.hasError('required')">Requerido.</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Apellidos</mat-label>
+              <input matInput formControlName="apellidos" />
+              <mat-error *ngIf="form.get('apellidos')?.hasError('required')">Requerido.</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Cédula</mat-label>
+              <input matInput formControlName="cedula" />
+              <mat-error *ngIf="form.get('cedula')?.hasError('required')">Requerido.</mat-error>
+              <mat-error *ngIf="form.get('cedula')?.hasError('pattern')">10 dígitos.</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Teléfono (Opcional)</mat-label>
+              <input matInput formControlName="telefono" />
+            </mat-form-field>
+          </div>
+
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Correo electrónico (Opcional)</mat-label>
+            <input matInput formControlName="email" type="email" />
+            <mat-error *ngIf="form.get('email')?.hasError('email')">Formato inválido.</mat-error>
+          </mat-form-field>
+        </div>
+      </ng-container>
+    </form>
+  </div>
+
+  <div class="dialog-actions" mat-dialog-actions>
+    <button mat-button mat-dialog-close [disabled]="loading">Cancelar</button>
+    <button mat-flat-button color="primary" 
+            (click)="onSubmit()" 
+            [disabled]="form.invalid || loading"
+            class="submit-btn">
+      <mat-spinner *ngIf="loading" diameter="20" class="spinner-btn"></mat-spinner>
+      <span *ngIf="!loading">
+        <ng-container *ngIf="data.mode === 'create'">Guardar</ng-container>
+        <ng-container *ngIf="data.mode === 'edit'">Guardar cambios</ng-container>
+      </span>
+    </button>
+  </div>
+</div>

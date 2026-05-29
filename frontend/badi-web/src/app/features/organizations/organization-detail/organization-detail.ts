@@ -14,6 +14,8 @@ import {
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/components/confirm-dialog/confirm-dialog';
 import { RepresentativeFormDialogComponent } from './representative-form-dialog/representative-form-dialog';
+import { GroupLeaderFormDialogComponent } from './group-leader-form-dialog/group-leader-form-dialog';
+import { LeaderFormDialogComponent } from './leader-form-dialog/leader-form-dialog';
 
 @Component({
   selector: 'app-organization-detail',
@@ -206,6 +208,115 @@ export class OrganizationDetailComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.loadDetail(this.detail!.organizacion.id);
+      }
+    });
+  }
+
+  // --- GRUPOS ATENDIDOS ---
+
+  openGroupForm(mode: 'create' | 'edit', groupData?: any): void {
+    if (!this.detail) return;
+
+    const dialogRef = this.dialog.open(GroupLeaderFormDialogComponent, {
+      width: '700px',
+      disableClose: true,
+      data: {
+        organizationId: this.detail.organizacion.id,
+        hasActiveRepresentative: !!this.activeRepresentative,
+        mode,
+        groupData
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadDetail(this.detail!.organizacion.id);
+      }
+    });
+  }
+
+  deactivateGroup(groupId: string): void {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Desactivar grupo',
+        message: '¿Está seguro de que desea desactivar este grupo atendido? Esta acción lo ocultará de los procesos activos.',
+        confirmText: 'Desactivar',
+        cancelText: 'Cancelar',
+        isDestructive: true
+      } as ConfirmDialogData
+    });
+
+    dialogRef.afterClosed().subscribe(confirm => {
+      if (confirm) {
+        this.orgService.deactivateAttendedGroup(groupId).subscribe({
+          next: () => {
+            this.loadDetail(this.detail!.organizacion.id);
+          },
+          error: (err) => {
+            console.error('Error deactivating group:', err);
+            this.error = err?.error?.message || 'No se pudo desactivar el grupo.';
+            this.cdr.detectChanges();
+            window.scrollTo(0, 0);
+          }
+        });
+      }
+    });
+  }
+
+  // --- DIRIGENTES ---
+
+  getActiveLeader(groupItem: any): any {
+    if (!groupItem.dirigentes) return null;
+    return groupItem.dirigentes.find((d: any) => d.estado === 'Activo') || null;
+  }
+
+  openLeaderForm(groupId: string, mode: 'create' | 'edit' | 'replace', leaderData?: any): void {
+    if (!this.detail) return;
+
+    const dialogRef = this.dialog.open(LeaderFormDialogComponent, {
+      width: '600px',
+      disableClose: true,
+      data: {
+        groupId,
+        hasActiveRepresentative: !!this.activeRepresentative,
+        mode,
+        leaderData
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadDetail(this.detail!.organizacion.id);
+      }
+    });
+  }
+
+  deactivateLeader(leaderId: string): void {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Inactivar dirigente',
+        message: '¿Está seguro de inactivar este dirigente? Esta acción no eliminará el registro, pero dejará de considerarse vigente para este grupo atendido. Si esta persona también es representante de la organización u ocupa otros roles, esos registros no serán modificados.',
+        confirmText: 'Inactivar dirigente',
+        cancelText: 'Cancelar',
+        isDestructive: true
+      } as ConfirmDialogData
+    });
+
+    dialogRef.afterClosed().subscribe(confirm => {
+      if (confirm) {
+        this.orgService.deactivateLeader(leaderId).subscribe({
+          next: () => {
+            this.loadDetail(this.detail!.organizacion.id);
+          },
+          error: (err) => {
+            console.error('Error deactivating leader:', err);
+            this.error = err?.error?.message || 'No se pudo inactivar el dirigente.';
+            this.cdr.detectChanges();
+            window.scrollTo(0, 0);
+          }
+        });
       }
     });
   }
