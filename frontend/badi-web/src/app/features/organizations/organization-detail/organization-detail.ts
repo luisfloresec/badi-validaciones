@@ -5,6 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { finalize } from 'rxjs/operators';
 import {
   OrganizationsService,
@@ -16,6 +17,8 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/compo
 import { RepresentativeFormDialogComponent } from './representative-form-dialog/representative-form-dialog';
 import { GroupLeaderFormDialogComponent } from './group-leader-form-dialog/group-leader-form-dialog';
 import { LeaderFormDialogComponent } from './leader-form-dialog/leader-form-dialog';
+import { AgreementFormDialogComponent } from '../../agreements/agreement-form-dialog/agreement-form-dialog';
+import { AgreementsService } from '../../agreements/agreements.service';
 
 @Component({
   selector: 'app-organization-detail',
@@ -42,7 +45,9 @@ export class OrganizationDetailComponent implements OnInit {
     private router: Router,
     private orgService: OrganizationsService,
     private cdr: ChangeDetectorRef,
-    private dialog: MatDialog
+    private snackBar: MatSnackBar,
+    private dialog: MatDialog,
+    private agreementsService: AgreementsService
   ) {}
 
   ngOnInit(): void {
@@ -231,6 +236,69 @@ export class OrganizationDetailComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.loadDetail(this.detail!.organizacion.id);
+      }
+    });
+  }
+
+  openAgreementForm(): void {
+    if (!this.detail || this.detail.organizacion.estado === 'Inactiva') return;
+    
+    const dialogRef = this.dialog.open(AgreementFormDialogComponent, {
+      width: '600px',
+      disableClose: true,
+      data: {
+        organizationId: this.detail.organizacion.id,
+        disableOrgSelect: true
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadDetail(this.detail!.organizacion.id);
+      }
+    });
+  }
+
+  editAgreement(conv: any): void {
+    if (!this.detail || this.detail.organizacion.estado === 'Inactiva') return;
+    
+    const dialogRef = this.dialog.open(AgreementFormDialogComponent, {
+      width: '600px',
+      disableClose: true,
+      data: {
+        organizationId: this.detail.organizacion.id,
+        agreement: conv,
+        disableOrgSelect: true
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadDetail(this.detail!.organizacion.id);
+      }
+    });
+  }
+
+  deactivateAgreement(convId: string): void {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Anular Convenio',
+        message: '¿Estás seguro de que deseas anular este convenio? Esta acción lo marcará como anulado pero no lo eliminará.'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.agreementsService.deactivate(convId).subscribe({
+          next: () => {
+            this.snackBar.open('Convenio anulado exitosamente', 'Cerrar', { duration: 3000 });
+            this.loadDetail(this.detail!.organizacion.id);
+          },
+          error: (err) => {
+            this.snackBar.open(err.error?.message || 'Error al anular el convenio', 'Cerrar', { duration: 3000 });
+          }
+        });
       }
     });
   }

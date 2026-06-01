@@ -4,11 +4,14 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { OrganizationType } from '../../organization-types/entities/organization-type.entity';
 import { Catalog } from '../../catalogs/entities/catalog.entity';
+import { AttendedGroup } from '../../attended-groups/entities/attended-group.entity';
+import { Agreement } from '../../agreements/entities/agreement.entity';
 
 @Entity('organizacion')
 export class Organization {
@@ -73,6 +76,12 @@ export class Organization {
 
   @Column({ name: 'redes_sociales', type: 'jsonb', nullable: true })
   redesSociales: Record<string, any>;
+
+  @OneToMany(() => AttendedGroup, (ag) => ag.organizacion)
+  gruposAtendidos: AttendedGroup[];
+
+  @OneToMany(() => Agreement, (agr) => agr.organizacion)
+  convenios: Agreement[];
 
   @Column({ type: 'text', nullable: true })
   observaciones: string;

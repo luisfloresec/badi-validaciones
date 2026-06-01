@@ -1,0 +1,83 @@
+<div class="page-container">
+  <div class="page-header">
+    <div class="header-content">
+      <h1>Convenios</h1>
+      <p class="subtitle">Gestión de convenios con organizaciones</p>
+    </div>
+    <div class="header-actions">
+      <button mat-flat-button color="primary" class="btn-primary" (click)="openAgreementForm()">
+        <mat-icon>add</mat-icon> Registrar Convenio
+      </button>
+    </div>
+  </div>
+
+  <div class="badi-card">
+    <div class="table-container">
+
+      <div *ngIf="loading" class="loading-state text-center p-4">
+        <mat-spinner diameter="40" class="mx-auto"></mat-spinner>
+        <p class="mt-2 text-muted">Cargando convenios...</p>
+      </div>
+
+      <div *ngIf="!loading && error" class="error-state text-center p-4">
+        <mat-icon color="warn">error_outline</mat-icon>
+        <p>{{ error }}</p>
+        <button mat-button color="primary" (click)="loadAgreements()">Reintentar</button>
+      </div>
+
+      <table mat-table [dataSource]="agreements" class="badi-table" *ngIf="!loading && !error && agreements.length > 0">
+
+        <ng-container matColumnDef="codigo">
+          <th mat-header-cell *matHeaderCellDef> Código </th>
+          <td mat-cell *matCellDef="let element" class="col-primary fw-600"> {{ element.codigoConvenio || 'S/N' }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="organizacion">
+          <th mat-header-cell *matHeaderCellDef> Organización </th>
+          <td mat-cell *matCellDef="let element"> {{ element.organizacion?.razonSocial || element.organizacion?.nombreComercial }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="tipo">
+          <th mat-header-cell *matHeaderCellDef> Tipo </th>
+          <td mat-cell *matCellDef="let element"> {{ element.tipoConvenio?.nombre }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="estado">
+          <th mat-header-cell *matHeaderCellDef> Estado </th>
+          <td mat-cell *matCellDef="let element">
+            <span class="estado-chip" [ngClass]="{
+              'estado-activa': element.estado === 'Activo',
+              'estado-registrada': element.estado === 'Registrado' || element.estado === 'Borrador',
+              'estado-inactiva': element.estado === 'Anulado' || element.estado === 'Inactivo'
+            }">{{ element.estado }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="fechaInicio">
+          <th mat-header-cell *matHeaderCellDef> Fecha Inicio </th>
+          <td mat-cell *matCellDef="let element" class="col-mono"> {{ element.fechaInicio ? (element.fechaInicio | date:'dd/MM/yyyy') : '—' }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef class="text-center"> Acciones </th>
+          <td mat-cell *matCellDef="let element" class="text-center actions-cell">
+            <button mat-icon-button color="primary" matTooltip="Editar" (click)="openAgreementForm(element)" [disabled]="element.estado === 'Anulado'">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" matTooltip="Anular" (click)="deactivateAgreement(element.id)" [disabled]="element.estado === 'Anulado'">
+              <mat-icon>block</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" [ngClass]="{'inactive-row': row.estado === 'Anulado' || row.estado === 'Inactivo'}"></tr>
+      </table>
+
+      <div *ngIf="!loading && !error && agreements.length === 0" class="empty-state">
+        <mat-icon>handshake</mat-icon>
+        <p>No se encontraron convenios registrados.</p>
+      </div>
+    </div>
+  </div>
+</div>

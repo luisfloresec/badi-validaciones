@@ -20,6 +20,7 @@ export class TopbarComponent implements OnInit, OnDestroy {
   private readonly routeTitleMap: Record<string, string> = {
     '/dashboard': 'Panel de Control',
     '/organizations': 'Organizaciones',
+    '/agreements': 'Convenios',
     '/users': 'Usuarios',
     '/roles': 'Roles',
     '/documents': 'Repositorio Global',

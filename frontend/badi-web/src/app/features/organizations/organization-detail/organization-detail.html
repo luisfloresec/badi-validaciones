@@ -356,6 +356,62 @@
       </ng-template>
     </div>
 
+    <!-- 4.5. Convenios -->
+    <div class="badi-card section-card">
+      <div class="section-header-flex">
+        <div class="badi-card-header mb-0">
+          <mat-icon class="badi-card-icon">handshake</mat-icon>
+          <h2>Convenios</h2>
+        </div>
+        <button mat-button class="btn-primary-text" (click)="openAgreementForm()" [disabled]="detail.organizacion.estado === 'Inactiva'">
+          <mat-icon>add</mat-icon> Registrar convenio
+        </button>
+      </div>
+
+      <div class="badi-card-body pt-0">
+        <div class="table-wrapper" *ngIf="detail.convenios?.length; else noAgreements">
+          <table class="badi-table mt-3">
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Tipo</th>
+                <th>Estado</th>
+                <th>Fecha Inicio</th>
+                <th>Observaciones</th>
+                <th class="text-center">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let conv of detail.convenios" [ngClass]="{'inactive-row': conv.estado === 'Anulado' || conv.estado === 'Inactivo'}">
+                <td class="col-primary fw-600">{{ conv.codigoConvenio || 'S/N' }}</td>
+                <td>{{ conv.tipoConvenio?.nombre }}</td>
+                <td>
+                  <span class="estado-chip" [ngClass]="{
+                    'estado-activa': conv.estado === 'Activo',
+                    'estado-registrada': conv.estado === 'Registrado' || conv.estado === 'Borrador',
+                    'estado-inactiva': conv.estado === 'Anulado' || conv.estado === 'Inactivo'
+                  }">{{ conv.estado }}</span>
+                </td>
+                <td class="col-mono">{{ conv.fechaInicio ? (conv.fechaInicio | date:'dd/MM/yyyy') : '—' }}</td>
+                <td><span class="trunc-text" [title]="conv.observaciones">{{ conv.observaciones || '—' }}</span></td>
+                <td class="text-center actions-cell">
+                  <button mat-icon-button color="primary" matTooltip="Editar" [disabled]="conv.estado === 'Anulado'" (click)="editAgreement(conv)">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button mat-icon-button color="warn" matTooltip="Anular" [disabled]="conv.estado === 'Anulado'" (click)="deactivateAgreement(conv.id)">
+                    <mat-icon>block</mat-icon>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <ng-template #noAgreements>
+          <p class="empty-text mt-3">No hay convenios registrados todavía.</p>
+        </ng-template>
+      </div>
+    </div>
+
     <!-- 5. Documentos asociados -->
     <div class="badi-card section-card">
       <div class="section-header-flex">

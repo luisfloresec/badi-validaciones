@@ -1,0 +1,56 @@
+.page-container {
+  padding: 24px;
+}
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+.header-content h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+.subtitle {
+  color: #6b7280;
+  margin: 4px 0 0;
+  font-size: 14px;
+}
+.badi-card {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+}
+.badi-table {
+  width: 100%;
+}
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  color: #6b7280;
+}
+.empty-state mat-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+.empty-state p {
+  margin: 0;
+  font-size: 16px;
+}
+.btn-primary {
+  background-color: #015641 !important;
+  color: #fff !important;
+}

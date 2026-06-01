@@ -12,6 +12,7 @@ import { OrganizationsModule } from './modules/organizations/organizations.modul
 import { RepresentativesModule } from './modules/representatives/representatives.module';
 import { AttendedGroupsModule } from './modules/attended-groups/attended-groups.module';
 import { LeadersModule } from './modules/leaders/leaders.module';
+import { AgreementsModule } from './modules/agreements/agreements.module';
 
 @Module({
   imports: [
@@ -51,6 +52,8 @@ import { LeadersModule } from './modules/leaders/leaders.module';
     AttendedGroupsModule,
 
     LeadersModule,
+
+    AgreementsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,0 +1,58 @@
+.dialog-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.header-title h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+}
+.header-title mat-icon {
+  color: #015641;
+}
+.btn-close {
+  color: #6b7280;
+}
+.dialog-content {
+  padding: 24px;
+  flex: 1;
+  overflow-y: auto;
+}
+.badi-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.form-row {
+  display: flex;
+  gap: 16px;
+}
+.w-100 {
+  width: 100%;
+}
+.dialog-actions {
+  padding: 16px 24px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-bottom: 0;
+}
+.btn-primary {
+  background-color: #015641 !important;
+  color: #fff !important;
+}

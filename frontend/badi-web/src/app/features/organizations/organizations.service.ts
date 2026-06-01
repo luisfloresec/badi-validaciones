@@ -50,14 +50,24 @@ export interface RepresentanteDetail {
   id: string;
   nombres: string;
   apellidos: string;
-  cedula: string | null;
-  telefono: string | null;
-  email: string | null;
-  cargo: string | null;
+  cedula: string;
+  telefono: string;
+  email: string;
+  cargo: string;
   esPrincipal: boolean;
   estado: string;
   fechaRegistro: string;
   fechaActualizacion: string | null;
+}
+
+export interface AgreementDetail {
+  id: string;
+  codigoConvenio?: string;
+  tipoConvenio: { id: string; nombre: string; descripcion: string; estado: string };
+  estado: string;
+  fechaInicio?: string;
+  fechaCreacion: string;
+  observaciones?: string;
 }
 
 /** Grupo atendido dentro de full-detail */
@@ -99,6 +109,7 @@ export interface OrganizationFullDetail {
   organizacion: OrganizationSummary;
   representantes: RepresentanteDetail[];
   gruposAtendidos: GrupoConDirigentes[];
+  convenios?: AgreementDetail[];
   documentos: any[];
 }
 

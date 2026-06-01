@@ -13,6 +13,7 @@ import { Representative } from '../representatives/entities/representative.entit
 import { AttendedGroup } from '../attended-groups/entities/attended-group.entity';
 import { Leader } from '../leaders/entities/leader.entity';
 import { AttendedGroupVulnerability } from '../attended-groups/entities/attended-group-vulnerability.entity';
+import { Agreement } from '../agreements/entities/agreement.entity';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { UpdateOrganizationDto } from './dto/update-organization.dto';
 import { ReplaceRepresentativeDto } from './dto/replace-representative.dto';
@@ -265,6 +266,22 @@ export class OrganizationsService {
       }),
     );
 
+    const conveniosRaw = await this.dataSource.getRepository(Agreement).find({
+      where: { organizacion: { id } },
+      order: { fechaCreacion: 'DESC' },
+      relations: { tipoConvenio: true }
+    });
+
+    const convenios = conveniosRaw.map(c => ({
+      id: c.id,
+      codigoConvenio: c.codigoConvenio,
+      tipoConvenio: c.tipoConvenio,
+      estado: c.estado,
+      fechaInicio: c.fechaInicio,
+      fechaCreacion: c.fechaCreacion,
+      observaciones: c.observaciones,
+    }));
+
     return {
       organizacion: {
         id: org.id,
@@ -291,6 +308,7 @@ export class OrganizationsService {
       },
       representantes,
       gruposAtendidos,
+      convenios,
       documentos: [],
     };
   }
