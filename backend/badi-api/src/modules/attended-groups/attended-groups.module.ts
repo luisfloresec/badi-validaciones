@@ -5,9 +5,10 @@ import { AttendedGroupsController } from './attended-groups.controller';
 import { AttendedGroup } from './entities/attended-group.entity';
 import { Organization } from '../organizations/entities/organization.entity';
 import { Catalog } from '../catalogs/entities/catalog.entity';
+import { AttendedGroupVulnerability } from './entities/attended-group-vulnerability.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([AttendedGroup, Organization, Catalog])],
+  imports: [TypeOrmModule.forFeature([AttendedGroup, Organization, Catalog, AttendedGroupVulnerability])],
   controllers: [AttendedGroupsController],
   providers: [AttendedGroupsService],
   exports: [AttendedGroupsService],

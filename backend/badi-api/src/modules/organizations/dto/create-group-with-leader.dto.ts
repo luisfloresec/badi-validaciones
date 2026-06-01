@@ -1,4 +1,4 @@
-import { IsBoolean, IsEmail, IsNotEmpty, IsNumber, IsOptional, IsString, IsUUID, MaxLength, Min, Matches } from 'class-validator';
+import { ArrayNotEmpty, IsArray, IsBoolean, IsEmail, IsNotEmpty, IsNumber, IsOptional, IsString, IsUUID, MaxLength, Min, Matches } from 'class-validator';
 
 export class CreateAttendedGroupWithLeaderDto {
   // --- Grupo Atendido ---
@@ -11,9 +11,10 @@ export class CreateAttendedGroupWithLeaderDto {
   @IsUUID('all', { message: 'ID de grupo etario inválido.' })
   grupoEtarioId: string;
 
-  @IsNotEmpty({ message: 'El nivel de vulnerabilidad es obligatorio.' })
-  @IsUUID('all', { message: 'ID de vulnerabilidad inválido.' })
-  vulnerabilidadId: string;
+  @IsArray({ message: 'vulnerabilidadIds debe ser un arreglo.' })
+  @ArrayNotEmpty({ message: 'Debe seleccionar al menos una vulnerabilidad.' })
+  @IsUUID('all', { each: true, message: 'ID de vulnerabilidad inválido.' })
+  vulnerabilidadIds: string[];
 
   @IsNotEmpty({ message: 'El número de personas es obligatorio.' })
   @IsNumber({}, { message: 'El número de personas debe ser numérico.' })

@@ -35,11 +35,11 @@
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="w-100">
-          <mat-label>Vulnerabilidad</mat-label>
-          <mat-select formControlName="vulnerabilidadId">
+          <mat-label>Vulnerabilidades</mat-label>
+          <mat-select formControlName="vulnerabilidadIds" multiple>
             <mat-option *ngFor="let v of vulnerabilidades" [value]="v.id">{{ v.nombre }}</mat-option>
           </mat-select>
-          <mat-error *ngIf="form.get('vulnerabilidadId')?.hasError('required')">Requerido.</mat-error>
+          <mat-error *ngIf="form.get('vulnerabilidadIds')?.hasError('required')">Debe seleccionar al menos una vulnerabilidad.</mat-error>
         </mat-form-field>
       </div>
 

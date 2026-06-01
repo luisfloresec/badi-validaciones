@@ -3,6 +3,7 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  OnModuleInit,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
@@ -14,9 +15,10 @@ import { Representative } from '../representatives/entities/representative.entit
 import { CreateAttendedGroupDto } from './dto/create-attended-group.dto';
 import { UpdateAttendedGroupDto } from './dto/update-attended-group.dto';
 import { ReplaceLeaderDto } from './dto/replace-leader.dto';
+import { AttendedGroupVulnerability } from './entities/attended-group-vulnerability.entity';
 
 @Injectable()
-export class AttendedGroupsService {
+export class AttendedGroupsService implements OnModuleInit {
   constructor(
     @InjectRepository(AttendedGroup)
     private readonly attendedGroupsRepository: Repository<AttendedGroup>,
@@ -27,8 +29,39 @@ export class AttendedGroupsService {
     @InjectRepository(Catalog)
     private readonly catalogsRepository: Repository<Catalog>,
 
+    @InjectRepository(AttendedGroupVulnerability)
+    private readonly attendedGroupVulnerabilityRepository: Repository<AttendedGroupVulnerability>,
+
     private readonly dataSource: DataSource,
   ) {}
+
+  async onModuleInit() {
+    console.log('AttendedGroupsService: Iniciando migración de vulnerabilidades...');
+    const groups = await this.attendedGroupsRepository.find({
+      relations: { vulnerabilidad: true }
+    });
+
+    let migratedCount = 0;
+    for (const group of groups) {
+      if (!group.vulnerabilidad) continue;
+      
+      const existingRelation = await this.attendedGroupVulnerabilityRepository.findOne({
+        where: { grupoAtendido: { id: group.id }, vulnerabilidad: { id: group.vulnerabilidad.id }, estado: 'Activo' }
+      });
+
+      if (!existingRelation) {
+        const agv = new AttendedGroupVulnerability();
+        agv.grupoAtendido = group;
+        agv.vulnerabilidad = group.vulnerabilidad;
+        agv.estado = 'Activo';
+        await this.attendedGroupVulnerabilityRepository.save(agv);
+        migratedCount++;
+      }
+    }
+    if (migratedCount > 0) {
+      console.log(`AttendedGroupsService: Se migraron ${migratedCount} vulnerabilidades exitosamente.`);
+    }
+  }
 
   /**
    * Valida que un catálogo exista, esté Activo y corresponda al tipo esperado.
@@ -84,18 +117,20 @@ export class AttendedGroupsService {
       'grupo_etario',
       'grupoEtarioId',
     );
-    const vulnerabilidad = await this.validateCatalog(
-      createDto.vulnerabilidadId,
-      'vulnerabilidad',
-      'vulnerabilidadId',
-    );
+    
+    const uniqueVulnerabilidadIds = [...new Set(createDto.vulnerabilidadIds)];
+    const vulnerabilidades: Catalog[] = [];
+    for (const vulnId of uniqueVulnerabilidadIds) {
+      const vuln = await this.validateCatalog(vulnId, 'vulnerabilidad', 'vulnerabilidadIds');
+      vulnerabilidades.push(vuln);
+    }
 
     // Construir la entidad
     const group = new AttendedGroup();
     group.organizacion = org;
     group.nombre = createDto.nombre;
     group.grupoEtario = grupoEtario;
-    group.vulnerabilidad = vulnerabilidad;
+    group.vulnerabilidad = vulnerabilidades[0]; // fallback legacy
     group.numeroPersonas = createDto.numeroPersonas;
     group.estado = 'Activo';
 
@@ -103,7 +138,17 @@ export class AttendedGroupsService {
       group.observaciones = createDto.observaciones;
     }
 
-    return this.attendedGroupsRepository.save(group);
+    const savedGroup = await this.attendedGroupsRepository.save(group);
+
+    for (const vuln of vulnerabilidades) {
+      const agv = new AttendedGroupVulnerability();
+      agv.grupoAtendido = savedGroup;
+      agv.vulnerabilidad = vuln;
+      agv.estado = 'Activo';
+      await this.attendedGroupVulnerabilityRepository.save(agv);
+    }
+
+    return savedGroup;
   }
 
   /**
@@ -170,12 +215,32 @@ export class AttendedGroupsService {
         'grupoEtarioId',
       );
     }
-    if (updateDto.vulnerabilidadId) {
-      group.vulnerabilidad = await this.validateCatalog(
-        updateDto.vulnerabilidadId,
-        'vulnerabilidad',
-        'vulnerabilidadId',
-      );
+    if (updateDto.vulnerabilidadIds && updateDto.vulnerabilidadIds.length > 0) {
+      const uniqueVulnerabilidadIds = [...new Set(updateDto.vulnerabilidadIds)];
+      const vulnerabilidades: Catalog[] = [];
+      for (const vulnId of uniqueVulnerabilidadIds) {
+        const vuln = await this.validateCatalog(vulnId, 'vulnerabilidad', 'vulnerabilidadIds');
+        vulnerabilidades.push(vuln);
+      }
+      group.vulnerabilidad = vulnerabilidades[0];
+
+      // Inactivar relaciones anteriores
+      const previousRelations = await this.attendedGroupVulnerabilityRepository.find({
+        where: { grupoAtendido: { id: group.id }, estado: 'Activo' }
+      });
+      for (const prev of previousRelations) {
+        prev.estado = 'Inactivo';
+        await this.attendedGroupVulnerabilityRepository.save(prev);
+      }
+      
+      // Crear nuevas relaciones
+      for (const vuln of vulnerabilidades) {
+        const agv = new AttendedGroupVulnerability();
+        agv.grupoAtendido = group;
+        agv.vulnerabilidad = vuln;
+        agv.estado = 'Activo';
+        await this.attendedGroupVulnerabilityRepository.save(agv);
+      }
     }
 
     // Asignar campos escalares permitidos

@@ -66,6 +66,7 @@ export interface GrupoAtendidoDetail {
   nombre: string;
   grupoEtario: CatalogRef;
   vulnerabilidad: CatalogRef;
+  vulnerabilidades: CatalogRef[];
   numeroPersonas: number;
   observaciones: string | null;
   estado: string;

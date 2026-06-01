@@ -55,7 +55,7 @@ export class GroupLeaderFormDialogComponent implements OnInit {
     this.form = this.fb.group({
       nombre: ['', [Validators.required, Validators.maxLength(150)]],
       grupoEtarioId: ['', Validators.required],
-      vulnerabilidadId: ['', Validators.required],
+      vulnerabilidadIds: [[], Validators.required],
       numeroPersonas: [1, [Validators.required, Validators.min(1)]],
       observaciones: [''],
       
@@ -84,7 +84,7 @@ export class GroupLeaderFormDialogComponent implements OnInit {
       this.form.patchValue({
         nombre: g.nombre,
         grupoEtarioId: g.grupoEtario.id,
-        vulnerabilidadId: g.vulnerabilidad.id,
+        vulnerabilidadIds: g.vulnerabilidades?.map((v: any) => v.id) || (g.vulnerabilidad ? [g.vulnerabilidad.id] : []),
         numeroPersonas: g.numeroPersonas,
         observaciones: g.observaciones
       });
@@ -149,7 +149,7 @@ export class GroupLeaderFormDialogComponent implements OnInit {
       const payload = {
         nombre: v.nombre,
         grupoEtarioId: v.grupoEtarioId,
-        vulnerabilidadId: v.vulnerabilidadId,
+        vulnerabilidadIds: v.vulnerabilidadIds,
         numeroPersonas: v.numeroPersonas,
         observaciones: v.observaciones || null
       };
@@ -174,7 +174,7 @@ export class GroupLeaderFormDialogComponent implements OnInit {
     const payload = {
       nombre: v.nombre,
       grupoEtarioId: v.grupoEtarioId,
-      vulnerabilidadId: v.vulnerabilidadId,
+      vulnerabilidadIds: v.vulnerabilidadIds,
       numeroPersonas: v.numeroPersonas,
       observaciones: v.observaciones || undefined,
       useActiveRepresentative: !isNew,

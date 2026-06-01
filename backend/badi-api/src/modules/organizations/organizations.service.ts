@@ -12,6 +12,7 @@ import { Catalog } from '../catalogs/entities/catalog.entity';
 import { Representative } from '../representatives/entities/representative.entity';
 import { AttendedGroup } from '../attended-groups/entities/attended-group.entity';
 import { Leader } from '../leaders/entities/leader.entity';
+import { AttendedGroupVulnerability } from '../attended-groups/entities/attended-group-vulnerability.entity';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { UpdateOrganizationDto } from './dto/update-organization.dto';
 import { ReplaceRepresentativeDto } from './dto/replace-representative.dto';
@@ -227,6 +228,12 @@ export class OrganizationsService {
           where: { grupoAtendido: { id: grupo.id }, estado: 'Activo' },
         });
 
+        const vulnerabilidadesRaw = await this.dataSource.getRepository(AttendedGroupVulnerability).find({
+          where: { grupoAtendido: { id: grupo.id }, estado: 'Activo' },
+          relations: { vulnerabilidad: true }
+        });
+        const vulnerabilidades = vulnerabilidadesRaw.map(v => v.vulnerabilidad);
+
         const dirigentes = dirigentesRaw.map((dir) => ({
           id: dir.id,
           representanteId: dir.representante ? dir.representante.id : null,
@@ -246,6 +253,7 @@ export class OrganizationsService {
             nombre: grupo.nombre,
             grupoEtario: grupo.grupoEtario,
             vulnerabilidad: grupo.vulnerabilidad,
+            vulnerabilidades: vulnerabilidades,
             numeroPersonas: grupo.numeroPersonas,
             observaciones: grupo.observaciones,
             estado: grupo.estado,
@@ -498,11 +506,16 @@ export class OrganizationsService {
       throw new NotFoundException('Catálogo de grupo etario no encontrado.');
     }
 
-    const vulnerabilidad = await this.dataSource.getRepository(Catalog).findOne({
-      where: { id: dto.vulnerabilidadId },
-    });
-    if (!vulnerabilidad) {
-      throw new NotFoundException('Catálogo de vulnerabilidad no encontrado.');
+    const uniqueVulnerabilidadIds = [...new Set(dto.vulnerabilidadIds)];
+    const vulnerabilidades: Catalog[] = [];
+    for (const vulnId of uniqueVulnerabilidadIds) {
+      const vuln = await this.dataSource.getRepository(Catalog).findOne({
+        where: { id: vulnId, estado: 'Activo', tipoCatalogo: 'vulnerabilidad' },
+      });
+      if (!vuln) {
+        throw new NotFoundException(`Catálogo de vulnerabilidad con id ${vulnId} no encontrado o inactivo.`);
+      }
+      vulnerabilidades.push(vuln);
     }
 
     const queryRunner = this.dataSource.createQueryRunner();
@@ -515,12 +528,20 @@ export class OrganizationsService {
       newGroup.organizacion = org;
       newGroup.nombre = dto.nombre;
       newGroup.grupoEtario = grupoEtario;
-      newGroup.vulnerabilidad = vulnerabilidad;
+      newGroup.vulnerabilidad = vulnerabilidades[0];
       newGroup.numeroPersonas = dto.numeroPersonas;
       if (dto.observaciones) newGroup.observaciones = dto.observaciones;
       newGroup.estado = 'Activo';
 
       const savedGroup = await queryRunner.manager.save(AttendedGroup, newGroup);
+
+      for (const vuln of vulnerabilidades) {
+        const agv = new AttendedGroupVulnerability();
+        agv.grupoAtendido = savedGroup;
+        agv.vulnerabilidad = vuln;
+        agv.estado = 'Activo';
+        await queryRunner.manager.save(AttendedGroupVulnerability, agv);
+      }
 
       // 2. Crear el dirigente
       const newLeader = new Leader();

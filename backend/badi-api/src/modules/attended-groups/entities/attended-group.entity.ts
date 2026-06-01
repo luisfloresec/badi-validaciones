@@ -9,6 +9,8 @@ import {
 } from 'typeorm';
 import { Organization } from '../../organizations/entities/organization.entity';
 import { Catalog } from '../../catalogs/entities/catalog.entity';
+import { AttendedGroupVulnerability } from './attended-group-vulnerability.entity';
+import { OneToMany } from 'typeorm';
 
 @Entity('grupo_atendido')
 export class AttendedGroup {
@@ -29,6 +31,9 @@ export class AttendedGroup {
   @ManyToOne(() => Catalog, { nullable: false, eager: true })
   @JoinColumn({ name: 'id_vulnerabilidad' })
   vulnerabilidad: Catalog;
+
+  @OneToMany(() => AttendedGroupVulnerability, (gv) => gv.grupoAtendido, { eager: true })
+  vulnerabilidades: AttendedGroupVulnerability[];
 
   @Column({ name: 'numero_personas', type: 'int' })
   numeroPersonas: number;

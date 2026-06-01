@@ -207,15 +207,14 @@
 
     <!-- 4. Grupos Atendidos y Dirigentes -->
     <!-- Se muestran si es GAD o si tienen datos registrados -->
-    <div class="badi-card section-card" *ngIf="isGad() || detail.gruposAtendidos.length > 0">
+    <div class="badi-card section-card">
       <div class="section-header-flex">
         <div class="badi-card-header mb-0">
           <mat-icon class="badi-card-icon">groups</mat-icon>
           <h2>Grupos Atendidos y Dirigentes</h2>
         </div>
-        <button *ngIf="isGad()" mat-button class="btn-primary-text" 
-                (click)="openGroupForm('create')" 
-                [disabled]="detail.organizacion.estado === 'Inactiva'">
+        <button *ngIf="detail.organizacion.estado !== 'Inactiva'" mat-button class="btn-primary-text" 
+                (click)="openGroupForm('create')">
           <mat-icon>add</mat-icon> Agregar grupo atendido
         </button>
       </div>
@@ -235,7 +234,7 @@
                 <mat-icon>people</mat-icon>
                 <span>{{ item.grupo.numeroPersonas }}</span>
               </div>
-              <div class="action-buttons-mini" *ngIf="item.grupo.estado !== 'Inactiva'">
+              <div class="action-buttons-mini" *ngIf="item.grupo.estado !== 'Inactivo' && detail.organizacion.estado !== 'Inactiva'">
                 <button mat-icon-button color="primary" matTooltip="Editar grupo" (click)="openGroupForm('edit', item.grupo)">
                   <mat-icon>edit</mat-icon>
                 </button>
@@ -253,8 +252,15 @@
               <span class="attr-val chip-info">{{ item.grupo.grupoEtario.nombre || 'No espec.' }}</span>
             </div>
             <div class="attr-block">
-              <span class="attr-label">Vulnerabilidad</span>
-              <span class="attr-val chip-info">{{ item.grupo.vulnerabilidad.nombre || 'No espec.' }}</span>
+              <span class="attr-label">Vulnerabilidades</span>
+              <div style="display:flex; flex-wrap:wrap; gap:6px;">
+                <ng-container *ngIf="item.grupo.vulnerabilidades?.length; else fallbackVuln">
+                  <span class="chip-info" *ngFor="let v of item.grupo.vulnerabilidades">{{ v.nombre }}</span>
+                </ng-container>
+                <ng-template #fallbackVuln>
+                  <span class="chip-info">{{ item.grupo.vulnerabilidad?.nombre || 'No espec.' }}</span>
+                </ng-template>
+              </div>
             </div>
             <div class="attr-block w-full">
               <span class="attr-label">Observaciones</span>
@@ -266,7 +272,7 @@
           <div class="leader-subcard">
             <div class="leader-subcard-header">
               <h4>Dirigente Activo</h4>
-              <button *ngIf="isGad() && !getActiveLeader(item) && item.grupo.estado !== 'Inactiva'" mat-button class="btn-primary-text btn-small" (click)="openLeaderForm(item.grupo.id, 'create')">
+              <button *ngIf="!getActiveLeader(item) && item.grupo.estado !== 'Inactivo' && detail.organizacion.estado !== 'Inactiva'" mat-button class="btn-primary-text btn-small" (click)="openLeaderForm(item.grupo.id, 'create')">
                 <mat-icon>add</mat-icon> Agregar dirigente
               </button>
             </div>
@@ -300,7 +306,7 @@
                 </div>
               </div>
               
-              <div class="leader-btn-actions" *ngIf="item.grupo.estado !== 'Inactiva'">
+              <div class="leader-btn-actions" *ngIf="item.grupo.estado !== 'Inactivo' && detail.organizacion.estado !== 'Inactiva'">
                 <button mat-stroked-button class="btn-xs outline" (click)="openLeaderForm(item.grupo.id, 'edit', activeLeader)">
                   <mat-icon>edit</mat-icon> Editar datos
                 </button>

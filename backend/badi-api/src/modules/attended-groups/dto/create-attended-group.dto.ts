@@ -1,4 +1,6 @@
 import {
+  ArrayNotEmpty,
+  IsArray,
   IsInt,
   IsNotEmpty,
   IsOptional,
@@ -22,9 +24,10 @@ export class CreateAttendedGroupDto {
   @IsNotEmpty({ message: 'El campo grupoEtarioId es obligatorio.' })
   grupoEtarioId: string;
 
-  @IsUUID('all', { message: 'El campo vulnerabilidadId debe ser un UUID válido.' })
-  @IsNotEmpty({ message: 'El campo vulnerabilidadId es obligatorio.' })
-  vulnerabilidadId: string;
+  @IsArray({ message: 'El campo vulnerabilidadIds debe ser un arreglo.' })
+  @ArrayNotEmpty({ message: 'Debe seleccionar al menos una vulnerabilidad.' })
+  @IsUUID('all', { each: true, message: 'Cada vulnerabilidad debe ser un UUID válido.' })
+  vulnerabilidadIds: string[];
 
   @IsInt({ message: 'El campo numeroPersonas debe ser un número entero.' })
   @Min(0, { message: 'El número de personas no puede ser negativo.' })

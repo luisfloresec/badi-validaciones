@@ -8,9 +8,10 @@ import { Catalog } from '../catalogs/entities/catalog.entity';
 import { Representative } from '../representatives/entities/representative.entity';
 import { AttendedGroup } from '../attended-groups/entities/attended-group.entity';
 import { Leader } from '../leaders/entities/leader.entity';
+import { AttendedGroupVulnerability } from '../attended-groups/entities/attended-group-vulnerability.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Organization, OrganizationType, Catalog, Representative, AttendedGroup, Leader])],
+  imports: [TypeOrmModule.forFeature([Organization, OrganizationType, Catalog, Representative, AttendedGroup, Leader, AttendedGroupVulnerability])],
   controllers: [OrganizationsController],
   providers: [OrganizationsService],
   exports: [OrganizationsService],
