@@ -145,6 +145,52 @@ export class OrganizationFormComponent implements OnInit {
     return found ? found.prefix : '';
   }
 
+  getSocialNetworkPlaceholder(tipo: string): string {
+    switch (tipo) {
+      case 'facebook':
+      case 'tiktok':
+      case 'x_twitter':
+        return 'fundacionbadi';
+      case 'instagram':
+        return 'fundacionbadi.ec';
+      case 'whatsapp':
+        return '0987654321';
+      case 'pagina_web':
+        return 'organizacion.org';
+      case 'youtube':
+        return '@fundacionbadi o canal-badi';
+      case 'linkedin':
+        return 'fundacion-badi';
+      case 'otro':
+        return 'enlace o referencia oficial';
+      default:
+        return 'Seleccione primero el tipo de red social';
+    }
+  }
+
+  getSocialNetworkHint(tipo: string): string {
+    switch (tipo) {
+      case 'facebook':
+        return 'Escriba solo el usuario o página, no la URL completa.';
+      case 'instagram':
+      case 'tiktok':
+      case 'x_twitter':
+        return 'Escriba solo el usuario, sin @ si ya se muestra como prefijo.';
+      case 'whatsapp':
+        return 'Ingrese el número de contacto, solo dígitos.';
+      case 'pagina_web':
+        return 'Ingrese el dominio o sitio web institucional.';
+      case 'youtube':
+        return 'Ingrese el usuario, canal o identificador.';
+      case 'linkedin':
+        return 'Ingrese el identificador de la página u organización.';
+      case 'otro':
+        return 'Ingrese el enlace o referencia correspondiente.';
+      default:
+        return '';
+    }
+  }
+
   whitespaceValidator(control: AbstractControl): ValidationErrors | null {
     if (control.value && control.value.trim().length === 0) {
       return { required: true };

@@ -46,7 +46,7 @@
         
         <mat-form-field appearance="outline" class="col-half">
           <mat-label>Tipo de organización</mat-label>
-          <mat-select formControlName="tipoOrganizacionId">
+          <mat-select formControlName="tipoOrganizacionId" placeholder="Seleccione el tipo de organización">
             <mat-option *ngFor="let tipo of organizationTypes" [value]="tipo.id">
               {{ tipo.nombre }}
             </mat-option>
@@ -56,26 +56,30 @@
 
         <mat-form-field appearance="outline" class="col-half">
           <mat-label>RUC</mat-label>
-          <input matInput formControlName="ruc" placeholder="13 dígitos" maxlength="13">
+          <input matInput formControlName="ruc" maxlength="13">
+          <mat-hint>Ejemplo: 1099999999001</mat-hint>
           <mat-error *ngIf="orgForm.get('ruc')?.hasError('required')">El RUC es obligatorio</mat-error>
           <mat-error *ngIf="orgForm.get('ruc')?.hasError('pattern')">Debe contener exactamente 13 números</mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="col-full">
           <mat-label>Razón social</mat-label>
-          <input matInput formControlName="razonSocial" placeholder="Ej: Fundación de Ayuda BADI">
+          <input matInput formControlName="razonSocial">
+          <mat-hint>Ejemplo: Fundación de Apoyo Comunitario</mat-hint>
           <mat-error *ngIf="orgForm.get('razonSocial')?.hasError('required')">La razón social es obligatoria</mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="col-half">
           <mat-label>Email de contacto (Opcional)</mat-label>
-          <input matInput formControlName="email" type="email" placeholder="correo@ejemplo.com">
+          <input matInput formControlName="email" type="email">
+          <mat-hint>Ejemplo: contacto@organizacion.org</mat-hint>
           <mat-error *ngIf="orgForm.get('email')?.hasError('email')">Formato de email inválido</mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="col-full">
           <mat-label>Observaciones generales (Opcional)</mat-label>
           <textarea matInput formControlName="observaciones" rows="2"></textarea>
+          <mat-hint>Ejemplo: Organización con atención prioritaria mensual</mat-hint>
         </mat-form-field>
 
       </div>
@@ -91,24 +95,28 @@
         
         <mat-form-field appearance="outline" class="col-half">
           <mat-label>Ciudad</mat-label>
-          <input matInput formControlName="ciudad" placeholder="Ej: Ibarra">
+          <input matInput formControlName="ciudad">
+          <mat-hint>Ejemplo: Ibarra</mat-hint>
           <mat-error *ngIf="orgForm.get('ciudad')?.hasError('required')">La ciudad es obligatoria</mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="col-half">
           <mat-label>Sector / Barrio (Opcional)</mat-label>
-          <input matInput formControlName="sectorBarrio" placeholder="Ej: Los Ceibos">
+          <input matInput formControlName="sectorBarrio">
+          <mat-hint>Ejemplo: Los Ceibos</mat-hint>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="col-full">
           <mat-label>Dirección exacta</mat-label>
-          <input matInput formControlName="direccion" placeholder="Calle principal y secundaria">
+          <input matInput formControlName="direccion">
+          <mat-hint>Ejemplo: Av. Principal y Calle Secundaria</mat-hint>
           <mat-error *ngIf="orgForm.get('direccion')?.hasError('required')">La dirección es obligatoria</mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="col-full">
           <mat-label>Referencia de dirección (Opcional)</mat-label>
-          <input matInput formControlName="referenciaDireccion" placeholder="Ej: Frente al parque central">
+          <input matInput formControlName="referenciaDireccion">
+          <mat-hint>Ejemplo: Frente al parque central</mat-hint>
         </mat-form-field>
 
       </div>
@@ -124,7 +132,7 @@
         
         <mat-form-field appearance="outline" class="col-half">
           <mat-label>Acción social</mat-label>
-          <mat-select formControlName="accionSocialId">
+          <mat-select formControlName="accionSocialId" placeholder="Seleccione la acción social">
             <mat-option *ngFor="let item of accionSocialList" [value]="item.id">
               {{ item.nombre }}
             </mat-option>
@@ -134,7 +142,7 @@
 
         <mat-form-field appearance="outline" class="col-half">
           <mat-label>Segmento</mat-label>
-          <mat-select formControlName="segmentoId">
+          <mat-select formControlName="segmentoId" placeholder="Seleccione el segmento">
             <mat-option *ngFor="let item of segmentoList" [value]="item.id">
               {{ item.nombre }}
             </mat-option>
@@ -145,6 +153,7 @@
         <mat-form-field appearance="outline" class="col-half">
           <mat-label>Total personas atendidas</mat-label>
           <input matInput formControlName="totalPersonasAtendidas" type="number" min="0">
+          <mat-hint>Ejemplo: 50</mat-hint>
           <mat-error *ngIf="orgForm.get('totalPersonasAtendidas')?.hasError('required')">Obligatorio</mat-error>
           <mat-error *ngIf="orgForm.get('totalPersonasAtendidas')?.hasError('min')">No puede ser negativo</mat-error>
         </mat-form-field>
@@ -152,12 +161,13 @@
         <mat-form-field appearance="outline" class="col-half">
           <mat-label>Cuota de recuperación estimada ($) (Opcional)</mat-label>
           <input matInput formControlName="cuotaRecuperacionEstimada" type="number" min="0" step="0.01">
+          <mat-hint>Ejemplo: 15.50</mat-hint>
           <mat-error *ngIf="orgForm.get('cuotaRecuperacionEstimada')?.hasError('min')">No puede ser negativo</mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="col-half">
           <mat-label>Frecuencia de retiro (Opcional)</mat-label>
-          <mat-select formControlName="frecuenciaRetiroId">
+          <mat-select formControlName="frecuenciaRetiroId" placeholder="Seleccione la frecuencia">
             <mat-option *ngFor="let item of frecuenciaRetiroList" [value]="item.id">
               {{ item.nombre }}
             </mat-option>
@@ -166,7 +176,7 @@
 
         <mat-form-field appearance="outline" class="col-half">
           <mat-label>Transporte (Opcional)</mat-label>
-          <mat-select formControlName="transporteId">
+          <mat-select formControlName="transporteId" placeholder="Seleccione el tipo de transporte">
             <mat-option *ngFor="let item of transporteList" [value]="item.id">
               {{ item.nombre }}
             </mat-option>
@@ -199,7 +209,7 @@
           
           <mat-form-field appearance="outline" class="social-select">
             <mat-label>Tipo</mat-label>
-            <mat-select formControlName="tipo">
+            <mat-select formControlName="tipo" placeholder="Seleccione una red">
               <mat-option *ngFor="let type of socialNetworkTypes" [value]="type.value">
                 {{ type.label }}
               </mat-option>
@@ -212,7 +222,8 @@
             <span matTextPrefix *ngIf="getPrefix(control.get('tipo')?.value)">
               {{ getPrefix(control.get('tipo')?.value) }}&nbsp;
             </span>
-            <input matInput formControlName="valor" placeholder="Ej: fundacion_badi">
+            <input matInput formControlName="valor">
+            <mat-hint>Ejemplo: {{ getSocialNetworkPlaceholder(control.get('tipo')?.value || '') }}</mat-hint>
             <mat-error *ngIf="control.get('valor')?.hasError('required')">Campo obligatorio o vacío</mat-error>
           </mat-form-field>
 

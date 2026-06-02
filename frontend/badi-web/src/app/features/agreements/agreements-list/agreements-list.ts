@@ -80,10 +80,14 @@ export class AgreementsListComponent implements OnInit {
 
   deactivateAgreement(id: string) {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      width: '400px',
+      width: '450px',
       data: {
         title: 'Anular Convenio',
-        message: '¿Estás seguro de que deseas anular este convenio? Esta acción no se puede deshacer.'
+        message: '¿Estás seguro de que deseas anular este convenio? Esta acción no se puede deshacer.',
+        secondaryText: 'El convenio quedará registrado con estado Anulado y no podrá reactivarse.',
+        confirmText: 'Anular convenio',
+        cancelText: 'Cancelar',
+        confirmColor: 'warn'
       }
     });
 

@@ -20,7 +20,8 @@
       
       <mat-form-field appearance="outline" class="w-100">
         <mat-label>Nombre del Grupo</mat-label>
-        <input matInput formControlName="nombre" placeholder="Ej. Niños del Sur" />
+        <input matInput formControlName="nombre" />
+        <mat-hint>Ejemplo: Adultos mayores sector norte</mat-hint>
         <mat-error *ngIf="form.get('nombre')?.hasError('required')">El nombre es obligatorio.</mat-error>
         <mat-error *ngIf="form.get('nombre')?.hasError('maxlength')">Máximo 150 caracteres.</mat-error>
       </mat-form-field>
@@ -28,25 +29,41 @@
       <div class="form-row">
         <mat-form-field appearance="outline" class="w-100">
           <mat-label>Grupo Etario</mat-label>
-          <mat-select formControlName="grupoEtarioId">
+          <mat-select formControlName="grupoEtarioId" placeholder="Seleccione el grupo etario">
             <mat-option *ngFor="let g of gruposEtarios" [value]="g.id">{{ g.nombre }}</mat-option>
           </mat-select>
           <mat-error *ngIf="form.get('grupoEtarioId')?.hasError('required')">Requerido.</mat-error>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>Vulnerabilidades</mat-label>
-          <mat-select formControlName="vulnerabilidadIds" multiple>
-            <mat-option *ngFor="let v of vulnerabilidades" [value]="v.id">{{ v.nombre }}</mat-option>
-          </mat-select>
-          <mat-error *ngIf="form.get('vulnerabilidadIds')?.hasError('required')">Debe seleccionar al menos una vulnerabilidad.</mat-error>
-        </mat-form-field>
+        <div class="w-100" style="display: flex; flex-direction: column;">
+          <mat-form-field appearance="outline" class="w-100" style="margin-bottom: 0;">
+            <mat-label>Vulnerabilidades</mat-label>
+            <mat-select formControlName="vulnerabilidadIds" multiple placeholder="Seleccione una o varias vulnerabilidades">
+              <mat-select-trigger>
+                <span *ngIf="form.get('vulnerabilidadIds')?.value?.length === 1">1 opción seleccionada</span>
+                <span *ngIf="form.get('vulnerabilidadIds')?.value?.length > 1">{{ form.get('vulnerabilidadIds')?.value?.length }} opciones seleccionadas</span>
+              </mat-select-trigger>
+              <mat-option *ngFor="let v of vulnerabilidades" [value]="v.id">{{ v.nombre }}</mat-option>
+            </mat-select>
+            <mat-error *ngIf="form.get('vulnerabilidadIds')?.hasError('required')">Debe seleccionar al menos una vulnerabilidad.</mat-error>
+          </mat-form-field>
+
+          <div class="badi-chips-container" *ngIf="form.get('vulnerabilidadIds')?.value?.length > 0">
+            <div class="badi-chip" *ngFor="let id of form.get('vulnerabilidadIds')?.value">
+              <span>{{ getOptionName(vulnerabilidades, id) }}</span>
+              <button type="button" class="chip-remove" (click)="removeSelectedOption('vulnerabilidadIds', id)">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="form-row">
         <mat-form-field appearance="outline" class="w-100">
           <mat-label>Número de personas</mat-label>
           <input matInput type="number" formControlName="numeroPersonas" min="1" />
+          <mat-hint>Ejemplo: 35</mat-hint>
           <mat-error *ngIf="form.get('numeroPersonas')?.hasError('required')">Requerido.</mat-error>
           <mat-error *ngIf="form.get('numeroPersonas')?.hasError('min')">Debe ser al menos 1.</mat-error>
         </mat-form-field>
@@ -55,6 +72,7 @@
       <mat-form-field appearance="outline" class="w-100">
         <mat-label>Observaciones (Opcional)</mat-label>
         <textarea matInput formControlName="observaciones" rows="2"></textarea>
+        <mat-hint>Ejemplo: Grupo con atención mensual prioritaria</mat-hint>
       </mat-form-field>
 
       <!-- SECCION DIRIGENTE INICIAL (Solo en CREATE) -->
@@ -77,12 +95,14 @@
             <mat-form-field appearance="outline" class="w-100">
               <mat-label>Nombres</mat-label>
               <input matInput formControlName="nombres" />
+              <mat-hint>Ejemplo: María Fernanda</mat-hint>
               <mat-error *ngIf="form.get('nombres')?.hasError('required')">Requerido.</mat-error>
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="w-100">
               <mat-label>Apellidos</mat-label>
               <input matInput formControlName="apellidos" />
+              <mat-hint>Ejemplo: Imbaquingo Flores</mat-hint>
               <mat-error *ngIf="form.get('apellidos')?.hasError('required')">Requerido.</mat-error>
             </mat-form-field>
           </div>
@@ -91,6 +111,7 @@
             <mat-form-field appearance="outline" class="w-100">
               <mat-label>Cédula</mat-label>
               <input matInput formControlName="cedula" />
+              <mat-hint>Ejemplo: 1000000040</mat-hint>
               <mat-error *ngIf="form.get('cedula')?.hasError('required')">Requerido.</mat-error>
               <mat-error *ngIf="form.get('cedula')?.hasError('pattern')">10 dígitos.</mat-error>
             </mat-form-field>
@@ -98,12 +119,14 @@
             <mat-form-field appearance="outline" class="w-100">
               <mat-label>Teléfono (Opcional)</mat-label>
               <input matInput formControlName="telefono" />
+              <mat-hint>Ejemplo: 0987654321</mat-hint>
             </mat-form-field>
           </div>
 
           <mat-form-field appearance="outline" class="w-100">
             <mat-label>Correo electrónico (Opcional)</mat-label>
             <input matInput formControlName="email" type="email" />
+            <mat-hint>Ejemplo: dirigente@correo.com</mat-hint>
             <mat-error *ngIf="form.get('email')?.hasError('email')">Formato inválido.</mat-error>
           </mat-form-field>
         </div>
@@ -112,7 +135,7 @@
   </div>
 
   <div class="dialog-actions" mat-dialog-actions>
-    <button mat-button mat-dialog-close [disabled]="loading">Cancelar</button>
+    <button mat-stroked-button mat-dialog-close [disabled]="loading">Cancelar</button>
     <button mat-flat-button color="primary" 
             (click)="onSubmit()" 
             [disabled]="form.invalid || loading"

@@ -134,6 +134,22 @@ export class GroupLeaderFormDialogComponent implements OnInit {
     telCtrl?.updateValueAndValidity();
   }
 
+  // --- MULTI-SELECT HELPERS ---
+  getOptionName(options: any[], id: string): string {
+    if (!options || options.length === 0) return 'Cargando...';
+    const opt = options.find(o => o.id == id);
+    return opt ? opt.nombre : 'Vulnerabilidad no disponible';
+  }
+
+  removeSelectedOption(controlName: string, id: string): void {
+    const control = this.form.get(controlName);
+    if (control && control.value) {
+      const newValue = control.value.filter((val: string) => val !== id);
+      control.setValue(newValue);
+      control.markAsDirty();
+    }
+  }
+
   onSubmit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();

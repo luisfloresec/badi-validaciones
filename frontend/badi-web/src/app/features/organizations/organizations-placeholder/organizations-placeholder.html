@@ -25,9 +25,13 @@
       </button>
     </mat-form-field>
 
-    <mat-slide-toggle class="inactive-toggle" [(ngModel)]="showInactive" (change)="toggleInactive()">
-      Mostrar inactivas
-    </mat-slide-toggle>
+    <label class="badi-switch-wrapper">
+      <div class="badi-switch">
+        <input type="checkbox" [(ngModel)]="showInactive" (change)="toggleInactive()">
+        <span class="slider"></span>
+      </div>
+      <span class="switch-label">Mostrar inactivas</span>
+    </label>
   </div>
 
   <!-- Loading -->
@@ -93,10 +97,10 @@
               </button>
               
               <ng-container *ngIf="org.estado !== 'Inactiva'">
-                <button mat-icon-button matTooltip="Editar" (click)="editOrganization(org.id)">
+                <button mat-icon-button matTooltip="Editar organización" (click)="editOrganization(org.id)">
                   <mat-icon>edit</mat-icon>
                 </button>
-                <button mat-icon-button color="warn" matTooltip="Desactivar" 
+                <button mat-icon-button color="warn" matTooltip="Desactivar organización" 
                         (click)="deactivateOrganization(org.id, org.razonSocial)">
                   <mat-icon>block</mat-icon>
                 </button>

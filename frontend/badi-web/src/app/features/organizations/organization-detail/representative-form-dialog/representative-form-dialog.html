@@ -27,14 +27,16 @@
       <div class="form-row">
         <mat-form-field appearance="outline" class="w-100">
           <mat-label>Nombres</mat-label>
-          <input matInput formControlName="nombres" placeholder="Ej. Juan Pérez" />
+          <input matInput formControlName="nombres" />
+          <mat-hint>Ejemplo: Juan Carlos</mat-hint>
           <mat-error *ngIf="form.get('nombres')?.hasError('required')">Los nombres son obligatorios.</mat-error>
           <mat-error *ngIf="form.get('nombres')?.hasError('maxlength')">Máximo 100 caracteres.</mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="w-100">
           <mat-label>Apellidos</mat-label>
-          <input matInput formControlName="apellidos" placeholder="Ej. Gómez Silva" />
+          <input matInput formControlName="apellidos" />
+          <mat-hint>Ejemplo: Pérez López</mat-hint>
           <mat-error *ngIf="form.get('apellidos')?.hasError('required')">Los apellidos son obligatorios.</mat-error>
           <mat-error *ngIf="form.get('apellidos')?.hasError('maxlength')">Máximo 100 caracteres.</mat-error>
         </mat-form-field>
@@ -43,21 +45,24 @@
       <div class="form-row">
         <mat-form-field appearance="outline" class="w-100">
           <mat-label>Cédula</mat-label>
-          <input matInput formControlName="cedula" placeholder="Ej. 1712345678" />
+          <input matInput formControlName="cedula" />
+          <mat-hint>Ejemplo: 1000000040</mat-hint>
           <mat-error *ngIf="form.get('cedula')?.hasError('required')">La cédula es obligatoria.</mat-error>
           <mat-error *ngIf="form.get('cedula')?.hasError('pattern')">Debe contener 10 dígitos.</mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="w-100">
           <mat-label>Teléfono (Opcional)</mat-label>
-          <input matInput formControlName="telefono" placeholder="Ej. 0991234567" />
+          <input matInput formControlName="telefono" />
+          <mat-hint>Ejemplo: 0987654321</mat-hint>
           <mat-error *ngIf="form.get('telefono')?.hasError('maxlength')">Máximo 20 caracteres.</mat-error>
         </mat-form-field>
       </div>
 
       <mat-form-field appearance="outline" class="w-100">
         <mat-label>Correo electrónico (Opcional)</mat-label>
-        <input matInput formControlName="email" type="email" placeholder="Ej. correo@dominio.com" />
+        <input matInput formControlName="email" type="email" />
+        <mat-hint>Ejemplo: representante@correo.com</mat-hint>
         <mat-error *ngIf="form.get('email')?.hasError('email')">Formato de correo inválido.</mat-error>
         <mat-error *ngIf="form.get('email')?.hasError('maxlength')">Máximo 120 caracteres.</mat-error>
       </mat-form-field>
@@ -65,7 +70,7 @@
   </div>
 
   <div class="dialog-actions" mat-dialog-actions>
-    <button mat-button mat-dialog-close [disabled]="loading">Cancelar</button>
+    <button mat-stroked-button mat-dialog-close [disabled]="loading">Cancelar</button>
     <button mat-flat-button color="primary" 
             (click)="onSubmit()" 
             [disabled]="form.invalid || loading"

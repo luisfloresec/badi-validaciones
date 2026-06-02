@@ -70,10 +70,31 @@ export class AgreementFormDialogComponent implements OnInit {
         organizationId: a.organizacion?.id || this.data.organizationId,
         tipoConvenioId: a.tipoConvenio?.id || a.tipoConvenio,
         codigoConvenio: a.codigoConvenio,
-        fechaInicio: a.fechaInicio ? new Date(a.fechaInicio) : '',
+        fechaInicio: a.fechaInicio ? this.parseDateString(a.fechaInicio) : '',
         observaciones: a.observaciones
       });
     }
+  }
+
+  private parseDateString(dateValue: any): Date | string {
+    if (!dateValue) return '';
+    if (typeof dateValue === 'string') {
+      const parts = dateValue.split('T')[0].split('-');
+      if (parts.length === 3) {
+        return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+      }
+    }
+    return new Date(dateValue);
+  }
+
+  private formatDateForApi(dateValue: any): string | undefined {
+    if (!dateValue) return undefined;
+    const d = new Date(dateValue);
+    if (isNaN(d.getTime())) return undefined;
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   loadTypes() {
@@ -99,7 +120,7 @@ export class AgreementFormDialogComponent implements OnInit {
     const payload: any = {
       tipoConvenioId: v.tipoConvenioId,
       codigoConvenio: v.codigoConvenio?.trim() || undefined,
-      fechaInicio: v.fechaInicio ? new Date(v.fechaInicio).toISOString().split('T')[0] : undefined,
+      fechaInicio: this.formatDateForApi(v.fechaInicio),
       observaciones: v.observaciones || undefined
     };
 

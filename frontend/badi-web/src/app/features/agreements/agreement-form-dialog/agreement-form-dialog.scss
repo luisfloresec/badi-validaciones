@@ -1,58 +1,123 @@
+$green: #015641;
+$g9: #111827;
+$g7: #374151;
+$g5: #6b7280;
+$g3: #d1d5db;
+$g1: #f3f4f6;
+$border: #e5e7eb;
+
 .dialog-container {
   display: flex;
   flex-direction: column;
   height: 100%;
 }
+
 .dialog-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 24px;
-  border-bottom: 1px solid #e5e7eb;
+  padding: 24px 28px 20px;
+  border-bottom: 1px solid $g1;
+  background: #fff;
 }
+
 .header-title {
   display: flex;
   align-items: center;
   gap: 12px;
+
+  h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: $g9;
+    letter-spacing: -0.01em;
+  }
+
+  mat-icon {
+    color: $green;
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+  }
 }
-.header-title h2 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-  color: #111827;
-}
-.header-title mat-icon {
-  color: #015641;
-}
+
 .btn-close {
-  color: #6b7280;
+  color: $g5;
+  transition: all 0.15s ease;
+  &:hover { color: $g7; background: $g1; }
 }
+
 .dialog-content {
-  padding: 24px;
+  padding: 24px 28px !important;
   flex: 1;
   overflow-y: auto;
 }
+
 .badi-form {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 0;
 }
+
 .form-row {
   display: flex;
   gap: 16px;
+  align-items: flex-start;
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+    gap: 4px;
+  }
 }
+
 .w-100 {
   width: 100%;
 }
+
 .dialog-actions {
-  padding: 16px 24px;
-  border-top: 1px solid #e5e7eb;
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  margin-bottom: 0;
+  padding: 16px 28px 20px;
+  border-top: 1px solid $g1;
+  background-color: #fafbfc;
+  margin: 0 !important;
+
+  button[mat-stroked-button] {
+    border: 1px solid $g3 !important;
+    color: $g7 !important;
+    font-weight: 500 !important;
+    border-radius: 10px !important;
+    padding: 0 20px !important;
+    background: #fff !important;
+    transition: all 0.15s ease;
+    &:hover:not([disabled]) { background: $g1 !important; border-color: #9ca3af !important; }
+  }
 }
+
 .btn-primary {
-  background-color: #015641 !important;
+  background: $green !important;
   color: #fff !important;
+  font-weight: 500 !important;
+  border-radius: 10px !important;
+  padding: 0 24px !important;
+  box-shadow: 0 1px 3px rgba(1,86,65,0.2) !important;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  &:hover:not([disabled]) {
+    background: #016b50 !important;
+    box-shadow: 0 4px 12px rgba(1,86,65,0.25) !important;
+  }
+  &[disabled] { opacity: 0.5; }
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    margin-right: 2px;
+  }
 }

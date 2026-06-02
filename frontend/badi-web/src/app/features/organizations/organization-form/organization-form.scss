@@ -1,34 +1,63 @@
 $green: #015641;
+$green-bg: #f1faf7;
 $g9: #111827;
 $g7: #374151;
 $g5: #6b7280;
 $g3: #d1d5db;
 $g1: #f3f4f6;
+$border: #e5e7eb;
 
 .page-container {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 24px;
+  max-width: 1100px;
+  margin: 0 auto;
+  width: 100%;
 }
 
 // Breadcrumb
 .breadcrumb {
-  display: flex; align-items: center; gap: 6px; font-size: 13px; color: $g5; margin-bottom: -10px;
-  a { color: $green; font-weight: 500; cursor: pointer; text-decoration: none; &:hover { text-decoration: underline; } }
-  mat-icon { font-size: 16px; width: 16px; height: 16px; }
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: $g5;
+  margin-bottom: -12px;
+
+  a {
+    color: $green;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: color 0.15s ease;
+    &:hover { text-decoration: underline; color: #016b50; }
+  }
+  mat-icon { font-size: 16px; width: 16px; height: 16px; color: $g3; }
   .current-page { color: $g7; font-weight: 500; }
 }
 
 .page-header {
-  .header-main {
-    h1 { margin: 0 0 4px; font-size: 24px; font-weight: 700; color: $g9; }
-    p { margin: 0; font-size: 14px; color: $g5; }
+  h1 {
+    margin: 0 0 4px;
+    font-size: 24px;
+    font-weight: 700;
+    color: $g9;
+    letter-spacing: -0.02em;
+  }
+  p {
+    margin: 0;
+    font-size: 14px;
+    color: $g5;
+    line-height: 1.5;
   }
 }
 
-// Cards
+// Cards / Sections
 .section-card {
   padding: 0;
+  border-radius: 12px;
+  overflow: hidden;
   margin-bottom: 24px;
 }
 
@@ -36,12 +65,11 @@ $g1: #f3f4f6;
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 16px 24px;
-  padding: 24px;
+  gap: 12px 24px;
+  padding: 20px 28px 28px;
 
   mat-form-field {
     width: 100%;
-    margin-bottom: -1.25em; // Reduce el espacio exagerado de mat-form-field
   }
 
   .col-full {
@@ -52,42 +80,99 @@ $g1: #f3f4f6;
   }
 }
 
-// Botones y acciones
+// Botones
 .btn-primary {
-  background-color: $green !important; color: #fff !important;
-  display: flex; align-items: center; justify-content: center; gap: 6px;
+  background-color: $green !important;
+  color: #fff !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-weight: 500 !important;
+  border-radius: 10px !important;
+  padding: 0 24px !important;
+  height: 42px;
+  box-shadow: 0 1px 3px rgba(1, 86, 65, 0.2);
+  transition: all 0.2s ease;
+
+  &:hover:not([disabled]) {
+    background-color: #016b50 !important;
+    box-shadow: 0 4px 12px rgba(1, 86, 65, 0.25);
+  }
+
   mat-icon { margin-right: 0; }
   .spinner-btn { display: inline-block; }
 }
 
 .form-actions {
-  display: flex; justify-content: flex-end; gap: 12px; margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+  padding-top: 24px;
+  border-top: 1px solid $g1;
+
+  button[mat-stroked-button] {
+    border: 1px solid $g3 !important;
+    color: $g7 !important;
+    font-weight: 500 !important;
+    border-radius: 10px !important;
+    padding: 0 24px !important;
+    height: 42px;
+    background: #fff !important;
+    transition: all 0.2s ease;
+
+    &:hover:not([disabled]) {
+      background: $g1 !important;
+      border-color: #9ca3af !important;
+    }
+  }
 }
 
 // Estados
 .state-container {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  padding: 48px 24px; text-align: center; color: $g5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 56px 24px;
+  text-align: center;
+  color: $g5;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid $border;
+
+  &.compact { padding: 36px 24px; }
   p { margin: 4px 0; }
   strong { color: $g7; }
-  .state-icon { font-size: 48px; width: 48px; height: 48px; color: $g5; margin-bottom: 12px; }
+  .state-icon { font-size: 48px; width: 48px; height: 48px; color: $g3; margin-bottom: 12px; }
   .state-hint { font-size: 13px; margin-bottom: 16px; }
-  &.state-error .state-icon { color: #dc2626; }
+  &.state-error .state-icon { color: #f87171; }
 }
 
 .error-banner {
-  display: flex; align-items: center; gap: 8px;
-  background-color: #fef2f2; border: 1px solid #fecaca; color: #dc2626;
-  padding: 12px 16px; border-radius: 8px; margin-bottom: 24px; font-size: 14px; font-weight: 500;
-  mat-icon { font-size: 20px; width: 20px; height: 20px; }
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  padding: 12px 16px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+  mat-icon { font-size: 20px; width: 20px; height: 20px; flex-shrink: 0; }
 }
 
+// Section header con botón a la derecha
 .section-header-flex {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 24px;
-  border-bottom: 1px solid $g3;
+  padding: 20px 28px 16px;
+  border-bottom: 1px solid $g1;
 
   .badi-card-header.mb-0 {
     padding: 0;
@@ -98,17 +183,29 @@ $g1: #f3f4f6;
 
 .btn-primary-text {
   color: $green !important;
+  font-weight: 500;
+  transition: all 0.15s ease;
   mat-icon { margin-right: 4px; }
+  &:hover { background: rgba(1, 86, 65, 0.06) !important; }
 }
 
 .social-networks-container {
-  padding: 24px;
+  padding: 20px 28px 28px;
 
   .social-row {
     display: flex;
     align-items: flex-start;
     gap: 16px;
     margin-bottom: 8px;
+    padding: 12px 16px;
+    background: #fafbfc;
+    border-radius: 10px;
+    border: 1px solid $g1;
+    transition: border-color 0.15s ease;
+
+    &:hover {
+      border-color: $g3;
+    }
 
     .social-select {
       flex: 0 0 200px;
@@ -120,6 +217,9 @@ $g1: #f3f4f6;
 
     .btn-remove {
       margin-top: 4px;
+      color: $g5;
+      transition: color 0.15s ease;
+      &:hover { color: #dc2626; }
     }
   }
 
@@ -127,10 +227,11 @@ $g1: #f3f4f6;
     color: $g5;
     font-size: 14px;
     text-align: center;
-    padding: 24px 0;
+    padding: 28px 24px;
     margin: 0;
     background-color: $g1;
-    border-radius: 8px;
+    border-radius: 10px;
+    border: 1px dashed $g3;
   }
 }
 

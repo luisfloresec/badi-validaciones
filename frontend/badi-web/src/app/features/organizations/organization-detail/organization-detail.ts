@@ -281,11 +281,15 @@ export class OrganizationDetailComponent implements OnInit {
 
   deactivateAgreement(convId: string): void {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      width: '400px',
+      width: '450px',
       data: {
         title: 'Anular Convenio',
-        message: '¿Estás seguro de que deseas anular este convenio? Esta acción lo marcará como anulado pero no lo eliminará.'
-      }
+        message: '¿Estás seguro de que deseas anular este convenio? Esta acción lo marcará como anulado pero no lo eliminará.',
+        secondaryText: 'El convenio quedará registrado con estado Anulado y no podrá reactivarse.',
+        confirmText: 'Anular convenio',
+        cancelText: 'Cancelar',
+        confirmColor: 'warn'
+      } as ConfirmDialogData
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -305,13 +309,14 @@ export class OrganizationDetailComponent implements OnInit {
 
   deactivateGroup(groupId: string): void {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      width: '400px',
+      width: '450px',
       data: {
         title: 'Desactivar grupo',
         message: '¿Está seguro de que desea desactivar este grupo atendido? Esta acción lo ocultará de los procesos activos.',
-        confirmText: 'Desactivar',
+        secondaryText: 'El grupo dejará de considerarse activo, pero su historial se mantendrá.',
+        confirmText: 'Desactivar grupo',
         cancelText: 'Cancelar',
-        isDestructive: true
+        confirmColor: 'warn'
       } as ConfirmDialogData
     });
 
@@ -362,13 +367,14 @@ export class OrganizationDetailComponent implements OnInit {
 
   deactivateLeader(leaderId: string): void {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      width: '400px',
+      width: '450px',
       data: {
         title: 'Inactivar dirigente',
-        message: '¿Está seguro de inactivar este dirigente? Esta acción no eliminará el registro, pero dejará de considerarse vigente para este grupo atendido. Si esta persona también es representante de la organización u ocupa otros roles, esos registros no serán modificados.',
+        message: '¿Está seguro de inactivar este dirigente? Esta acción no eliminará el registro, pero dejará de considerarse vigente para este grupo atendido.',
+        secondaryText: 'Si esta persona también es representante de la organización u ocupa otros roles, esos registros no serán modificados.',
         confirmText: 'Inactivar dirigente',
         cancelText: 'Cancelar',
-        isDestructive: true
+        confirmColor: 'warn'
       } as ConfirmDialogData
     });
 
@@ -397,7 +403,9 @@ export class OrganizationDetailComponent implements OnInit {
     const map: Record<string, string> = {
       'Registrada': 'estado-registrada',
       'Activa': 'estado-activa',
-      'Inactiva': 'estado-inactiva'
+      'Activo': 'estado-activa',
+      'Inactiva': 'estado-inactiva',
+      'Inactivo': 'estado-inactiva'
     };
     return map[estado] || '';
   }

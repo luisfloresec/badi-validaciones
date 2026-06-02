@@ -181,7 +181,9 @@ export class OrganizationsPlaceholderComponent implements OnInit {
     const map: Record<string, string> = {
       'Registrada': 'estado-registrada',
       'Activa': 'estado-activa',
-      'Inactiva': 'estado-inactiva'
+      'Activo': 'estado-activa',
+      'Inactiva': 'estado-inactiva',
+      'Inactivo': 'estado-inactiva'
     };
     return map[estado] || '';
   }

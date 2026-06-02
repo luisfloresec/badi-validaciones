@@ -254,11 +254,11 @@
             <div class="attr-block">
               <span class="attr-label">Vulnerabilidades</span>
               <div style="display:flex; flex-wrap:wrap; gap:6px;">
-                <ng-container *ngIf="item.grupo.vulnerabilidades?.length; else fallbackVuln">
+                <ng-container *ngIf="item.grupo.vulnerabilidades.length; else fallbackVuln">
                   <span class="chip-info" *ngFor="let v of item.grupo.vulnerabilidades">{{ v.nombre }}</span>
                 </ng-container>
                 <ng-template #fallbackVuln>
-                  <span class="chip-info">{{ item.grupo.vulnerabilidad?.nombre || 'No espec.' }}</span>
+                  <span class="chip-info">{{ item.grupo.vulnerabilidad.nombre || 'No espec.' }}</span>
                 </ng-template>
               </div>
             </div>
@@ -384,7 +384,7 @@
             <tbody>
               <tr *ngFor="let conv of detail.convenios" [ngClass]="{'inactive-row': conv.estado === 'Anulado' || conv.estado === 'Inactivo'}">
                 <td class="col-primary fw-600">{{ conv.codigoConvenio || 'S/N' }}</td>
-                <td>{{ conv.tipoConvenio?.nombre }}</td>
+                <td>{{ conv.tipoConvenio.nombre }}</td>
                 <td>
                   <span class="estado-chip" [ngClass]="{
                     'estado-activa': conv.estado === 'Activo',
@@ -395,10 +395,10 @@
                 <td class="col-mono">{{ conv.fechaInicio ? (conv.fechaInicio | date:'dd/MM/yyyy') : '—' }}</td>
                 <td><span class="trunc-text" [title]="conv.observaciones">{{ conv.observaciones || '—' }}</span></td>
                 <td class="text-center actions-cell">
-                  <button mat-icon-button color="primary" matTooltip="Editar" [disabled]="conv.estado === 'Anulado'" (click)="editAgreement(conv)">
+                  <button mat-icon-button color="primary" matTooltip="Editar convenio" [disabled]="conv.estado === 'Anulado'" (click)="editAgreement(conv)">
                     <mat-icon>edit</mat-icon>
                   </button>
-                  <button mat-icon-button color="warn" matTooltip="Anular" [disabled]="conv.estado === 'Anulado'" (click)="deactivateAgreement(conv.id)">
+                  <button mat-icon-button color="warn" matTooltip="Anular convenio" [disabled]="conv.estado === 'Anulado'" (click)="deactivateAgreement(conv.id)">
                     <mat-icon>block</mat-icon>
                   </button>
                 </td>

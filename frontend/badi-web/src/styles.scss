@@ -46,16 +46,18 @@ body {
   min-height: 100%;
   margin: 0;
   overflow-x: hidden;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
+  font-family: 'Inter', Roboto, "Helvetica Neue", sans-serif;
   background-color: var(--gray-050);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* ──────────────────────────────────────
    Encabezado de página reutilizable
    ────────────────────────────────────── */
 .page-header {
-  h1 { margin: 0 0 4px; font-size: 24px; font-weight: 700; color: var(--gray-900); }
-  p  { margin: 0; color: var(--gray-500); font-size: 14px; }
+  h1 { margin: 0 0 4px; font-size: 24px; font-weight: 700; color: var(--gray-900); letter-spacing: -0.02em; }
+  p  { margin: 0; color: var(--gray-500); font-size: 14px; line-height: 1.5; }
 }
 
 /* ──────────────────────────────────────
@@ -63,18 +65,35 @@ body {
    ────────────────────────────────────── */
 .badi-card {
   background: #fff;
-  border-radius: 10px;
+  border-radius: 12px;
   border: 1px solid #e5e7eb;
-  box-shadow: 0 1px 3px 0 rgba(0,0,0,0.05);
-  padding: 20px 24px;
+  box-shadow: 0 1px 3px 0 rgba(0,0,0,0.04), 0 1px 2px -1px rgba(0,0,0,0.03);
+  padding: 24px 28px;
+  transition: box-shadow 0.2s ease;
 }
 
 .badi-card-header {
-  display: flex; align-items: center; gap: 10px; margin-bottom: 18px;
-  .badi-card-icon { font-size: 20px; width: 20px; height: 20px; color: var(--badi-green-700);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 28px 0;
+  margin-bottom: 4px;
+
+  .badi-card-icon {
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
+    color: var(--badi-green-700);
     &.icon-warning { color: var(--state-pending); }
+    &.color-warn { color: #ef4444; }
   }
-  h2 { margin: 0; font-size: 16px; font-weight: 600; color: var(--gray-900); }
+  h2 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--gray-900);
+    letter-spacing: -0.01em;
+  }
 }
 
 /* ──────────────────────────────────────
@@ -87,14 +106,24 @@ body {
    Chips de estado reutilizables
    ────────────────────────────────────── */
 .estado-chip {
-  display: inline-block; padding: 3px 10px; border-radius: 12px;
-  font-size: 12px; font-weight: 600; white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+  line-height: 1.4;
 }
-.estado-programada   { background: rgba(37,99,235,0.1);  color: #2563eb; }
-.estado-pendiente    { background: rgba(217,119,6,0.1);  color: #d97706; }
-.estado-completada   { background: rgba(5,150,105,0.1);  color: #059669; }
-.estado-cancelada    { background: rgba(220,38,38,0.08); color: #dc2626; }
-.estado-reprogramada { background: rgba(124,58,237,0.1); color: #7c3aed; }
+.estado-programada   { background: rgba(37,99,235,0.08);  color: #2563eb; }
+.estado-pendiente    { background: rgba(217,119,6,0.08);  color: #d97706; }
+.estado-completada   { background: rgba(5,150,105,0.08);  color: #059669; }
+.estado-cancelada    { background: rgba(220,38,38,0.06); color: #dc2626; }
+.estado-reprogramada { background: rgba(124,58,237,0.08); color: #7c3aed; }
+.estado-registrada   { background: rgba(37,99,235,0.08);  color: #2563eb; }
+.estado-activa       { background: rgba(5,150,105,0.08);  color: #059669; }
+.estado-inactiva     { background: rgba(220,38,38,0.06);  color: #dc2626; border: 1px solid rgba(220,38,38,0.12); }
 
 /* ──────────────────────────────────────
    Angular Material / CDK Overlays Fixes
@@ -103,11 +132,12 @@ body {
   z-index: 1000;
 }
 
+// mat-select dropdown panel — opaque, clean, professional
 .mat-mdc-select-panel {
   background: #ffffff !important;
   border: 1px solid #e5e7eb !important;
-  border-radius: 10px !important;
-  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.14), 0 4px 10px rgba(15, 23, 42, 0.06) !important;
   padding: 6px 0 !important;
 }
 
@@ -115,6 +145,8 @@ body {
   background: #ffffff !important;
   color: #111827 !important;
   min-height: 42px !important;
+  font-size: 14px !important;
+  transition: background-color 0.15s ease !important;
 }
 
 .mat-mdc-option:hover {
@@ -132,4 +164,236 @@ body {
 .mat-mdc-option.mdc-list-item--selected .mdc-list-item__primary-text {
   color: #015641 !important;
   font-weight: 600;
+}
+
+/* ──────────────────────────────────────
+   Angular Material — Dialog Global Override
+   ────────────────────────────────────── */
+.mat-mdc-dialog-container .mdc-dialog__surface {
+  border-radius: 16px !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 0 4px 16px rgba(0, 0, 0, 0.06) !important;
+  overflow: hidden !important;
+}
+
+/* ──────────────────────────────────────
+   Angular Material — Form Fields Global Refinement
+   ────────────────────────────────────── */
+.mat-mdc-form-field {
+  .mdc-text-field--outlined .mdc-notched-outline__leading,
+  .mdc-text-field--outlined .mdc-notched-outline__trailing,
+  .mdc-text-field--outlined .mdc-notched-outline__notch {
+    border-color: #d1d5db !important;
+    transition: border-color 0.2s ease;
+  }
+
+  &.mat-focused {
+    .mdc-text-field--outlined .mdc-notched-outline__leading,
+    .mdc-text-field--outlined .mdc-notched-outline__trailing,
+    .mdc-text-field--outlined .mdc-notched-outline__notch {
+      border-color: #015641 !important;
+    }
+  }
+}
+
+.mat-mdc-text-field-wrapper {
+  border-radius: 10px !important;
+}
+
+/* ──────────────────────────────────────
+   Angular Material — Text, Placeholders, and Hints Colors
+   ────────────────────────────────────── */
+.mat-mdc-input-element {
+  color: #111827 !important;
+  font-weight: 500 !important;
+}
+
+.mat-mdc-input-element::placeholder,
+textarea.mat-mdc-input-element::placeholder {
+  color: #9ca3af !important;
+  font-weight: 400 !important;
+  opacity: 1 !important;
+}
+
+.mat-mdc-select-placeholder {
+  color: #9ca3af !important;
+  font-weight: 400 !important;
+}
+
+.mat-mdc-select-value-text {
+  color: #111827 !important;
+  font-weight: 500 !important;
+}
+
+.mat-mdc-form-field-hint {
+  color: #6b7280 !important;
+  font-size: 11.5px !important;
+  font-weight: 400 !important;
+}
+
+// Slide toggle override
+.mat-mdc-slide-toggle {
+  --mdc-switch-selected-track-color: #015641 !important;
+  --mdc-switch-selected-handle-color: #ffffff !important;
+  --mdc-switch-selected-hover-track-color: #016b50 !important;
+  --mdc-switch-selected-focus-track-color: #015641 !important;
+  --mdc-switch-selected-pressed-track-color: #015641 !important;
+}
+
+/* ──────────────────────────────────────
+   Angular Material — Datepicker Overlay
+   ────────────────────────────────────── */
+.mat-datepicker-content {
+  border-radius: 12px !important;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.14) !important;
+}
+
+/* ──────────────────────────────────────
+   Angular Material — Tooltip
+   ────────────────────────────────────── */
+.mat-mdc-tooltip .mdc-tooltip__surface {
+  background-color: #1e293b !important;
+  color: #ffffff !important;
+  font-size: 12px !important;
+  border-radius: 6px !important;
+  padding: 6px 12px !important;
+}
+
+/* ──────────────────────────────────────
+   Global reusable: buttons
+   ────────────────────────────────────── */
+.badi-btn-primary {
+  background-color: #015641 !important;
+  color: #fff !important;
+  font-weight: 500 !important;
+  border-radius: 10px !important;
+  padding: 0 20px !important;
+  height: 40px !important;
+  letter-spacing: 0.01em;
+  box-shadow: 0 1px 3px rgba(1, 86, 65, 0.2) !important;
+  transition: all 0.2s ease !important;
+  &:hover:not([disabled]) {
+    background-color: #016b50 !important;
+    box-shadow: 0 4px 12px rgba(1, 86, 65, 0.25) !important;
+  }
+  &[disabled] {
+    opacity: 0.5;
+  }
+  mat-icon {
+    font-size: 20px !important;
+    width: 20px !important;
+    height: 20px !important;
+    margin-right: 6px !important;
+  }
+}
+
+.badi-btn-cancel {
+  border: 1px solid #d1d5db !important;
+  color: #374151 !important;
+  font-weight: 500 !important;
+  border-radius: 10px !important;
+  padding: 0 20px !important;
+  height: 40px !important;
+  background: #fff !important;
+  transition: all 0.2s ease !important;
+  &:hover:not([disabled]) {
+    background: #f3f4f6 !important;
+    border-color: #9ca3af !important;
+  }
+}
+
+.badi-btn-danger {
+  border: 1px solid #fecaca !important;
+  background: #fef2f2 !important;
+  color: #dc2626 !important;
+  font-weight: 500 !important;
+  border-radius: 10px !important;
+  padding: 0 20px !important;
+  height: 40px !important;
+  transition: all 0.2s ease !important;
+  &:hover:not([disabled]) {
+    background: #fee2e2 !important;
+    border-color: #f87171 !important;
+  }
+}
+
+/* ──────────────────────────────────────
+   Angular Material — Validations / Errors
+   ────────────────────────────────────── */
+mat-error, .mat-mdc-form-field-error {
+  font-size: 11px !important;
+  color: #dc2626 !important;
+  font-weight: 500 !important;
+  line-height: 1.3 !important;
+  margin-top: 2px !important;
+  white-space: normal !important;
+  overflow-wrap: break-word !important;
+  display: block !important;
+}
+
+.mat-mdc-form-field-bottom-align {
+  height: auto !important;
+}
+
+.mat-mdc-form-field-subscript-wrapper {
+  position: relative !important;
+  height: auto !important;
+  min-height: 18px !important;
+  padding-top: 4px !important;
+  padding-bottom: 12px !important;
+  overflow: visible !important;
+}
+
+/* ──────────────────────────────────────
+   Badi Multi-Select Chips
+   ────────────────────────────────────── */
+.badi-chips-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: -8px;
+  margin-bottom: 12px;
+  padding: 0 4px;
+}
+
+.badi-chip {
+  display: inline-flex;
+  align-items: center;
+  background-color: #f1faf7;
+  color: #015641;
+  border: 1px solid #d1fae5;
+  border-radius: 12px;
+  padding: 3px 6px 3px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.2;
+
+  span {
+    margin-right: 4px;
+  }
+
+  .chip-remove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    color: #015641;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    transition: background-color 0.15s ease;
+
+    &:hover {
+      background-color: #d1fae5;
+    }
+
+    mat-icon {
+      font-size: 14px;
+      width: 14px;
+      height: 14px;
+    }
+  }
 }
