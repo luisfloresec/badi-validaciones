@@ -93,6 +93,7 @@ $border: #e5e7eb;
       padding: 14px 20px;
       border-bottom: 2px solid $border;
       background: #fafbfc;
+      white-space: nowrap;
     }
 
     .mat-mdc-cell {
@@ -131,7 +132,7 @@ $border: #e5e7eb;
   }
 }
 
-// State containers
+// State containers — unified with organizations
 .loading-state, .error-state {
   display: flex;
   flex-direction: column;
@@ -140,6 +141,7 @@ $border: #e5e7eb;
   padding: 56px 24px;
   text-align: center;
   color: $g5;
+  background: #fff;
 
   p { margin: 8px 0 0; }
   mat-icon { font-size: 48px; width: 48px; height: 48px; color: $g3; margin-bottom: 12px; }
@@ -147,8 +149,8 @@ $border: #e5e7eb;
 
 .error-state {
   mat-icon { color: #f87171 !important; }
-  p { color: $g7; }
-  button { margin-top: 12px; }
+  p { color: $g7; font-weight: 500; }
+  button { margin-top: 16px; }
 }
 
 .empty-state {
@@ -159,6 +161,7 @@ $border: #e5e7eb;
   padding: 56px 24px;
   color: $g5;
   text-align: center;
+  background: #fff;
 
   mat-icon {
     font-size: 52px;
@@ -169,7 +172,15 @@ $border: #e5e7eb;
   }
   p {
     margin: 0;
-    font-size: 15px;
+    font-size: 14px;
     color: $g5;
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
   }
 }

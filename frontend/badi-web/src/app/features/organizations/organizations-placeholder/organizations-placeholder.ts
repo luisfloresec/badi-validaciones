@@ -28,7 +28,8 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/compo
     MatFormFieldModule,
     MatInputModule,
     MatProgressSpinnerModule,
-    MatSlideToggleModule
+    MatSlideToggleModule,
+    MatTooltipModule
   ],
   templateUrl: './organizations-placeholder.html',
   styleUrl: './organizations-placeholder.scss'

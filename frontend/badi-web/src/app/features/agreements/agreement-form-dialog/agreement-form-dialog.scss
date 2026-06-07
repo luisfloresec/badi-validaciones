@@ -42,15 +42,17 @@ $border: #e5e7eb;
   }
 }
 
-.btn-close {
+.close-button {
   color: $g5;
+  margin-right: -8px;
   transition: all 0.15s ease;
   &:hover { color: $g7; background: $g1; }
 }
 
 .dialog-content {
   padding: 24px 28px !important;
-  flex: 1;
+  margin: 0 !important;
+  max-height: 70vh;
   overflow-y: auto;
 }
 

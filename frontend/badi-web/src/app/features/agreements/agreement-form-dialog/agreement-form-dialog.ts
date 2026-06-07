@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
@@ -20,6 +21,7 @@ import { OrganizationsService } from '../../organizations/organizations.service'
     ReactiveFormsModule,
     MatDialogModule,
     MatButtonModule,
+    MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
     MatIconModule,

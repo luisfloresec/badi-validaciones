@@ -4,7 +4,7 @@
       <mat-icon>{{ isEdit ? 'edit_document' : 'post_add' }}</mat-icon>
       <h2>{{ isEdit ? 'Editar Convenio' : 'Registrar Nuevo Convenio' }}</h2>
     </div>
-    <button mat-icon-button mat-dialog-close class="btn-close">
+    <button mat-icon-button mat-dialog-close class="close-button">
       <mat-icon>close</mat-icon>
     </button>
   </div>
@@ -17,7 +17,7 @@
         <mat-select formControlName="organizationId" placeholder="Seleccione una organización">
           <mat-option *ngFor="let org of organizations" [value]="org.id">{{ org.razonSocial || org.nombreComercial }}</mat-option>
         </mat-select>
-        <mat-error *ngIf="form.get('organizationId')?.hasError('required')">Requerido.</mat-error>
+        <mat-error *ngIf="form.get('organizationId')?.hasError('required')">La organización es obligatoria.</mat-error>
       </mat-form-field>
 
       <div class="form-row">
@@ -26,12 +26,12 @@
           <mat-select formControlName="tipoConvenioId" placeholder="Seleccione el tipo de convenio">
             <mat-option *ngFor="let t of types" [value]="t.id">{{ t.nombre }}</mat-option>
           </mat-select>
-          <mat-error *ngIf="form.get('tipoConvenioId')?.hasError('required')">Requerido.</mat-error>
+          <mat-error *ngIf="form.get('tipoConvenioId')?.hasError('required')">El tipo de convenio es obligatorio.</mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="w-100">
           <mat-label>Código de Convenio</mat-label>
-          <input matInput formControlName="codigoConvenio" required>
+          <input matInput formControlName="codigoConvenio">
           <mat-hint>Ejemplo: BADI-2026-001</mat-hint>
           <mat-error *ngIf="form.get('codigoConvenio')?.hasError('required')">El código es obligatorio.</mat-error>
           <mat-error *ngIf="form.get('codigoConvenio')?.hasError('pattern')">El código no puede estar vacío.</mat-error>
@@ -39,14 +39,12 @@
         </mat-form-field>
       </div>
 
-      <div class="form-row">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>Fecha de Inicio (Opcional)</mat-label>
-          <input matInput [matDatepicker]="picker" formControlName="fechaInicio" placeholder="Seleccione una fecha">
-          <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-          <mat-datepicker #picker></mat-datepicker>
-        </mat-form-field>
-      </div>
+      <mat-form-field appearance="outline" class="w-100">
+        <mat-label>Fecha de Inicio (Opcional)</mat-label>
+        <input matInput [matDatepicker]="picker" formControlName="fechaInicio" placeholder="Seleccione una fecha">
+        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
 
       <mat-form-field appearance="outline" class="w-100">
         <mat-label>Observaciones (Opcional)</mat-label>

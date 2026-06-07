@@ -254,8 +254,11 @@ textarea.mat-mdc-input-element::placeholder {
   background-color: #1e293b !important;
   color: #ffffff !important;
   font-size: 12px !important;
+  font-weight: 500 !important;
   border-radius: 6px !important;
   padding: 6px 12px !important;
+  max-width: 240px !important;
+  line-height: 1.4 !important;
 }
 
 /* ──────────────────────────────────────
@@ -327,6 +330,7 @@ mat-error, .mat-mdc-form-field-error {
   margin-top: 2px !important;
   white-space: normal !important;
   overflow-wrap: break-word !important;
+  word-break: break-word !important;
   display: block !important;
 }
 
@@ -337,10 +341,22 @@ mat-error, .mat-mdc-form-field-error {
 .mat-mdc-form-field-subscript-wrapper {
   position: relative !important;
   height: auto !important;
-  min-height: 18px !important;
+  min-height: 20px !important;
   padding-top: 4px !important;
-  padding-bottom: 12px !important;
+  padding-bottom: 4px !important;
   overflow: visible !important;
+}
+
+// Ensure error wrapper doesn't collapse
+.mat-mdc-form-field-error-wrapper {
+  position: relative !important;
+  padding: 0 !important;
+}
+
+// Ensure hint wrapper also doesn't overlap
+.mat-mdc-form-field-hint-wrapper {
+  position: relative !important;
+  padding: 0 16px !important;
 }
 
 /* ──────────────────────────────────────
@@ -350,7 +366,7 @@ mat-error, .mat-mdc-form-field-error {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin-top: -8px;
+  margin-top: 4px;
   margin-bottom: 12px;
   padding: 0 4px;
 }
@@ -396,4 +412,15 @@ mat-error, .mat-mdc-form-field-error {
       height: 14px;
     }
   }
+}
+
+/* ──────────────────────────────────────
+   Angular Material — Radio Buttons
+   ────────────────────────────────────── */
+.mat-mdc-radio-button {
+  --mdc-radio-selected-icon-color: #015641 !important;
+  --mdc-radio-selected-hover-icon-color: #016b50 !important;
+  --mdc-radio-selected-focus-icon-color: #015641 !important;
+  --mdc-radio-selected-pressed-icon-color: #015641 !important;
+  --mat-radio-checked-ripple-color: rgba(1, 86, 65, 0.12) !important;
 }

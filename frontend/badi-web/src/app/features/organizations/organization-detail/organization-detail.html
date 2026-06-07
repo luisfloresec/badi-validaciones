@@ -219,7 +219,7 @@
         </button>
       </div>
 
-      <div class="groups-list mt-3" *ngIf="detail.gruposAtendidos.length > 0; else noGroups">
+      <div class="groups-list" *ngIf="detail.gruposAtendidos.length > 0; else noGroups">
         <div class="group-item-card" *ngFor="let item of detail.gruposAtendidos">
           
           <!-- Cabecera del Grupo -->
@@ -352,7 +352,7 @@
         </div>
       </div>
       <ng-template #noGroups>
-        <p class="empty-text mt-3">No hay grupos atendidos registrados todavía.</p>
+        <p class="empty-text">No hay grupos atendidos registrados todavía.</p>
       </ng-template>
     </div>
 
@@ -370,7 +370,7 @@
 
       <div class="badi-card-body pt-0">
         <div class="table-wrapper" *ngIf="detail.convenios?.length; else noAgreements">
-          <table class="badi-table mt-3">
+          <table class="badi-table">
             <thead>
               <tr>
                 <th>Código</th>
@@ -407,7 +407,7 @@
           </table>
         </div>
         <ng-template #noAgreements>
-          <p class="empty-text mt-3">No hay convenios registrados todavía.</p>
+          <p class="empty-text">No hay convenios registrados todavía.</p>
         </ng-template>
       </div>
     </div>

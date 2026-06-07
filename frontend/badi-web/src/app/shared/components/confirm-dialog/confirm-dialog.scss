@@ -8,6 +8,7 @@ $border: #e5e7eb;
   display: flex;
   flex-direction: column;
   min-width: 360px;
+  max-width: 100%;
 }
 
 // Header
@@ -93,4 +94,5 @@ $border: #e5e7eb;
   margin: 0 !important;
   border-top: 1px solid #f3f4f6;
   min-height: auto !important;
+  flex-wrap: wrap;
 }
