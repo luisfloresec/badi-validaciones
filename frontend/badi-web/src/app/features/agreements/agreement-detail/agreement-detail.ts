@@ -1,91 +1,103 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatTableModule } from '@angular/material/table';
-import { MatButtonModule } from '@angular/material/button';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
+import { finalize } from 'rxjs/operators';
 import { AgreementsService, Agreement } from '../agreements.service';
 import { AgreementFormDialogComponent } from '../agreement-form-dialog/agreement-form-dialog';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { finalize } from 'rxjs/operators';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { RouterModule } from '@angular/router';
 
 @Component({
-  selector: 'app-agreements-list',
+  selector: 'app-agreement-detail',
   standalone: true,
   imports: [
     CommonModule,
-    MatTableModule,
-    MatButtonModule,
     MatIconModule,
-    MatTooltipModule,
-    MatDialogModule,
+    MatButtonModule,
     MatProgressSpinnerModule,
+    MatTooltipModule,
     RouterModule
   ],
-  templateUrl: './agreements-list.html',
-  styleUrls: ['./agreements-list.scss']
+  templateUrl: './agreement-detail.html',
+  styleUrls: ['../../organizations/organization-detail/organization-detail.scss']
 })
-export class AgreementsListComponent implements OnInit {
-  agreements: Agreement[] = [];
+export class AgreementDetailComponent implements OnInit {
+  agreement: Agreement | null = null;
   loading = true;
   error: string | null = null;
-  displayedColumns: string[] = [
-    'codigo', 'organizacion', 'tipo', 'estado',
-    'fechaInicio', 'fechaActivacion', 'fechaFinEstimada',
-    'retirosRealizados', 'acciones'
-  ];
 
   constructor(
+    private route: ActivatedRoute,
+    private router: Router,
     private agreementsService: AgreementsService,
-    private dialog: MatDialog,
+    private cdr: ChangeDetectorRef,
     private snackBar: MatSnackBar,
-    private cdr: ChangeDetectorRef
+    private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
-    this.loadAgreements();
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) {
+      this.loadAgreement(id);
+    } else {
+      this.error = 'No se proporcionó un ID de convenio válido.';
+      this.loading = false;
+      this.cdr.detectChanges();
+    }
   }
 
-  loadAgreements() {
+  loadAgreement(id: string): void {
     this.loading = true;
     this.error = null;
-    this.agreementsService.getAll()
+
+    this.agreementsService.getById(id)
       .pipe(finalize(() => {
         this.loading = false;
         this.cdr.detectChanges();
       }))
       .subscribe({
-        next: (res) => {
-          this.agreements = res;
+        next: (data) => {
+          this.agreement = data;
         },
         error: (err) => {
-          this.error = 'Error al cargar convenios';
-          this.snackBar.open('Error al cargar convenios', 'Cerrar', { duration: 3000 });
+          this.error = 'No se pudo cargar el detalle del convenio.';
+          this.agreement = null;
         }
       });
   }
 
-  openAgreementForm(agreement?: Agreement) {
+  goBack(): void {
+    this.router.navigate(['/agreements']);
+  }
+
+  openAgreementForm(): void {
+    if (!this.agreement) return;
+    
     const dialogRef = this.dialog.open(AgreementFormDialogComponent, {
       width: '600px',
       disableClose: true,
       data: {
-        agreement: agreement,
-        disableOrgSelect: !!agreement
+        organizationId: this.agreement.organizacion.id,
+        agreement: this.agreement,
+        disableOrgSelect: true
       }
     });
 
-    dialogRef.afterClosed().subscribe(res => {
-      if (res) this.loadAgreements();
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadAgreement(this.agreement!.id);
+      }
     });
   }
 
-  activateAgreement(agreement: Agreement) {
-    const tipoInfo = agreement.tipoConvenio;
+  activateAgreement(): void {
+    if (!this.agreement) return;
+    const tipoInfo = this.agreement.tipoConvenio;
     let rulesText = '';
     if (tipoInfo?.duracionMeses) {
       rulesText += `\n• Duración: ${tipoInfo.duracionMeses} meses.`;
@@ -111,10 +123,10 @@ export class AgreementsListComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(res => {
       if (res) {
-        this.agreementsService.activate(agreement.id).subscribe({
+        this.agreementsService.activate(this.agreement!.id).subscribe({
           next: () => {
             this.snackBar.open('Convenio activado exitosamente', 'Cerrar', { duration: 3000 });
-            this.loadAgreements();
+            this.loadAgreement(this.agreement!.id);
           },
           error: (err) => {
             this.snackBar.open(err.error?.message || 'Error al activar el convenio', 'Cerrar', { duration: 3000 });
@@ -124,7 +136,8 @@ export class AgreementsListComponent implements OnInit {
     });
   }
 
-  finalizeAgreement(agreement: Agreement) {
+  finalizeAgreement(): void {
+    if (!this.agreement) return;
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '450px',
       data: {
@@ -139,10 +152,10 @@ export class AgreementsListComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(res => {
       if (res) {
-        this.agreementsService.finalize(agreement.id).subscribe({
+        this.agreementsService.finalize(this.agreement!.id).subscribe({
           next: () => {
             this.snackBar.open('Convenio finalizado exitosamente', 'Cerrar', { duration: 3000 });
-            this.loadAgreements();
+            this.loadAgreement(this.agreement!.id);
           },
           error: (err) => {
             this.snackBar.open(err.error?.message || 'Error al finalizar el convenio', 'Cerrar', { duration: 3000 });
@@ -152,7 +165,8 @@ export class AgreementsListComponent implements OnInit {
     });
   }
 
-  deactivateAgreement(agreement: Agreement) {
+  deactivateAgreement(): void {
+    if (!this.agreement) return;
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '450px',
       data: {
@@ -167,10 +181,10 @@ export class AgreementsListComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(res => {
       if (res) {
-        this.agreementsService.deactivate(agreement.id).subscribe({
+        this.agreementsService.deactivate(this.agreement!.id).subscribe({
           next: () => {
             this.snackBar.open('Convenio anulado exitosamente', 'Cerrar', { duration: 3000 });
-            this.loadAgreements();
+            this.loadAgreement(this.agreement!.id);
           },
           error: (err) => {
             this.snackBar.open(err.error?.message || 'Error al anular el convenio', 'Cerrar', { duration: 3000 });
@@ -191,7 +205,8 @@ export class AgreementsListComponent implements OnInit {
     return map[estado] || '';
   }
 
-  isHistorico(estado: string): boolean {
-    return estado === 'Anulado' || estado === 'Finalizado';
+  isHistorico(): boolean {
+    if (!this.agreement) return false;
+    return this.agreement.estado === 'Anulado' || this.agreement.estado === 'Finalizado';
   }
 }

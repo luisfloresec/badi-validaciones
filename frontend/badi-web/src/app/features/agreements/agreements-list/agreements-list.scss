@@ -90,14 +90,14 @@ $border: #e5e7eb;
       color: $g5;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      padding: 14px 20px;
+      padding: 14px 16px;
       border-bottom: 2px solid $border;
       background: #fafbfc;
       white-space: nowrap;
     }
 
     .mat-mdc-cell {
-      padding: 14px 20px;
+      padding: 14px 16px;
       color: $g7;
       border-bottom: 1px solid $g1;
       font-size: 14px;
@@ -129,6 +129,38 @@ $border: #e5e7eb;
   }
   button[color="warn"] {
     &:hover { color: #dc2626; background: rgba(220,38,38,0.06); }
+  }
+}
+
+// Botón activar — verde institucional
+.btn-action-activate {
+  color: #059669 !important;
+  transition: all 0.2s ease;
+  &:hover {
+    color: #047857 !important;
+    background: rgba(5, 150, 105, 0.08) !important;
+  }
+}
+
+// Botón finalizar — azul/gris profesional
+.btn-action-finalize {
+  color: #2563eb !important;
+  transition: all 0.2s ease;
+  &:hover {
+    color: #1d4ed8 !important;
+    background: rgba(37, 99, 235, 0.08) !important;
+  }
+}
+
+// Histórico label
+.historico-label {
+  display: inline-flex;
+  align-items: center;
+  color: $g3;
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
   }
 }
 

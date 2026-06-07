@@ -376,31 +376,54 @@
                 <th>Código</th>
                 <th>Tipo</th>
                 <th>Estado</th>
-                <th>Fecha Inicio</th>
-                <th>Observaciones</th>
+                <th>Activación</th>
+                <th>Fin Estimado</th>
+                <th class="text-center">Retiros</th>
                 <th class="text-center">Acciones</th>
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let conv of detail.convenios" [ngClass]="{'inactive-row': conv.estado === 'Anulado' || conv.estado === 'Inactivo'}">
+              <tr *ngFor="let conv of detail.convenios" [ngClass]="{'inactive-row': isHistorico(conv.estado)}">
                 <td class="col-primary fw-600">{{ conv.codigoConvenio || 'S/N' }}</td>
                 <td>{{ conv.tipoConvenio.nombre }}</td>
                 <td>
-                  <span class="estado-chip" [ngClass]="{
-                    'estado-activa': conv.estado === 'Activo',
-                    'estado-registrada': conv.estado === 'Registrado' || conv.estado === 'Borrador',
-                    'estado-inactiva': conv.estado === 'Anulado' || conv.estado === 'Inactivo'
-                  }">{{ conv.estado }}</span>
+                  <span class="estado-chip" [ngClass]="getEstadoClass(conv.estado)">{{ conv.estado }}</span>
                 </td>
-                <td class="col-mono">{{ conv.fechaInicio ? (conv.fechaInicio | date:'dd/MM/yyyy') : '—' }}</td>
-                <td><span class="trunc-text" [title]="conv.observaciones">{{ conv.observaciones || '—' }}</span></td>
+                <td class="col-mono">{{ conv.fechaActivacion ? (conv.fechaActivacion | date:'dd/MM/yyyy') : '—' }}</td>
+                <td class="col-mono">{{ conv.fechaFinEstimada ? (conv.fechaFinEstimada | date:'dd/MM/yyyy') : '—' }}</td>
+                <td class="text-center">
+                  <span *ngIf="conv.tipoConvenio?.maxRetiros !== null && conv.tipoConvenio?.maxRetiros !== undefined">
+                    {{ conv.retirosRealizados ?? 0 }} / {{ conv.tipoConvenio.maxRetiros }}
+                  </span>
+                  <span *ngIf="conv.tipoConvenio?.maxRetiros === null || conv.tipoConvenio?.maxRetiros === undefined">
+                    {{ conv.retirosRealizados ?? 0 }}
+                  </span>
+                </td>
                 <td class="text-center actions-cell">
-                  <button mat-icon-button color="primary" matTooltip="Editar convenio" [disabled]="conv.estado === 'Anulado'" (click)="editAgreement(conv)">
+                  <!-- Ver detalle -->
+                  <button mat-icon-button color="primary"
+                          matTooltip="Ver detalle"
+                          [routerLink]="['/agreements', conv.id]">
+                    <mat-icon>visibility</mat-icon>
+                  </button>
+                  <!-- Editar: solo si Registrado -->
+                  <button mat-icon-button class="text-muted"
+                          matTooltip="Editar convenio"
+                          (click)="editAgreement(conv)"
+                          *ngIf="conv.estado === 'Registrado' && detail.organizacion.estado !== 'Inactiva'">
                     <mat-icon>edit</mat-icon>
                   </button>
-                  <button mat-icon-button color="warn" matTooltip="Anular convenio" [disabled]="conv.estado === 'Anulado'" (click)="deactivateAgreement(conv.id)">
+                  <!-- Anular: si Registrado o Activo -->
+                  <button mat-icon-button color="warn"
+                          matTooltip="Anular convenio"
+                          (click)="deactivateAgreement(conv.id)"
+                          *ngIf="(conv.estado === 'Registrado' || conv.estado === 'Activo') && detail.organizacion.estado !== 'Inactiva'">
                     <mat-icon>block</mat-icon>
                   </button>
+                  <!-- Histórico: indicador para finalizados/anulados -->
+                  <span class="historico-label" *ngIf="isHistorico(conv.estado)" matTooltip="Convenio histórico">
+                    <mat-icon>inventory_2</mat-icon>
+                  </span>
                 </td>
               </tr>
             </tbody>

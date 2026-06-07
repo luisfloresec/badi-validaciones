@@ -9,6 +9,12 @@
     </button>
   </div>
 
+  <!-- Info banner for restricted edit -->
+  <div class="state-info-banner" *ngIf="agreementEstado === 'Activo'">
+    <mat-icon>info</mat-icon>
+    <span>El convenio está activo. Solo se pueden editar las observaciones.</span>
+  </div>
+
   <div class="dialog-content" mat-dialog-content>
     <form [formGroup]="form" (ngSubmit)="onSubmit()" class="badi-form">
 
@@ -41,9 +47,10 @@
 
       <mat-form-field appearance="outline" class="w-100">
         <mat-label>Fecha de Inicio (Opcional)</mat-label>
-        <input matInput [matDatepicker]="picker" formControlName="fechaInicio" placeholder="Seleccione una fecha">
-        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-        <mat-datepicker #picker></mat-datepicker>
+        <input matInput [matDatepicker]="fechaInicioPicker" formControlName="fechaInicio" readonly (click)="fechaInicioPicker.open()">
+        <mat-datepicker-toggle matIconSuffix [for]="fechaInicioPicker"></mat-datepicker-toggle>
+        <mat-datepicker #fechaInicioPicker></mat-datepicker>
+        <mat-hint>Seleccione una fecha desde el calendario</mat-hint>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="w-100">
@@ -57,7 +64,7 @@
 
   <div class="dialog-actions" mat-dialog-actions>
     <button mat-stroked-button mat-dialog-close [disabled]="isLoading">Cancelar</button>
-    <button mat-flat-button color="primary" (click)="onSubmit()" [disabled]="form.invalid || isLoading" class="btn-primary">
+    <button mat-flat-button color="primary" (click)="onSubmit()" [disabled]="form.invalid || isLoading || isReadOnly" class="btn-primary">
       <mat-icon>save</mat-icon> {{ isEdit ? 'Guardar Cambios' : 'Registrar Convenio' }}
     </button>
   </div>

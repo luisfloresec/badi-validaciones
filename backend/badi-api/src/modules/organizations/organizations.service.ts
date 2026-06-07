@@ -278,8 +278,14 @@ export class OrganizationsService {
       tipoConvenio: c.tipoConvenio,
       estado: c.estado,
       fechaInicio: c.fechaInicio,
+      fechaActivacion: c.fechaActivacion,
+      fechaFinEstimada: c.fechaFinEstimada,
+      fechaFinalizacion: c.fechaFinalizacion,
+      retirosRealizados: c.retirosRealizados,
       fechaCreacion: c.fechaCreacion,
       observaciones: c.observaciones,
+      convenioOrigenId: c.convenioOrigenId,
+      motivoCambio: c.motivoCambio,
     }));
 
     return {

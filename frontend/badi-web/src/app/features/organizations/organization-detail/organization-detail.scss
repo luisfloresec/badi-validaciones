@@ -279,6 +279,20 @@ $divider: #f3f4f6;
 .badi-card-body { padding: 0 28px 28px; }
 .badi-card-body.pt-0 { padding-top: 0; }
 
+/* ── Convenio action buttons ──────── */
+.btn-action-activate {
+  color: #059669 !important; transition: all 0.2s ease;
+  &:hover { color: #047857 !important; background: rgba(5, 150, 105, 0.08) !important; }
+}
+.btn-action-finalize {
+  color: #2563eb !important; transition: all 0.2s ease;
+  &:hover { color: #1d4ed8 !important; background: rgba(37, 99, 235, 0.08) !important; }
+}
+.historico-label {
+  display: inline-flex; align-items: center; color: #d1d5db;
+  mat-icon { font-size: 20px; width: 20px; height: 20px; }
+}
+
 /* ── Responsive ────────────────────── */
 @media (max-width: 768px) {
   .org-identity { flex-direction: column; }

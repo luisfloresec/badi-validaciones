@@ -1,0 +1,201 @@
+<div class="page-container" *ngIf="agreement">
+  
+  <div class="breadcrumb">
+    <a routerLink="/agreements">Convenios</a>
+    <mat-icon>chevron_right</mat-icon>
+    <span class="current-page">{{ agreement.codigoConvenio || 'S/N' }}</span>
+  </div>
+
+  <div class="badi-card detail-header-card">
+    <div class="top-actions">
+      <button mat-button class="btn-back" (click)="goBack()">
+        <mat-icon>arrow_back</mat-icon> Volver a convenios
+      </button>
+
+      <div class="action-buttons">
+        <!-- Acciones principales -->
+        <button mat-flat-button class="btn-primary" 
+                *ngIf="agreement.estado === 'Registrado'" 
+                (click)="activateAgreement()">
+          <mat-icon>check_circle_outline</mat-icon> Activar convenio
+        </button>
+        <button mat-stroked-button color="primary" 
+                *ngIf="agreement.estado === 'Registrado'" 
+                (click)="openAgreementForm()">
+          <mat-icon>edit</mat-icon> Editar convenio
+        </button>
+      </div>
+    </div>
+
+    <div class="org-identity">
+      <div class="identity-main">
+        <h1>Convenio {{ agreement.codigoConvenio || 'S/N' }}</h1>
+        <div class="identity-badges">
+          <span class="estado-chip" [ngClass]="getEstadoClass(agreement.estado)">{{ agreement.estado }}</span>
+          <span class="badge" *ngIf="agreement.tipoConvenio?.nombre">
+            {{ agreement.tipoConvenio.nombre }}
+          </span>
+          <span class="badge badge-ruc" *ngIf="agreement.organizacion?.ruc">
+            RUC: {{ agreement.organizacion.ruc }}
+          </span>
+        </div>
+        <p class="identity-location mt-2" *ngIf="agreement.organizacion">
+          <mat-icon>domain</mat-icon>
+          Organización vinculada: <strong class="ml-1">{{ agreement.organizacion.razonSocial || agreement.organizacion.nombreComercial }}</strong>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;">
+
+    <!-- Reglas del tipo de convenio -->
+    <div class="badi-card section-card">
+      <div class="badi-card-header">
+        <mat-icon class="badi-card-icon">rule</mat-icon>
+        <h2>Reglas del Tipo de Convenio</h2>
+      </div>
+      <div class="info-grid">
+        <div class="info-item">
+          <label>Duración en meses</label>
+          <span *ngIf="agreement.tipoConvenio?.duracionMeses">{{ agreement.tipoConvenio.duracionMeses }} meses</span>
+          <span *ngIf="!agreement.tipoConvenio?.duracionMeses" class="text-muted">Sin control por tiempo</span>
+        </div>
+        <div class="info-item">
+          <label>Máximo de retiros</label>
+          <span *ngIf="agreement.tipoConvenio?.maxRetiros">{{ agreement.tipoConvenio.maxRetiros }}</span>
+          <span *ngIf="!agreement.tipoConvenio?.maxRetiros" class="text-muted">Sin límite configurado</span>
+        </div>
+        <div class="info-item full-width mt-2">
+          <label>Resumen de control</label>
+          <span class="chip-info" *ngIf="!agreement.tipoConvenio?.duracionMeses && !agreement.tipoConvenio?.maxRetiros">
+            Control manual
+          </span>
+          <span class="desc-text" *ngIf="agreement.tipoConvenio?.duracionMeses || agreement.tipoConvenio?.maxRetiros">
+            Este convenio tiene controles automáticos configurados en su tipo.
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ciclo de vida -->
+    <div class="badi-card section-card">
+      <div class="badi-card-header">
+        <mat-icon class="badi-card-icon">history</mat-icon>
+        <h2>Ciclo de Vida</h2>
+      </div>
+      <div class="info-grid">
+        <div class="info-item">
+          <label>Fecha de creación</label>
+          <span>{{ agreement.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+        <div class="info-item">
+          <label>Fecha inicio referencial</label>
+          <span>{{ agreement.fechaInicio ? (agreement.fechaInicio | date:'dd/MM/yyyy') : 'No especificada' }}</span>
+        </div>
+        <div class="info-item">
+          <label>Fecha de activación</label>
+          <span>{{ agreement.fechaActivacion ? (agreement.fechaActivacion | date:'dd/MM/yyyy') : 'Pendiente' }}</span>
+        </div>
+        <div class="info-item">
+          <label>Fecha fin estimada</label>
+          <span>{{ agreement.fechaFinEstimada ? (agreement.fechaFinEstimada | date:'dd/MM/yyyy') : 'N/A' }}</span>
+        </div>
+        <div class="info-item">
+          <label>Fecha de finalización</label>
+          <span>{{ agreement.fechaFinalizacion ? (agreement.fechaFinalizacion | date:'dd/MM/yyyy') : 'N/A' }}</span>
+        </div>
+        <div class="info-item">
+          <label>Retiros realizados</label>
+          <span style="font-weight: 600; color: #015641;">
+            {{ agreement.retirosRealizados || 0 }}
+            <ng-container *ngIf="agreement.tipoConvenio?.maxRetiros">/ {{ agreement.tipoConvenio.maxRetiros }}</ng-container>
+          </span>
+        </div>
+        <div class="info-item full-width" *ngIf="agreement.observaciones">
+          <label>Observaciones</label>
+          <span>{{ agreement.observaciones }}</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="page-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;">
+
+    <!-- Documentos Asociados (Placeholder) -->
+    <div class="badi-card section-card">
+      <div class="badi-card-header">
+        <mat-icon class="badi-card-icon">description</mat-icon>
+        <h2>Documentos asociados</h2>
+      </div>
+      <div class="badi-card-body pt-0">
+        <p class="empty-text">No existen documentos asociados a este convenio.</p>
+      </div>
+    </div>
+
+    <!-- Cronograma (Placeholder) -->
+    <div class="badi-card section-card">
+      <div class="badi-card-header">
+        <mat-icon class="badi-card-icon">calendar_month</mat-icon>
+        <h2>Cronograma y entregas</h2>
+      </div>
+      <div class="badi-card-body pt-0">
+        <p class="empty-text">Aún no existen entregas programadas para este convenio.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Acciones administrativas -->
+  <div class="badi-card admin-card mb-4" *ngIf="agreement.estado === 'Activo' || agreement.estado === 'Registrado'">
+    <div class="badi-card-header">
+      <mat-icon class="badi-card-icon color-warn">admin_panel_settings</mat-icon>
+      <h2>Acciones administrativas</h2>
+    </div>
+    <div class="badi-card-body pt-0">
+      
+      <!-- Finalizar convenio (Solo Activo) -->
+      <div class="admin-action-row" *ngIf="agreement.estado === 'Activo'">
+        <div class="admin-info">
+          <h3>Finalizar Convenio</h3>
+          <p>El convenio se marcará como Finalizado y pasará a ser histórico. Ya no podrá operar como convenio vigente ni reactivarse.</p>
+        </div>
+        <div class="admin-btn">
+          <button mat-flat-button style="background: #2563eb; color: white;" (click)="finalizeAgreement()">
+            <mat-icon>task_alt</mat-icon> Finalizar convenio
+          </button>
+        </div>
+      </div>
+
+      <!-- Anular convenio (Registrado o Activo) -->
+      <div class="admin-action-row">
+        <div class="admin-info">
+          <h3>Anular Convenio</h3>
+          <p>La anulación dejará el convenio sin efecto de forma irreversible. Quedará en estado Anulado para historial.</p>
+        </div>
+        <div class="admin-btn">
+          <button mat-stroked-button color="warn" (click)="deactivateAgreement()">
+            <mat-icon>block</mat-icon> Anular convenio
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- Loading state -->
+<div *ngIf="loading" class="state-container">
+  <mat-spinner diameter="40"></mat-spinner>
+  <p class="mt-2 text-muted">Cargando detalle del convenio...</p>
+</div>
+
+<!-- Error state -->
+<div *ngIf="!loading && error" class="state-container state-error">
+  <mat-icon class="state-icon">error_outline</mat-icon>
+  <p><strong>Error</strong></p>
+  <p>{{ error }}</p>
+  <button mat-button color="primary" class="mt-3" routerLink="/agreements">Volver a convenios</button>
+</div>

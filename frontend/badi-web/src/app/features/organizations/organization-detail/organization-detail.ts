@@ -1,6 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -28,7 +28,8 @@ import { AgreementsService } from '../../agreements/agreements.service';
     MatIconModule,
     MatButtonModule,
     MatProgressSpinnerModule,
-    MatTooltipModule
+    MatTooltipModule,
+    RouterModule
   ],
   templateUrl: './organization-detail.html',
   styleUrl: './organization-detail.scss'
@@ -279,6 +280,74 @@ export class OrganizationDetailComponent implements OnInit {
     });
   }
 
+  activateAgreement(conv: any): void {
+    const tipoInfo = conv.tipoConvenio;
+    let rulesText = '';
+    if (tipoInfo?.duracionMeses) {
+      rulesText += `\n• Duración: ${tipoInfo.duracionMeses} meses.`;
+    }
+    if (tipoInfo?.maxRetiros) {
+      rulesText += `\n• Máximo de retiros: ${tipoInfo.maxRetiros}.`;
+    }
+    if (!tipoInfo?.duracionMeses && !tipoInfo?.maxRetiros) {
+      rulesText = '\n• El tipo de convenio no tiene restricciones automáticas configuradas.';
+    }
+
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '450px',
+      data: {
+        title: 'Activar convenio',
+        message: '¿Está seguro de activar este convenio? Se registrará la fecha de activación y se aplicarán las reglas configuradas en el tipo de convenio.',
+        secondaryText: `Reglas del tipo "${tipoInfo?.nombre}":${rulesText}`,
+        confirmText: 'Activar convenio',
+        cancelText: 'Cancelar',
+        confirmColor: 'primary'
+      } as ConfirmDialogData
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.agreementsService.activate(conv.id).subscribe({
+          next: () => {
+            this.snackBar.open('Convenio activado exitosamente', 'Cerrar', { duration: 3000 });
+            this.loadDetail(this.detail!.organizacion.id);
+          },
+          error: (err) => {
+            this.snackBar.open(err.error?.message || 'Error al activar el convenio', 'Cerrar', { duration: 3000 });
+          }
+        });
+      }
+    });
+  }
+
+  finalizeAgreement(conv: any): void {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '450px',
+      data: {
+        title: 'Finalizar convenio',
+        message: '¿Está seguro de finalizar este convenio? El convenio quedará como histórico y no podrá seguir operando como convenio vigente.',
+        secondaryText: 'Esta acción no se puede deshacer. El convenio conservará su historial completo.',
+        confirmText: 'Finalizar convenio',
+        cancelText: 'Cancelar',
+        confirmColor: 'warn'
+      } as ConfirmDialogData
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.agreementsService.finalize(conv.id).subscribe({
+          next: () => {
+            this.snackBar.open('Convenio finalizado exitosamente', 'Cerrar', { duration: 3000 });
+            this.loadDetail(this.detail!.organizacion.id);
+          },
+          error: (err) => {
+            this.snackBar.open(err.error?.message || 'Error al finalizar el convenio', 'Cerrar', { duration: 3000 });
+          }
+        });
+      }
+    });
+  }
+
   deactivateAgreement(convId: string): void {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '450px',
@@ -402,12 +471,19 @@ export class OrganizationDetailComponent implements OnInit {
   getEstadoClass(estado: string): string {
     const map: Record<string, string> = {
       'Registrada': 'estado-registrada',
+      'Registrado': 'estado-registrada',
       'Activa': 'estado-activa',
       'Activo': 'estado-activa',
       'Inactiva': 'estado-inactiva',
-      'Inactivo': 'estado-inactiva'
+      'Inactivo': 'estado-inactiva',
+      'Anulado': 'estado-inactiva',
+      'Finalizado': 'estado-finalizada'
     };
     return map[estado] || '';
+  }
+
+  isHistorico(estado: string): boolean {
+    return estado === 'Anulado' || estado === 'Finalizado';
   }
 
   getRepresentativeName(id: string | null): string {

@@ -124,6 +124,7 @@ body {
 .estado-registrada   { background: rgba(37,99,235,0.08);  color: #2563eb; }
 .estado-activa       { background: rgba(5,150,105,0.08);  color: #059669; }
 .estado-inactiva     { background: rgba(220,38,38,0.06);  color: #dc2626; border: 1px solid rgba(220,38,38,0.12); }
+.estado-finalizada   { background: rgba(107,114,128,0.08); color: #4b5563; border: 1px solid rgba(107,114,128,0.12); }
 
 /* ──────────────────────────────────────
    Angular Material / CDK Overlays Fixes
@@ -242,9 +243,27 @@ textarea.mat-mdc-input-element::placeholder {
 /* ──────────────────────────────────────
    Angular Material — Datepicker Overlay
    ────────────────────────────────────── */
+.cdk-overlay-container {
+  z-index: 1200 !important;
+}
+
 .mat-datepicker-content {
+  background: #ffffff !important;
+  color: #111827 !important;
   border-radius: 12px !important;
-  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.14) !important;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.18) !important;
+}
+
+.mat-calendar {
+  background: #ffffff !important;
+}
+
+.mat-calendar-body-cell-content,
+.mat-calendar-table-header,
+.mat-calendar-period-button,
+.mat-calendar-previous-button,
+.mat-calendar-next-button {
+  color: #111827 !important;
 }
 
 /* ──────────────────────────────────────

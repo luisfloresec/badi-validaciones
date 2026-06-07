@@ -35,6 +35,9 @@ export class Agreement {
   @Column({ name: 'fecha_fin_estimada', type: 'date', nullable: true })
   fechaFinEstimada: Date;
 
+  @Column({ name: 'fecha_finalizacion', type: 'date', nullable: true })
+  fechaFinalizacion: Date;
+
   @Column({ name: 'retiros_realizados', type: 'int', default: 0 })
   retirosRealizados: number;
 
@@ -43,6 +46,12 @@ export class Agreement {
 
   @Column({ type: 'varchar', length: 20, default: 'Registrado' })
   estado: string;
+
+  @Column({ name: 'id_convenio_origen', type: 'uuid', nullable: true })
+  convenioOrigenId: string | null;
+
+  @Column({ name: 'motivo_cambio', type: 'text', nullable: true })
+  motivoCambio: string | null;
 
   @CreateDateColumn({ name: 'fecha_creacion', type: 'timestamp' })
   fechaCreacion: Date;

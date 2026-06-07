@@ -63,11 +63,17 @@ export interface RepresentanteDetail {
 export interface AgreementDetail {
   id: string;
   codigoConvenio?: string;
-  tipoConvenio: { id: string; nombre: string; descripcion: string; estado: string };
+  tipoConvenio: { id: string; nombre: string; descripcion: string; duracionMeses?: number | null; maxRetiros?: number | null; estado: string };
   estado: string;
   fechaInicio?: string;
+  fechaActivacion?: string;
+  fechaFinEstimada?: string;
+  fechaFinalizacion?: string;
+  retirosRealizados?: number;
   fechaCreacion: string;
   observaciones?: string;
+  convenioOrigenId?: string | null;
+  motivoCambio?: string | null;
 }
 
 /** Grupo atendido dentro de full-detail */

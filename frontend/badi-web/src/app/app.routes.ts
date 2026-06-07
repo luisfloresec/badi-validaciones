@@ -17,7 +17,14 @@ export const routes: Routes = [
           { path: ':id', loadComponent: () => import('./features/organizations/organization-detail/organization-detail').then(m => m.OrganizationDetailComponent) },
         ]
       },
-      { path: 'agreements', loadComponent: () => import('./features/agreements/agreements-list/agreements-list').then(m => m.AgreementsListComponent) },
+      {
+        path: 'agreements',
+        children: [
+          { path: '', loadComponent: () => import('./features/agreements/agreements-list/agreements-list').then(m => m.AgreementsListComponent) },
+          { path: 'types', loadComponent: () => import('./features/agreements/agreement-types-list/agreement-types-list').then(m => m.AgreementTypesListComponent) },
+          { path: ':id', loadComponent: () => import('./features/agreements/agreement-detail/agreement-detail').then(m => m.AgreementDetailComponent) }
+        ]
+      },
       { path: 'users', loadComponent: () => import('./features/users/users-placeholder/users-placeholder').then(m => m.UsersPlaceholderComponent) },
       { path: 'roles', loadComponent: () => import('./features/roles/roles-placeholder/roles-placeholder').then(m => m.RolesPlaceholderComponent) },
       { path: 'documents', loadComponent: () => import('./features/documents/documents-placeholder/documents-placeholder').then(m => m.DocumentsPlaceholderComponent) },

@@ -6,6 +6,8 @@ export interface AgreementType {
   id: string;
   nombre: string;
   descripcion: string;
+  duracionMeses: number | null;
+  maxRetiros: number | null;
   estado: string;
 }
 
@@ -15,9 +17,15 @@ export interface Agreement {
   tipoConvenio: AgreementType;
   codigoConvenio?: string;
   fechaInicio?: string;
+  fechaActivacion?: string;
+  fechaFinEstimada?: string;
+  fechaFinalizacion?: string;
+  retirosRealizados?: number;
   fechaCreacion: string;
   observaciones?: string;
   estado: string;
+  convenioOrigenId?: string | null;
+  motivoCambio?: string | null;
 }
 
 export interface CreateAgreementDto {
@@ -47,6 +55,30 @@ export class AgreementsService {
     return this.http.get<AgreementType[]>(`${this.apiUrl}/types`);
   }
 
+  getAllTypes(): Observable<AgreementType[]> {
+    return this.http.get<AgreementType[]>(`${this.apiUrl}/types/all`);
+  }
+
+  getTypeById(id: string): Observable<AgreementType> {
+    return this.http.get<AgreementType>(`${this.apiUrl}/types/${id}`);
+  }
+
+  createType(data: any): Observable<AgreementType> {
+    return this.http.post<AgreementType>(`${this.apiUrl}/types`, data);
+  }
+
+  updateType(id: string, data: any): Observable<AgreementType> {
+    return this.http.patch<AgreementType>(`${this.apiUrl}/types/${id}`, data);
+  }
+
+  deactivateType(id: string): Observable<AgreementType> {
+    return this.http.patch<AgreementType>(`${this.apiUrl}/types/${id}/deactivate`, {});
+  }
+
+  activateType(id: string): Observable<AgreementType> {
+    return this.http.patch<AgreementType>(`${this.apiUrl}/types/${id}/activate`, {});
+  }
+
   getAll(): Observable<Agreement[]> {
     return this.http.get<Agreement[]>(this.apiUrl);
   }
@@ -61,6 +93,14 @@ export class AgreementsService {
 
   update(id: string, data: UpdateAgreementDto): Observable<Agreement> {
     return this.http.patch<Agreement>(`${this.apiUrl}/${id}`, data);
+  }
+
+  activate(id: string): Observable<Agreement> {
+    return this.http.patch<Agreement>(`${this.apiUrl}/${id}/activate`, {});
+  }
+
+  finalize(id: string, motivo?: string): Observable<Agreement> {
+    return this.http.patch<Agreement>(`${this.apiUrl}/${id}/finalize`, { motivo });
   }
 
   deactivate(id: string): Observable<any> {

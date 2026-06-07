@@ -37,6 +37,7 @@ export class AgreementFormDialogComponent implements OnInit {
   isLoading = false;
   types: AgreementType[] = [];
   organizations: any[] = [];
+  agreementEstado: string = '';
   
   constructor(
     private fb: FormBuilder,
@@ -51,11 +52,16 @@ export class AgreementFormDialogComponent implements OnInit {
     }
   ) {
     this.isEdit = !!data.agreement;
+    this.agreementEstado = data.agreement?.estado || '';
+
+    // Si el convenio está Activo, solo observaciones es editable
+    const isActivo = this.agreementEstado === 'Activo';
+
     this.form = this.fb.group({
       organizationId: [{ value: data.organizationId || '', disabled: data.disableOrgSelect || this.isEdit }, Validators.required],
-      tipoConvenioId: ['', Validators.required],
-      codigoConvenio: ['', [Validators.required, Validators.maxLength(50), Validators.pattern('.*\\S+.*')]],
-      fechaInicio: [''],
+      tipoConvenioId: [{ value: '', disabled: isActivo }, Validators.required],
+      codigoConvenio: [{ value: '', disabled: isActivo }, [Validators.required, Validators.maxLength(50), Validators.pattern('.*\\S+.*')]],
+      fechaInicio: [{ value: '', disabled: isActivo }],
       observaciones: ['']
     });
   }
@@ -72,17 +78,18 @@ export class AgreementFormDialogComponent implements OnInit {
         organizationId: a.organizacion?.id || this.data.organizationId,
         tipoConvenioId: a.tipoConvenio?.id || a.tipoConvenio,
         codigoConvenio: a.codigoConvenio,
-        fechaInicio: a.fechaInicio ? this.parseDateString(a.fechaInicio) : '',
+        fechaInicio: a.fechaInicio ? this.parseDateForForm(a.fechaInicio) : '',
         observaciones: a.observaciones
       });
     }
   }
 
-  private parseDateString(dateValue: any): Date | string {
+  private parseDateForForm(dateValue: any): Date | string {
     if (!dateValue) return '';
     if (typeof dateValue === 'string') {
       const parts = dateValue.split('T')[0].split('-');
       if (parts.length === 3) {
+        // Create date considering local timezone to avoid off-by-one day issues
         return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
       }
     }
@@ -91,6 +98,10 @@ export class AgreementFormDialogComponent implements OnInit {
 
   private formatDateForApi(dateValue: any): string | undefined {
     if (!dateValue) return undefined;
+    if (typeof dateValue === 'string') {
+      const match = dateValue.match(/^\d{4}-\d{2}-\d{2}/);
+      if (match) return match[0];
+    }
     const d = new Date(dateValue);
     if (isNaN(d.getTime())) return undefined;
     const year = d.getFullYear();
@@ -114,20 +125,35 @@ export class AgreementFormDialogComponent implements OnInit {
     });
   }
 
+  get isReadOnly(): boolean {
+    return this.agreementEstado === 'Anulado' || this.agreementEstado === 'Finalizado';
+  }
+
   onSubmit() {
-    if (this.form.invalid) return;
+    if (this.form.invalid || this.isReadOnly) return;
 
     this.isLoading = true;
     const v = this.form.getRawValue(); // gets disabled fields too
-    const payload: any = {
-      tipoConvenioId: v.tipoConvenioId,
-      codigoConvenio: v.codigoConvenio?.trim() || undefined,
-      fechaInicio: this.formatDateForApi(v.fechaInicio),
-      observaciones: v.observaciones || undefined
-    };
+    
+    const payload: any = {};
+    
+    if (this.agreementEstado === 'Activo') {
+      // Solo observaciones
+      payload.observaciones = v.observaciones || undefined;
+    } else {
+      // Registrado: edición completa
+      payload.tipoConvenioId = v.tipoConvenioId;
+      payload.codigoConvenio = v.codigoConvenio?.trim() || undefined;
+      payload.fechaInicio = this.formatDateForApi(v.fechaInicio);
+      payload.observaciones = v.observaciones || undefined;
+    }
 
     if (!this.isEdit) {
       payload.organizationId = v.organizationId;
+      payload.tipoConvenioId = v.tipoConvenioId;
+      payload.codigoConvenio = v.codigoConvenio?.trim() || undefined;
+      payload.fechaInicio = this.formatDateForApi(v.fechaInicio);
+      payload.observaciones = v.observaciones || undefined;
     }
 
     const request = this.isEdit 

@@ -11,6 +11,12 @@ export class AgreementType {
   @Column({ type: 'text', nullable: true })
   descripcion: string;
 
+  @Column({ name: 'duracion_meses', type: 'int', nullable: true })
+  duracionMeses: number | null;
+
+  @Column({ name: 'max_retiros', type: 'int', nullable: true })
+  maxRetiros: number | null;
+
   @Column({ type: 'varchar', length: 20, default: 'Activo' })
   estado: string;
 }

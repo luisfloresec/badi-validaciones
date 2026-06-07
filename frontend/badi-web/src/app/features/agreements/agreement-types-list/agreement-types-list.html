@@ -1,0 +1,93 @@
+<div class="page-container">
+  <div class="page-header">
+    <div class="header-content">
+      <div class="breadcrumb">
+        <a routerLink="/agreements">Convenios</a>
+        <mat-icon>chevron_right</mat-icon>
+        <span class="current-page">Tipos de Convenio</span>
+      </div>
+      <h1 class="mt-2">Tipos de Convenio</h1>
+      <p class="subtitle">Gestión de reglas y modalidades para convenios</p>
+    </div>
+    <div class="header-actions">
+      <button mat-button class="btn-secondary-text mr-2" routerLink="/agreements">
+        <mat-icon>arrow_back</mat-icon> Volver a convenios
+      </button>
+      <button mat-flat-button color="primary" class="btn-primary" (click)="openTypeForm()">
+        <mat-icon>add</mat-icon> Nuevo Tipo
+      </button>
+    </div>
+  </div>
+
+  <div class="badi-card">
+    <div class="table-container">
+
+      <div *ngIf="loading" class="loading-state text-center p-4">
+        <mat-spinner diameter="40" class="mx-auto"></mat-spinner>
+        <p class="mt-2 text-muted">Cargando tipos de convenio...</p>
+      </div>
+
+      <div *ngIf="!loading && error" class="error-state text-center p-4">
+        <mat-icon color="warn">error_outline</mat-icon>
+        <p>{{ error }}</p>
+        <button mat-button color="primary" (click)="loadTypes()">Reintentar</button>
+      </div>
+
+      <table mat-table [dataSource]="types" class="badi-table" *ngIf="!loading && !error && types.length > 0">
+
+        <ng-container matColumnDef="nombre">
+          <th mat-header-cell *matHeaderCellDef> Nombre </th>
+          <td mat-cell *matCellDef="let element" class="col-primary fw-600"> {{ element.nombre }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="descripcion">
+          <th mat-header-cell *matHeaderCellDef> Descripción </th>
+          <td mat-cell *matCellDef="let element"> <span class="trunc-text" [title]="element.descripcion">{{ element.descripcion || '—' }}</span> </td>
+        </ng-container>
+
+        <ng-container matColumnDef="reglas">
+          <th mat-header-cell *matHeaderCellDef> Reglas </th>
+          <td mat-cell *matCellDef="let element" class="col-mono"> {{ getReglasText(element) }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="estado">
+          <th mat-header-cell *matHeaderCellDef> Estado </th>
+          <td mat-cell *matCellDef="let element">
+            <span class="estado-chip" [ngClass]="getEstadoClass(element.estado)">{{ element.estado }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef class="text-center"> Acciones </th>
+          <td mat-cell *matCellDef="let element" class="text-center actions-cell">
+            <button mat-icon-button color="primary"
+                    matTooltip="Editar tipo"
+                    (click)="openTypeForm(element)">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button color="warn"
+                    matTooltip="Inactivar tipo"
+                    (click)="deactivateType(element)"
+                    *ngIf="element.estado === 'Activo'">
+              <mat-icon>block</mat-icon>
+            </button>
+            <button mat-icon-button class="btn-action-activate"
+                    matTooltip="Reactivar tipo"
+                    (click)="activateType(element)"
+                    *ngIf="element.estado === 'Inactivo'">
+              <mat-icon>settings_backup_restore</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" [ngClass]="{'inactive-row': row.estado === 'Inactivo'}"></tr>
+      </table>
+
+      <div *ngIf="!loading && !error && types.length === 0" class="empty-state">
+        <mat-icon>category</mat-icon>
+        <p>No se encontraron tipos de convenio.</p>
+      </div>
+    </div>
+  </div>
+</div>

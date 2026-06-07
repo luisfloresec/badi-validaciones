@@ -5,6 +5,9 @@
       <p class="subtitle">Gestión de convenios con organizaciones</p>
     </div>
     <div class="header-actions">
+      <button mat-button class="btn-secondary-text mr-2" routerLink="/agreements/types">
+        <mat-icon>category</mat-icon> Tipos de Convenio
+      </button>
       <button mat-flat-button color="primary" class="btn-primary" (click)="openAgreementForm()">
         <mat-icon>add</mat-icon> Registrar Convenio
       </button>
@@ -45,11 +48,7 @@
         <ng-container matColumnDef="estado">
           <th mat-header-cell *matHeaderCellDef> Estado </th>
           <td mat-cell *matCellDef="let element">
-            <span class="estado-chip" [ngClass]="{
-              'estado-activa': element.estado === 'Activo',
-              'estado-registrada': element.estado === 'Registrado' || element.estado === 'Borrador',
-              'estado-inactiva': element.estado === 'Anulado' || element.estado === 'Inactivo'
-            }">{{ element.estado }}</span>
+            <span class="estado-chip" [ngClass]="getEstadoClass(element.estado)">{{ element.estado }}</span>
           </td>
         </ng-container>
 
@@ -58,20 +57,60 @@
           <td mat-cell *matCellDef="let element" class="col-mono"> {{ element.fechaInicio ? (element.fechaInicio | date:'dd/MM/yyyy') : '—' }} </td>
         </ng-container>
 
+        <ng-container matColumnDef="fechaActivacion">
+          <th mat-header-cell *matHeaderCellDef> Activación </th>
+          <td mat-cell *matCellDef="let element" class="col-mono"> {{ element.fechaActivacion ? (element.fechaActivacion | date:'dd/MM/yyyy') : '—' }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="fechaFinEstimada">
+          <th mat-header-cell *matHeaderCellDef> Fin Estimado </th>
+          <td mat-cell *matCellDef="let element" class="col-mono"> {{ element.fechaFinEstimada ? (element.fechaFinEstimada | date:'dd/MM/yyyy') : '—' }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="retirosRealizados">
+          <th mat-header-cell *matHeaderCellDef class="text-center"> Retiros </th>
+          <td mat-cell *matCellDef="let element" class="text-center">
+            <span *ngIf="element.tipoConvenio?.maxRetiros !== null && element.tipoConvenio?.maxRetiros !== undefined">
+              {{ element.retirosRealizados ?? 0 }} / {{ element.tipoConvenio.maxRetiros }}
+            </span>
+            <span *ngIf="element.tipoConvenio?.maxRetiros === null || element.tipoConvenio?.maxRetiros === undefined">
+              {{ element.retirosRealizados ?? 0 }}
+            </span>
+          </td>
+        </ng-container>
+
         <ng-container matColumnDef="acciones">
           <th mat-header-cell *matHeaderCellDef class="text-center"> Acciones </th>
           <td mat-cell *matCellDef="let element" class="text-center actions-cell">
-            <button mat-icon-button color="primary" matTooltip="Editar convenio" (click)="openAgreementForm(element)" [disabled]="element.estado === 'Anulado'">
+            <!-- Ver detalle -->
+            <button mat-icon-button color="primary"
+                    matTooltip="Ver detalle"
+                    [routerLink]="['/agreements', element.id]">
+              <mat-icon>visibility</mat-icon>
+            </button>
+            <!-- Editar: solo si Registrado -->
+            <button mat-icon-button class="text-muted"
+                    matTooltip="Editar convenio"
+                    (click)="openAgreementForm(element)"
+                    *ngIf="element.estado === 'Registrado'">
               <mat-icon>edit</mat-icon>
             </button>
-            <button mat-icon-button color="warn" matTooltip="Anular convenio" (click)="deactivateAgreement(element.id)" [disabled]="element.estado === 'Anulado'">
+            <!-- Anular: si Registrado o Activo -->
+            <button mat-icon-button color="warn"
+                    matTooltip="Anular convenio"
+                    (click)="deactivateAgreement(element)"
+                    *ngIf="element.estado === 'Registrado' || element.estado === 'Activo'">
               <mat-icon>block</mat-icon>
             </button>
+            <!-- Histórico: indicador para finalizados/anulados -->
+            <span class="historico-label" *ngIf="isHistorico(element.estado)">
+              <mat-icon>inventory_2</mat-icon>
+            </span>
           </td>
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;" [ngClass]="{'inactive-row': row.estado === 'Anulado' || row.estado === 'Inactivo'}"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" [ngClass]="{'inactive-row': isHistorico(row.estado)}"></tr>
       </table>
 
       <div *ngIf="!loading && !error && agreements.length === 0" class="empty-state">
