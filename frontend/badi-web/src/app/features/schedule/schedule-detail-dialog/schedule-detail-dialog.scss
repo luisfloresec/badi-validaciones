@@ -1,0 +1,395 @@
+$green: #015641;
+$g9: #111827;
+$g7: #374151;
+$g5: #6b7280;
+$g3: #d1d5db;
+$g1: #f3f4f6;
+$border: #e5e7eb;
+
+.dialog-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 28px 20px;
+  border-bottom: 1px solid $g1;
+  background: #fff;
+}
+
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: $g9;
+    letter-spacing: -0.01em;
+  }
+
+  mat-icon {
+    color: $green;
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+  }
+}
+
+.close-button {
+  color: $g5;
+  margin-right: -8px;
+  transition: all 0.15s ease;
+  &:hover { color: $g7; background: $g1; }
+}
+
+.state-info-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 28px;
+  font-size: 13px;
+  font-weight: 500;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+
+  &.warn-banner {
+    background: rgba(220, 38, 38, 0.06);
+    border-bottom: 1px solid rgba(220, 38, 38, 0.1);
+    color: #dc2626;
+  }
+}
+
+.dialog-content {
+  padding: 24px 28px !important;
+  margin: 0 !important;
+  max-height: 70vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ── Secciones ────────────────────────── */
+.detail-section {
+  background: #fff;
+  border: 1px solid $border;
+  border-radius: 12px;
+  overflow: hidden;
+
+  &.highlight-amber {
+    border-color: rgba(217, 119, 6, 0.2);
+    .detail-header {
+      background: rgba(217, 119, 6, 0.04);
+      border-bottom-color: rgba(217, 119, 6, 0.1);
+      h3 { color: #b45309; }
+      mat-icon { color: #d97706; }
+    }
+  }
+
+  &.highlight-red {
+    border-color: rgba(220, 38, 38, 0.2);
+    .detail-header {
+      background: rgba(220, 38, 38, 0.04);
+      border-bottom-color: rgba(220, 38, 38, 0.1);
+      h3 { color: #b91c1c; }
+      mat-icon { color: #dc2626; }
+    }
+  }
+
+  &.edit-section {
+    border-color: rgba(1, 86, 65, 0.25);
+    .detail-header {
+      background: rgba(1, 86, 65, 0.04);
+      border-bottom-color: rgba(1, 86, 65, 0.1);
+      h3 { color: $green; }
+      mat-icon { color: $green; }
+    }
+  }
+}
+
+.detail-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px;
+  background: #fafbfc;
+  border-bottom: 1px solid $border;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    color: $g5;
+  }
+
+  h3 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: $g7;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  padding: 20px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  &.full-width {
+    grid-column: 1 / -1;
+  }
+
+  label {
+    font-size: 12px;
+    font-weight: 500;
+    color: $g5;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  span {
+    font-size: 14px;
+    color: $g9;
+    line-height: 1.5;
+    word-break: break-word;
+  }
+
+  .text-primary {
+    color: $green;
+  }
+
+  .fw-500 {
+    font-weight: 500;
+  }
+
+  .text-block {
+    white-space: pre-line;
+    background: #fafbfc;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid $g1;
+    font-size: 13.5px;
+    color: $g7;
+  }
+
+  .date-value {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 14.5px;
+    font-weight: 500;
+    color: $g9;
+  }
+
+  .date-value-sm {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 13.5px;
+    color: $g7;
+  }
+
+  .strike-through {
+    text-decoration: line-through;
+    color: $g5;
+  }
+
+  .text-muted-sm {
+    font-style: italic;
+    color: $g5;
+    font-size: 13px;
+  }
+}
+
+/* ── Edit Form ───────────────────────── */
+.edit-form {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.full-field {
+  width: 100%;
+}
+
+.edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 4px;
+}
+
+.btn-spinner {
+  display: inline-block;
+}
+
+/* ── Trazabilidad ────────────────────── */
+.audit-info {
+  text-align: center;
+  font-size: 12px;
+  color: $g5;
+  padding-top: 8px;
+}
+
+/* ── Diálogo Acciones ────────────────── */
+.dialog-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 16px 28px 20px;
+  border-top: 1px solid $g1;
+  background-color: #fafbfc;
+  margin: 0 !important;
+
+  .action-spacer {
+    flex: 1;
+  }
+
+  button[mat-stroked-button] {
+    font-weight: 500 !important;
+    border-radius: 10px !important;
+    padding: 0 16px !important;
+    transition: all 0.15s ease;
+    font-size: 13px;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      margin-right: 4px;
+    }
+  }
+
+  /* Default stroked (Cerrar) */
+  button[mat-stroked-button]:not(.btn-action-edit):not(.btn-action-reschedule):not(.btn-action-cancel) {
+    border: 1px solid $g3 !important;
+    color: $g7 !important;
+    background: #fff !important;
+    &:hover:not([disabled]) { background: $g1 !important; border-color: #9ca3af !important; }
+  }
+
+  .btn-action-edit {
+    border: 1px solid rgba(1, 86, 65, 0.3) !important;
+    color: $green !important;
+    background: #fff !important;
+    &:hover:not([disabled]) { background: rgba(1, 86, 65, 0.04) !important; border-color: $green !important; }
+  }
+
+  .btn-action-reschedule {
+    border: 1px solid rgba(217, 119, 6, 0.3) !important;
+    color: #b45309 !important;
+    background: #fff !important;
+    &:hover:not([disabled]) { background: rgba(217, 119, 6, 0.04) !important; border-color: #d97706 !important; }
+  }
+
+  .btn-action-cancel {
+    border: 1px solid rgba(220, 38, 38, 0.25) !important;
+    color: #dc2626 !important;
+    background: #fff !important;
+    &:hover:not([disabled]) { background: rgba(220, 38, 38, 0.04) !important; border-color: #dc2626 !important; }
+  }
+}
+
+/* ── States ──────────────────────────── */
+.state-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+  text-align: center;
+  background: #fff;
+  min-height: 300px;
+
+  &.error {
+    mat-icon { font-size: 48px; width: 48px; height: 48px; margin-bottom: 16px; }
+    p { color: $g7; font-weight: 500; margin: 0; }
+  }
+}
+
+.btn-primary {
+  background: $green !important;
+  color: #fff !important;
+  font-weight: 500 !important;
+  border-radius: 10px !important;
+  padding: 0 24px !important;
+  box-shadow: 0 1px 3px rgba(1,86,65,0.2) !important;
+  transition: all 0.2s ease;
+
+  &:hover:not([disabled]) {
+    background: #016b50 !important;
+    box-shadow: 0 4px 12px rgba(1,86,65,0.25) !important;
+  }
+
+  &[disabled] {
+    opacity: 0.6;
+  }
+}
+
+/* ── Estado Chips ────────────────────── */
+.estado-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  width: fit-content;
+
+  &.estado-programada {
+    background: rgba(1, 86, 65, 0.08);
+    color: #015641;
+    border: 1px solid rgba(1, 86, 65, 0.15);
+  }
+
+  &.estado-reprogramada {
+    background: rgba(217, 119, 6, 0.08);
+    color: #b45309;
+    border: 1px solid rgba(217, 119, 6, 0.15);
+  }
+
+  &.estado-cancelada {
+    background: rgba(107, 114, 128, 0.08);
+    color: #4b5563;
+    border: 1px solid rgba(107, 114, 128, 0.15);
+  }
+
+  &.estado-finalizada {
+    background: rgba(37, 99, 235, 0.08);
+    color: #1d4ed8;
+    border: 1px solid rgba(37, 99, 235, 0.15);
+  }
+}
+
+/* ── Responsive ──────────────────────── */
+@media (max-width: 480px) {
+  .dialog-header { padding: 16px 20px 14px; }
+  .state-info-banner { padding: 12px 20px; }
+  .dialog-content { padding: 16px 20px !important; gap: 16px; }
+  .info-grid { padding: 16px; gap: 12px; }
+  .dialog-actions { padding: 16px 20px; justify-content: stretch; }
+  
+  .dialog-actions button { flex: 1; justify-content: center; }
+  .action-spacer { display: none; }
+}

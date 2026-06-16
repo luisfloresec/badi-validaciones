@@ -1,6 +1,5 @@
 import { Routes } from '@angular/router';
 import { AppShellComponent } from './layout/app-shell/app-shell';
-import { AuditPlaceholderComponent } from './features/audit/audit-placeholder/audit-placeholder';
 
 export const routes: Routes = [
   {
@@ -28,7 +27,7 @@ export const routes: Routes = [
       { path: 'users', loadComponent: () => import('./features/users/users-placeholder/users-placeholder').then(m => m.UsersPlaceholderComponent) },
       { path: 'roles', loadComponent: () => import('./features/roles/roles-placeholder/roles-placeholder').then(m => m.RolesPlaceholderComponent) },
       { path: 'documents', loadComponent: () => import('./features/documents/documents-placeholder/documents-placeholder').then(m => m.DocumentsPlaceholderComponent) },
-      { path: 'schedule', loadComponent: () => import('./features/schedule/schedule-placeholder/schedule-placeholder').then(m => m.SchedulePlaceholderComponent) },
+      { path: 'schedule', loadComponent: () => import('./features/schedule/schedule-calendar/schedule-calendar').then(m => m.ScheduleCalendarComponent) },
       { path: 'audit', loadComponent: () => import('./features/audit/audit-placeholder/audit-placeholder').then(m => m.AuditPlaceholderComponent) },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]

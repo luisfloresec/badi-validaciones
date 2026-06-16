@@ -11,6 +11,8 @@ import { finalize } from 'rxjs/operators';
 import { AgreementsService, Agreement } from '../agreements.service';
 import { AgreementFormDialogComponent } from '../agreement-form-dialog/agreement-form-dialog';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog';
+import { ScheduleService, ScheduledDelivery } from '../../schedule/schedule.service';
+import { ScheduleFormDialogComponent } from '../../schedule/schedule-form-dialog/schedule-form-dialog';
 
 @Component({
   selector: 'app-agreement-detail',
@@ -24,17 +26,22 @@ import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialo
     RouterModule
   ],
   templateUrl: './agreement-detail.html',
-  styleUrls: ['../../organizations/organization-detail/organization-detail.scss']
+  styleUrls: ['../../organizations/organization-detail/organization-detail.scss', './agreement-detail.scss']
 })
 export class AgreementDetailComponent implements OnInit {
   agreement: Agreement | null = null;
   loading = true;
   error: string | null = null;
 
+  // Cronograma
+  deliveries: ScheduledDelivery[] = [];
+  deliveriesLoading = false;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private agreementsService: AgreementsService,
+    private scheduleService: ScheduleService,
     private cdr: ChangeDetectorRef,
     private snackBar: MatSnackBar,
     private dialog: MatDialog
@@ -63,12 +70,28 @@ export class AgreementDetailComponent implements OnInit {
       .subscribe({
         next: (data) => {
           this.agreement = data;
+          this.loadDeliveries(id);
         },
         error: (err) => {
           this.error = 'No se pudo cargar el detalle del convenio.';
           this.agreement = null;
         }
       });
+  }
+
+  loadDeliveries(agreementId: string): void {
+    this.deliveriesLoading = true;
+    this.scheduleService.getByAgreement(agreementId).subscribe({
+      next: (data) => {
+        this.deliveries = data;
+        this.deliveriesLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.deliveriesLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   goBack(): void {
@@ -208,5 +231,36 @@ export class AgreementDetailComponent implements OnInit {
   isHistorico(): boolean {
     if (!this.agreement) return false;
     return this.agreement.estado === 'Anulado' || this.agreement.estado === 'Finalizado';
+  }
+
+  // ── Cronograma ─────────────────────────
+
+  openScheduleForm(): void {
+    if (!this.agreement) return;
+
+    const dialogRef = this.dialog.open(ScheduleFormDialogComponent, {
+      width: '560px',
+      maxWidth: '95vw',
+      disableClose: true,
+      data: {
+        fecha: new Date(),
+        agreementId: this.agreement.id
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result && this.agreement) {
+        this.loadDeliveries(this.agreement.id);
+      }
+    });
+  }
+
+  getDeliveryEstadoClass(estado: string): string {
+    const map: Record<string, string> = {
+      'Programado': 'delivery-programado',
+      'Reprogramado': 'delivery-reprogramado',
+      'Cancelado': 'delivery-cancelado'
+    };
+    return map[estado] || '';
   }
 }

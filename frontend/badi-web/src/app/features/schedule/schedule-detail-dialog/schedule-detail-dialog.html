@@ -1,0 +1,205 @@
+<div class="dialog-container">
+  <!-- Loading state -->
+  <div *ngIf="isLoading" class="state-container loading">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p class="mt-2 text-muted">Cargando detalle de entrega...</p>
+  </div>
+
+  <!-- Error state -->
+  <div *ngIf="!isLoading && error" class="state-container error">
+    <mat-icon color="warn">error_outline</mat-icon>
+    <p class="mt-2">{{ error }}</p>
+    <div class="mt-3">
+      <button mat-button (click)="dialogRef.close()">Cerrar</button>
+      <button mat-flat-button color="primary" class="ml-2 btn-primary" (click)="loadDetail()">Reintentar</button>
+    </div>
+  </div>
+
+  <ng-container *ngIf="!isLoading && !error && delivery">
+    <div class="dialog-header">
+      <div class="header-title">
+        <mat-icon>event_note</mat-icon>
+        <h2>Detalle de entrega programada</h2>
+      </div>
+      <button mat-icon-button class="close-button" (click)="closeDialog()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <!-- Banner histórico (Cancelado) -->
+    <div class="state-info-banner warn-banner" *ngIf="delivery.estado === 'Cancelado'">
+      <mat-icon>block</mat-icon>
+      <span>Esta entrega fue cancelada y se mantiene en el historial.</span>
+    </div>
+
+    <div class="dialog-content" mat-dialog-content>
+
+      <!-- Bloque 1: Información Principal (lectura) -->
+      <div class="detail-section" *ngIf="!editMode">
+        <div class="detail-header">
+          <mat-icon>info</mat-icon>
+          <h3>Información Principal</h3>
+        </div>
+
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Estado</label>
+            <span class="estado-chip mt-1" [ngClass]="getEstadoClass(delivery.estado)">{{ delivery.estado }}</span>
+          </div>
+
+          <div class="info-item">
+            <label>Fecha programada</label>
+            <span class="date-value">{{ delivery.fechaProgramada | date:'dd/MM/yyyy' }}</span>
+          </div>
+
+          <div class="info-item full-width" *ngIf="delivery.descripcion">
+            <label>Descripción</label>
+            <span>{{ delivery.descripcion }}</span>
+          </div>
+
+          <div class="info-item full-width" *ngIf="delivery.observaciones">
+            <label>Observaciones</label>
+            <span class="text-block">{{ delivery.observaciones }}</span>
+          </div>
+
+          <div class="info-item full-width" *ngIf="!delivery.descripcion && !delivery.observaciones">
+            <span class="text-muted-sm">Sin descripción ni observaciones registradas.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bloque 1b: Información Principal (edición) -->
+      <div class="detail-section edit-section" *ngIf="editMode">
+        <div class="detail-header">
+          <mat-icon>edit</mat-icon>
+          <h3>Editar información</h3>
+        </div>
+
+        <div class="edit-form">
+          <mat-form-field appearance="outline" class="full-field">
+            <mat-label>Descripción</mat-label>
+            <input matInput [(ngModel)]="editDescripcion" maxlength="300" placeholder="Descripción de la entrega">
+            <mat-hint align="end">{{ descripcionLength }}/300</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-field">
+            <mat-label>Observaciones</mat-label>
+            <textarea matInput [(ngModel)]="editObservaciones" rows="3" placeholder="Observaciones adicionales"></textarea>
+          </mat-form-field>
+
+          <div class="edit-actions">
+            <button mat-stroked-button (click)="cancelEditMode()" [disabled]="isSaving">
+              Cancelar edición
+            </button>
+            <button mat-flat-button class="btn-primary" (click)="saveEdit()" [disabled]="isSaving || descripcionLength > 300">
+              <mat-spinner *ngIf="isSaving" diameter="18" class="btn-spinner"></mat-spinner>
+              <span *ngIf="!isSaving">Guardar cambios</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bloque 2: Información del Convenio -->
+      <div class="detail-section" *ngIf="delivery.convenio">
+        <div class="detail-header">
+          <mat-icon>handshake</mat-icon>
+          <h3>Convenio Asociado</h3>
+        </div>
+
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Código de convenio</label>
+            <span class="fw-500">{{ delivery.convenio.codigoConvenio || 'S/N' }}</span>
+          </div>
+
+          <div class="info-item" *ngIf="delivery.convenio.tipoConvenio">
+            <label>Tipo</label>
+            <span>{{ delivery.convenio.tipoConvenio.nombre }}</span>
+          </div>
+
+          <div class="info-item full-width" *ngIf="delivery.convenio.organizacion">
+            <label>Organización</label>
+            <span class="fw-500 text-primary">{{ delivery.convenio.organizacion.razonSocial || delivery.convenio.organizacion.nombreComercial }}</span>
+          </div>
+
+          <div class="info-item">
+            <label>Estado del convenio</label>
+            <span>{{ delivery.convenio.estado }}</span>
+          </div>
+
+          <div class="info-item" *ngIf="delivery.convenio.tipoConvenio?.maxRetiros">
+            <label>Retiros del convenio</label>
+            <span>{{ delivery.convenio.retirosRealizados || 0 }} / {{ delivery.convenio.tipoConvenio?.maxRetiros }}</span>
+          </div>
+
+          <div class="info-item" *ngIf="delivery.convenio.fechaActivacion">
+            <label>Activación</label>
+            <span class="date-value-sm">{{ delivery.convenio.fechaActivacion | date:'dd/MM/yyyy' }}</span>
+          </div>
+
+          <div class="info-item" *ngIf="delivery.convenio.fechaFinEstimada">
+            <label>Vigente hasta</label>
+            <span class="date-value-sm">{{ delivery.convenio.fechaFinEstimada | date:'dd/MM/yyyy' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bloque 3: Reprogramación (si aplica) -->
+      <div class="detail-section highlight-amber" *ngIf="delivery.estado === 'Reprogramado'">
+        <div class="detail-header">
+          <mat-icon>update</mat-icon>
+          <h3>Detalles de Reprogramación</h3>
+        </div>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>Fecha original</label>
+            <span class="date-value-sm strike-through">{{ delivery.fechaOriginal | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="info-item full-width" *ngIf="delivery.motivoReprogramacion">
+            <label>Motivo de reprogramación</label>
+            <span class="text-block">{{ delivery.motivoReprogramacion }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bloque 4: Cancelación (si aplica) -->
+      <div class="detail-section highlight-red" *ngIf="delivery.estado === 'Cancelado'">
+        <div class="detail-header">
+          <mat-icon>cancel</mat-icon>
+          <h3>Detalles de Cancelación</h3>
+        </div>
+        <div class="info-grid">
+          <div class="info-item full-width" *ngIf="delivery.motivoCancelacion">
+            <label>Motivo de cancelación</label>
+            <span class="text-block">{{ delivery.motivoCancelacion }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trazabilidad -->
+      <div class="audit-info">
+        <span>Creado el {{ delivery.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}</span>
+        <span *ngIf="delivery.fechaActualizacion"> • Actualizado el {{ delivery.fechaActualizacion | date:'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+
+    </div>
+
+    <div class="dialog-actions" mat-dialog-actions>
+      <!-- Acciones solo si es editable (Programado o Reprogramado) y no estamos en edit mode -->
+      <ng-container *ngIf="isEditable && !editMode">
+        <button mat-stroked-button class="btn-action-edit" (click)="enterEditMode()">
+          <mat-icon>edit</mat-icon> Editar
+        </button>
+        <button mat-stroked-button class="btn-action-reschedule" (click)="openReschedule()">
+          <mat-icon>event_repeat</mat-icon> Reprogramar
+        </button>
+        <button mat-stroked-button class="btn-action-cancel" (click)="openCancel()">
+          <mat-icon>event_busy</mat-icon> Cancelar entrega
+        </button>
+      </ng-container>
+
+      <span class="action-spacer"></span>
+      <button mat-stroked-button (click)="closeDialog()">Cerrar</button>
+    </div>
+  </ng-container>
+</div>

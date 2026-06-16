@@ -1,0 +1,97 @@
+<div class="dialog-container">
+  <div class="dialog-header">
+    <div class="header-title">
+      <mat-icon>event_available</mat-icon>
+      <h2>Programar entrega</h2>
+    </div>
+    <button mat-icon-button mat-dialog-close class="close-button">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="dialog-content" mat-dialog-content>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="badi-form">
+
+      <!-- Convenio (bloqueado si viene preseleccionado) -->
+      <ng-container *ngIf="agreementLocked && selectedAgreement; else selectAgreement">
+        <div class="locked-field">
+          <label>Convenio</label>
+          <span class="locked-value">
+            <mat-icon>lock</mat-icon>
+            {{ getAgreementLabel(selectedAgreement) }}
+          </span>
+        </div>
+      </ng-container>
+
+      <ng-template #selectAgreement>
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Convenio</mat-label>
+          <mat-select formControlName="agreementId"
+                      placeholder="Seleccione un convenio activo"
+                      (selectionChange)="onAgreementChange()">
+            <mat-option *ngFor="let a of agreements" [value]="a.id">
+              {{ getAgreementLabel(a) }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="form.get('agreementId')?.hasError('required')">El convenio es obligatorio.</mat-error>
+          <mat-hint *ngIf="agreementsLoading">Cargando convenios...</mat-hint>
+          <mat-hint *ngIf="!agreementsLoading && agreements.length === 0">No hay convenios activos disponibles.</mat-hint>
+        </mat-form-field>
+      </ng-template>
+
+      <!-- Resumen del convenio seleccionado -->
+      <div class="agreement-summary" *ngIf="selectedAgreement">
+        <mat-icon>info_outline</mat-icon>
+        <div class="summary-content">
+          <span class="summary-item" *ngIf="selectedAgreement.tipoConvenio?.nombre">
+            <strong>Tipo:</strong> {{ selectedAgreement.tipoConvenio.nombre }}
+          </span>
+          <span class="summary-item" *ngIf="selectedAgreement.tipoConvenio?.maxRetiros !== null && selectedAgreement.tipoConvenio?.maxRetiros !== undefined">
+            <strong>Retiros:</strong> {{ selectedAgreement.retirosRealizados ?? 0 }} / {{ selectedAgreement.tipoConvenio.maxRetiros }}
+          </span>
+          <span class="summary-item" *ngIf="selectedAgreement.fechaFinEstimada">
+            <strong>Vigente hasta:</strong> {{ selectedAgreement.fechaFinEstimada | date:'dd/MM/yyyy' }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Fecha programada -->
+      <mat-form-field appearance="outline" class="w-100">
+        <mat-label>Fecha programada</mat-label>
+        <input matInput [matDatepicker]="fechaPicker" formControlName="fechaProgramada" readonly (click)="fechaPicker.open()">
+        <mat-datepicker-toggle matIconSuffix [for]="fechaPicker"></mat-datepicker-toggle>
+        <mat-datepicker #fechaPicker></mat-datepicker>
+        <mat-error *ngIf="form.get('fechaProgramada')?.hasError('required')">La fecha es obligatoria.</mat-error>
+      </mat-form-field>
+
+      <!-- Descripción -->
+      <mat-form-field appearance="outline" class="w-100">
+        <mat-label>Descripción</mat-label>
+        <textarea matInput formControlName="descripcion" rows="2"
+                  placeholder="Ej: Entrega mensual de alimentos"></textarea>
+        <mat-hint align="end">{{ descripcionLength }} / 300</mat-hint>
+        <mat-error *ngIf="form.get('descripcion')?.hasError('maxlength')">Máximo 300 caracteres.</mat-error>
+      </mat-form-field>
+
+      <!-- Observaciones -->
+      <mat-form-field appearance="outline" class="w-100">
+        <mat-label>Observaciones (Opcional)</mat-label>
+        <textarea matInput formControlName="observaciones" rows="2"
+                  placeholder="Información adicional para esta entrega"></textarea>
+      </mat-form-field>
+
+    </form>
+  </div>
+
+  <div class="dialog-actions" mat-dialog-actions>
+    <button mat-stroked-button mat-dialog-close [disabled]="isLoading">Cancelar</button>
+    <button mat-flat-button color="primary"
+            (click)="onSubmit()"
+            [disabled]="form.invalid || isLoading || agreements.length === 0"
+            class="btn-primary">
+      <mat-spinner diameter="18" *ngIf="isLoading"></mat-spinner>
+      <mat-icon *ngIf="!isLoading">event_available</mat-icon>
+      {{ isLoading ? 'Guardando...' : 'Programar entrega' }}
+    </button>
+  </div>
+</div>

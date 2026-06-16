@@ -134,14 +134,64 @@
       </div>
     </div>
 
-    <!-- Cronograma (Placeholder) -->
+    <!-- Cronograma de entregas -->
     <div class="badi-card section-card">
       <div class="badi-card-header">
         <mat-icon class="badi-card-icon">calendar_month</mat-icon>
         <h2>Cronograma y entregas</h2>
+        <span class="header-spacer"></span>
+        <button mat-stroked-button class="btn-schedule-sm"
+                *ngIf="agreement && agreement.estado === 'Activo'"
+                (click)="openScheduleForm()">
+          <mat-icon>add</mat-icon> Programar
+        </button>
       </div>
-      <div class="badi-card-body pt-0">
-        <p class="empty-text">Aún no existen entregas programadas para este convenio.</p>
+
+      <!-- Loading -->
+      <div class="badi-card-body pt-0" *ngIf="deliveriesLoading">
+        <div class="schedule-loading">
+          <mat-spinner diameter="24"></mat-spinner>
+          <span>Cargando entregas...</span>
+        </div>
+      </div>
+
+      <!-- Lista vacía -->
+      <div class="badi-card-body pt-0" *ngIf="!deliveriesLoading && deliveries.length === 0">
+        <div class="empty-schedule">
+          <mat-icon>event_busy</mat-icon>
+          <p class="empty-text">Aún no existen entregas programadas para este convenio.</p>
+          <button mat-stroked-button class="btn-schedule-empty"
+                  *ngIf="agreement && agreement.estado === 'Activo'"
+                  (click)="openScheduleForm()">
+            <mat-icon>add</mat-icon> Programar primera entrega
+          </button>
+        </div>
+      </div>
+
+      <!-- Lista de entregas -->
+      <div class="badi-card-body pt-0" *ngIf="!deliveriesLoading && deliveries.length > 0">
+        <div class="delivery-list">
+          <div class="delivery-item" *ngFor="let d of deliveries" [ngClass]="getDeliveryEstadoClass(d.estado)">
+            <div class="delivery-date">
+              <span class="day">{{ d.fechaProgramada | date:'dd' }}</span>
+              <span class="month">{{ d.fechaProgramada | date:'MMM' }}</span>
+            </div>
+            <div class="delivery-info">
+              <div class="delivery-top">
+                <span class="delivery-desc">{{ d.descripcion || 'Entrega programada' }}</span>
+                <span class="delivery-estado-badge" [ngClass]="getDeliveryEstadoClass(d.estado)">{{ d.estado }}</span>
+              </div>
+              <span class="delivery-obs" *ngIf="d.observaciones">{{ d.observaciones }}</span>
+              <span class="delivery-meta" *ngIf="d.estado === 'Reprogramado' && d.fechaOriginal">
+                Original: {{ d.fechaOriginal | date:'dd/MM/yyyy' }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <a class="schedule-link" routerLink="/schedule">
+          <mat-icon>open_in_new</mat-icon> Ver cronograma completo
+        </a>
       </div>
     </div>
 

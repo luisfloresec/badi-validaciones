@@ -1,0 +1,133 @@
+$green: #015641;
+$amber: #d97706;
+$g9: #111827;
+$g7: #374151;
+$g5: #6b7280;
+$g3: #d1d5db;
+$g1: #f3f4f6;
+$border: #e5e7eb;
+
+.dialog-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 28px 20px;
+  border-bottom: 1px solid $g1;
+}
+
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: $g9;
+  }
+
+  mat-icon {
+    color: $amber;
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+  }
+}
+
+.close-button {
+  color: $g5;
+  margin-right: -8px;
+  transition: all 0.15s ease;
+  &:hover { color: $g7; background: $g1; }
+}
+
+.dialog-info-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 28px;
+  background: rgba(217, 119, 6, 0.04);
+  border-bottom: 1px solid rgba(217, 119, 6, 0.1);
+  font-size: 13px;
+  color: #92400e;
+  line-height: 1.5;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: $amber;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+}
+
+.dialog-body {
+  padding: 24px 28px !important;
+  margin: 0 !important;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.full-field {
+  width: 100%;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 28px 20px;
+  border-top: 1px solid $g1;
+  background: #fafbfc;
+  margin: 0 !important;
+
+  button[mat-stroked-button] {
+    border: 1px solid $g3 !important;
+    color: $g7 !important;
+    font-weight: 500 !important;
+    border-radius: 10px !important;
+    padding: 0 20px !important;
+    background: #fff !important;
+    transition: all 0.15s ease;
+    &:hover:not([disabled]) { background: $g1 !important; }
+  }
+}
+
+.btn-reschedule {
+  background: $amber !important;
+  color: #fff !important;
+  font-weight: 500 !important;
+  border-radius: 10px !important;
+  padding: 0 24px !important;
+  box-shadow: 0 1px 3px rgba(217, 119, 6, 0.2) !important;
+  transition: all 0.2s ease;
+
+  &:hover:not([disabled]) {
+    background: #b45309 !important;
+    box-shadow: 0 4px 12px rgba(217, 119, 6, 0.25) !important;
+  }
+
+  &[disabled] {
+    opacity: 0.6;
+  }
+}
+
+.btn-spinner {
+  display: inline-block;
+}
+
+/* ── Responsive ──────────────────────── */
+@media (max-width: 480px) {
+  .dialog-header { padding: 16px 20px 14px; }
+  .dialog-info-banner { padding: 12px 20px; }
+  .dialog-body { padding: 16px 20px !important; }
+  .dialog-actions { padding: 16px 20px; }
+}

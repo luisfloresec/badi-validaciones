@@ -1,0 +1,228 @@
+$green: #015641;
+$g9: #111827;
+$g7: #374151;
+$g5: #6b7280;
+$g3: #d1d5db;
+$g1: #f3f4f6;
+$border: #e5e7eb;
+
+/* ── Header spacer for inline buttons ── */
+.header-spacer {
+  flex: 1;
+}
+
+.btn-schedule-sm {
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  border: 1px solid rgba(1, 86, 65, 0.3) !important;
+  color: $green !important;
+  border-radius: 8px !important;
+  padding: 0 12px !important;
+  height: 32px !important;
+  line-height: 32px !important;
+  background: #fff !important;
+  transition: all 0.15s ease;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
+  }
+
+  &:hover {
+    background: rgba(1, 86, 65, 0.04) !important;
+    border-color: $green !important;
+  }
+}
+
+/* ── Schedule loading ──────────────── */
+.schedule-loading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 0;
+  color: $g5;
+  font-size: 13px;
+}
+
+/* ── Empty schedule ────────────────── */
+.empty-schedule {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 0 16px;
+  text-align: center;
+
+  > mat-icon {
+    font-size: 36px;
+    width: 36px;
+    height: 36px;
+    color: $g3;
+    margin-bottom: 8px;
+  }
+}
+
+.btn-schedule-empty {
+  margin-top: 12px;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  border: 1px solid rgba(1, 86, 65, 0.3) !important;
+  color: $green !important;
+  border-radius: 8px !important;
+  padding: 0 16px !important;
+  background: #fff !important;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
+  }
+
+  &:hover {
+    background: rgba(1, 86, 65, 0.04) !important;
+  }
+}
+
+/* ── Delivery list ─────────────────── */
+.delivery-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.delivery-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid $g1;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.delivery-date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 44px;
+  padding: 6px 8px;
+  background: rgba(1, 86, 65, 0.06);
+  border-radius: 8px;
+  flex-shrink: 0;
+
+  .day {
+    font-size: 18px;
+    font-weight: 700;
+    color: $green;
+    line-height: 1.1;
+  }
+
+  .month {
+    font-size: 11px;
+    font-weight: 500;
+    color: $g5;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .delivery-cancelado & {
+    background: rgba(107, 114, 128, 0.08);
+    .day { color: $g5; }
+  }
+
+  .delivery-reprogramado & {
+    background: rgba(217, 119, 6, 0.06);
+    .day { color: #b45309; }
+  }
+}
+
+.delivery-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.delivery-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.delivery-desc {
+  font-size: 14px;
+  font-weight: 500;
+  color: $g9;
+  line-height: 1.4;
+}
+
+.delivery-estado-badge {
+  display: inline-flex;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  flex-shrink: 0;
+
+  &.delivery-programado {
+    background: rgba(1, 86, 65, 0.08);
+    color: $green;
+  }
+
+  &.delivery-reprogramado {
+    background: rgba(217, 119, 6, 0.08);
+    color: #b45309;
+  }
+
+  &.delivery-cancelado {
+    background: rgba(107, 114, 128, 0.08);
+    color: #4b5563;
+  }
+}
+
+.delivery-obs {
+  font-size: 13px;
+  color: $g5;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.delivery-meta {
+  font-size: 12px;
+  color: #b45309;
+  font-style: italic;
+}
+
+/* ── Schedule link ─────────────────── */
+.schedule-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 0 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: $green;
+  text-decoration: none;
+  transition: color 0.15s ease;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+
+  &:hover {
+    color: #016b50;
+    text-decoration: underline;
+  }
+}

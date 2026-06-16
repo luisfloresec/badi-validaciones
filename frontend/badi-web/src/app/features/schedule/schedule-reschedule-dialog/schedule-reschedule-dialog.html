@@ -1,0 +1,43 @@
+<div class="dialog-container">
+  <div class="dialog-header">
+    <div class="header-title">
+      <mat-icon>event_repeat</mat-icon>
+      <h2>Reprogramar entrega</h2>
+    </div>
+    <button mat-icon-button class="close-button" mat-dialog-close>
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="dialog-info-banner">
+    <mat-icon>info</mat-icon>
+    <span>La fecha actual programada es <strong>{{ data.fechaActual | date:'dd/MM/yyyy' }}</strong>. Selecciona una nueva fecha y proporciona el motivo de la reprogramación.</span>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="dialog-body" mat-dialog-content>
+      <mat-form-field appearance="outline" class="full-field">
+        <mat-label>Nueva fecha programada</mat-label>
+        <input matInput [matDatepicker]="picker" formControlName="nuevaFecha" placeholder="Seleccionar fecha">
+        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+        <mat-error *ngIf="form.get('nuevaFecha')?.hasError('required')">La nueva fecha es obligatoria</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-field">
+        <mat-label>Motivo de reprogramación</mat-label>
+        <textarea matInput formControlName="motivoReprogramacion" rows="3" placeholder="Ej: Cambio en la disponibilidad del equipo de logística"></textarea>
+        <mat-error *ngIf="form.get('motivoReprogramacion')?.hasError('required')">El motivo es obligatorio</mat-error>
+        <mat-error *ngIf="form.get('motivoReprogramacion')?.hasError('minlength')">Mínimo 5 caracteres</mat-error>
+      </mat-form-field>
+    </div>
+
+    <div class="dialog-actions" mat-dialog-actions>
+      <button mat-stroked-button type="button" mat-dialog-close [disabled]="isLoading">Cancelar</button>
+      <button mat-flat-button type="submit" class="btn-reschedule" [disabled]="form.invalid || isLoading">
+        <mat-spinner *ngIf="isLoading" diameter="18" class="btn-spinner"></mat-spinner>
+        <span *ngIf="!isLoading">Reprogramar</span>
+      </button>
+    </div>
+  </form>
+</div>
