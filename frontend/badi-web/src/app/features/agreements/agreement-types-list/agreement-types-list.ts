@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
@@ -38,7 +38,8 @@ export class AgreementTypesListComponent implements OnInit {
   constructor(
     private agreementsService: AgreementsService,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -48,13 +49,21 @@ export class AgreementTypesListComponent implements OnInit {
   loadTypes() {
     this.loading = true;
     this.error = null;
+    this.cdr.detectChanges();
     this.agreementsService.getAllTypes()
-      .pipe(finalize(() => this.loading = false))
+      .pipe(finalize(() => {
+        this.loading = false;
+        this.cdr.detectChanges();
+      }))
       .subscribe({
-        next: (res) => this.types = res,
+        next: (res) => {
+          this.types = res;
+          this.cdr.detectChanges();
+        },
         error: () => {
           this.error = 'Error al cargar tipos de convenio';
           this.snackBar.open('Error al cargar tipos de convenio', 'Cerrar', { duration: 3000 });
+          this.cdr.detectChanges();
         }
       });
   }
@@ -67,7 +76,9 @@ export class AgreementTypesListComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe(res => {
-      if (res) this.loadTypes();
+      if (res) {
+        this.loadTypes();
+      }
     });
   }
 
@@ -91,7 +102,10 @@ export class AgreementTypesListComponent implements OnInit {
             this.snackBar.open('Tipo inactivado exitosamente', 'Cerrar', { duration: 3000 });
             this.loadTypes();
           },
-          error: (err) => this.snackBar.open(err.error?.message || 'Error al inactivar', 'Cerrar', { duration: 3000 })
+          error: (err) => {
+            this.snackBar.open(err.error?.message || 'Error al inactivar', 'Cerrar', { duration: 3000 });
+            this.cdr.detectChanges();
+          }
         });
       }
     });
@@ -117,7 +131,10 @@ export class AgreementTypesListComponent implements OnInit {
             this.snackBar.open('Tipo reactivado exitosamente', 'Cerrar', { duration: 3000 });
             this.loadTypes();
           },
-          error: (err) => this.snackBar.open(err.error?.message || 'Error al reactivar', 'Cerrar', { duration: 3000 })
+          error: (err) => {
+            this.snackBar.open(err.error?.message || 'Error al reactivar', 'Cerrar', { duration: 3000 });
+            this.cdr.detectChanges();
+          }
         });
       }
     });

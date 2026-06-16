@@ -7,6 +7,19 @@ $g3: #d1d5db;
 $g1: #f3f4f6;
 $border: #e5e7eb;
 
+/* ── Breadcrumb & Navigation ───────── */
+.breadcrumb {
+  display: flex; align-items: center; gap: 6px; font-size: 13px; color: $g5; margin-bottom: 0;
+  a { color: $green; font-weight: 500; cursor: pointer; text-decoration: none; transition: color 0.15s; &:hover { text-decoration: underline; color: #016b50; } }
+  mat-icon { font-size: 16px; width: 16px; height: 16px; color: $g3; }
+  .current-page { color: $g7; font-weight: 500; }
+}
+
+.btn-secondary-text {
+  color: $g7 !important; font-weight: 500;
+  mat-icon { font-size: 18px; width: 18px; height: 18px; margin-right: 4px; }
+}
+
 .page-container {
   display: flex;
   flex-direction: column;
