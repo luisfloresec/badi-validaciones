@@ -1,53 +1,68 @@
 $green: #015641;
+$green-hover: #01785a;
 $green-bg: #f1faf7;
-$g9: #111827;
-$g7: #374151;
-$g5: #6b7280;
-$g3: #d1d5db;
-$g1: #f3f4f6;
-$border: #e5e7eb;
+$g9: #0f172a;
+$g7: #334155;
+$g5: #64748b;
+$g3: #cbd5e1;
+$g1: #f8fafc;
+$border: #e2e8f0;
 
 .page-container {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 32px;
   max-width: 1100px;
   margin: 0 auto;
   width: 100%;
+  padding-bottom: 40px;
 }
 
 // Breadcrumb
 .breadcrumb {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 6px;
   font-size: 13px;
   color: $g5;
-  margin-bottom: -12px;
+  margin-bottom: 8px;
+  padding: 6px 14px;
+  background-color: $g1;
+  border: 1px solid $border;
+  border-radius: 12px;
+  width: fit-content;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
 
   a {
+    display: flex;
+    align-items: center;
+    gap: 4px;
     color: $green;
     font-weight: 500;
     cursor: pointer;
     text-decoration: none;
     transition: color 0.15s ease;
-    &:hover { text-decoration: underline; color: #016b50; }
+    &:hover { color: $green-hover; }
+    mat-icon { font-size: 16px; width: 16px; height: 16px; }
   }
-  mat-icon { font-size: 16px; width: 16px; height: 16px; color: $g3; }
-  .current-page { color: $g7; font-weight: 500; }
+  .separator { font-size: 16px; width: 16px; height: 16px; color: $g3; }
+  .current-page { color: $g9; font-weight: 500; }
 }
 
 .page-header {
+  padding-bottom: 24px;
+  border-bottom: 1px solid $border;
+  margin-bottom: 8px;
   h1 {
-    margin: 0 0 4px;
-    font-size: 24px;
+    margin: 0 0 6px;
+    font-size: 28px;
     font-weight: 700;
     color: $g9;
     letter-spacing: -0.02em;
   }
   p {
     margin: 0;
-    font-size: 14px;
+    font-size: 15px;
     color: $g5;
     line-height: 1.5;
   }
@@ -57,7 +72,11 @@ $border: #e5e7eb;
 .section-card {
   padding: 0;
   border-radius: 12px;
+  border: 1px solid $border;
+  background-color: #fff;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
   overflow: hidden;
+  margin-bottom: 32px;
 }
 
 // Formularios
@@ -235,6 +254,15 @@ $border: #e5e7eb;
 }
 
 @media (max-width: 768px) {
+  .page-container {
+    gap: 20px;
+    padding-bottom: 24px;
+  }
+
+  .section-card {
+    margin-bottom: 20px;
+  }
+
   .form-grid {
     grid-template-columns: 1fr;
     .col-half { grid-column: 1 / -1; }
@@ -251,3 +279,34 @@ $border: #e5e7eb;
     }
   }
 }
+
+// PrimeNG Field Container Override
+.field-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+
+  .field-hint {
+    font-size: 11.5px;
+    color: $g5;
+    margin-top: 4px;
+    margin-left: 4px;
+  }
+
+  .field-error {
+    font-size: 11px;
+    color: #dc2626;
+    font-weight: 500;
+    margin-top: 4px;
+    margin-left: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+}
+
+// Ensure PrimeNG inputs take full width
+.p-inputtext, .p-select, .p-textarea {
+  width: 100%;
+}
+

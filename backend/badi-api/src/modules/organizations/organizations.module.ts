@@ -9,11 +9,22 @@ import { Representative } from '../representatives/entities/representative.entit
 import { AttendedGroup } from '../attended-groups/entities/attended-group.entity';
 import { Leader } from '../leaders/entities/leader.entity';
 import { AttendedGroupVulnerability } from '../attended-groups/entities/attended-group-vulnerability.entity';
+import { Province } from '../locations/entities/province.entity';
+import { City } from '../locations/entities/city.entity';
+import { LocationsModule } from '../locations/locations.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Organization, OrganizationType, Catalog, Representative, AttendedGroup, Leader, AttendedGroupVulnerability])],
+  imports: [
+    TypeOrmModule.forFeature([
+      Organization, OrganizationType, Catalog, Representative,
+      AttendedGroup, Leader, AttendedGroupVulnerability,
+      Province, City,
+    ]),
+    LocationsModule,
+  ],
   controllers: [OrganizationsController],
   providers: [OrganizationsService],
   exports: [OrganizationsService],
 })
 export class OrganizationsModule {}
+

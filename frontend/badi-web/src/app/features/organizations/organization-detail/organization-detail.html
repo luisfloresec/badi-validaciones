@@ -55,7 +55,12 @@
           </div>
           <p class="identity-location">
             <mat-icon>location_on</mat-icon> 
-            {{ detail.organizacion.ciudad }}, {{ detail.organizacion.direccion }}
+            <ng-container *ngIf="detail.organizacion.provincia && detail.organizacion.ciudadCatalogo; else legacyCityHeader">
+              {{ detail.organizacion.provincia.nombre }}, {{ detail.organizacion.ciudadCatalogo.nombre }}, {{ detail.organizacion.direccion }}
+            </ng-container>
+            <ng-template #legacyCityHeader>
+              {{ detail.organizacion.ciudad }}, {{ detail.organizacion.direccion }}
+            </ng-template>
           </p>
         </div>
         <div class="identity-stats">
@@ -87,8 +92,12 @@
           <span>{{ detail.organizacion.email || 'No especificado' }}</span>
         </div>
         <div class="info-item">
-          <label>Ciudad</label>
-          <span>{{ detail.organizacion.ciudad }}</span>
+          <label>Provincia</label>
+          <span>{{ detail.organizacion.provincia?.nombre || '—' }}</span>
+        </div>
+        <div class="info-item">
+          <label>Ciudad / Cantón</label>
+          <span>{{ detail.organizacion.ciudadCatalogo?.nombre || detail.organizacion.ciudad || 'No especificado' }}</span>
         </div>
         <div class="info-item">
           <label>Sector / Barrio</label>

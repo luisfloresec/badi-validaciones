@@ -60,61 +60,12 @@ $divider: #f3f4f6;
 .search-field {
   width: 420px;
   max-width: 100%;
-  ::ng-deep .mat-mdc-form-field-subscript-wrapper { display: none; }
-  ::ng-deep .mat-mdc-text-field-wrapper { background: #f9fafb; border-radius: 10px; }
 }
 
-.badi-switch-wrapper {
+.switch-wrapper {
   display: flex;
   align-items: center;
   gap: 10px;
-  cursor: pointer;
-  margin-top: -14px; // Optical alignment with the form field
-}
-
-.badi-switch {
-  position: relative;
-  width: 44px;
-  height: 24px;
-  
-  input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-    margin: 0;
-    
-    &:checked + .slider {
-      background-color: $green;
-    }
-    &:checked + .slider:before {
-      transform: translateX(20px);
-    }
-    &:focus-visible + .slider {
-      box-shadow: 0 0 0 2px rgba($green, 0.3);
-    }
-  }
-  
-  .slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background-color: #d1d5db;
-    transition: .3s;
-    border-radius: 24px;
-    
-    &:before {
-      position: absolute;
-      content: "";
-      height: 18px;
-      width: 18px;
-      left: 3px;
-      bottom: 3px;
-      background-color: white;
-      transition: .3s;
-      border-radius: 50%;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-  }
 }
 
 .switch-label {
@@ -254,7 +205,7 @@ $divider: #f3f4f6;
   .search-field {
     width: 100%;
   }
-  .badi-switch-wrapper {
+  .switch-wrapper {
     margin-top: 0;
   }
 }

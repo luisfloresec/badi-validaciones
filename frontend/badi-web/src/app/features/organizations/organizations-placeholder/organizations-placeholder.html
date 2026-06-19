@@ -14,24 +14,20 @@
 
   <!-- Barra de búsqueda -->
   <div class="search-bar" *ngIf="!loading && !error && organizations.length > 0">
-    <mat-form-field appearance="outline" class="search-field">
-      <mat-icon matPrefix>search</mat-icon>
-      <input matInput
+    <p-iconfield class="search-field">
+      <p-inputicon styleClass="pi pi-search"></p-inputicon>
+      <input pInputText type="text"
+             class="w-full"
              placeholder="Buscar por razón social, RUC o ciudad"
              [(ngModel)]="searchTerm"
              (ngModelChange)="applyFilter()" />
-      <button *ngIf="searchTerm" matSuffix mat-icon-button (click)="searchTerm=''; applyFilter()">
-        <mat-icon>close</mat-icon>
-      </button>
-    </mat-form-field>
+      <p-inputicon *ngIf="searchTerm" styleClass="pi pi-times" style="cursor: pointer;" (click)="searchTerm=''; applyFilter()"></p-inputicon>
+    </p-iconfield>
 
-    <label class="badi-switch-wrapper">
-      <div class="badi-switch">
-        <input type="checkbox" [(ngModel)]="showInactive" (change)="toggleInactive()">
-        <span class="slider"></span>
-      </div>
-      <span class="switch-label">Mostrar inactivas</span>
-    </label>
+    <div class="switch-wrapper">
+      <p-toggleswitch [(ngModel)]="showInactive" (onChange)="toggleInactive()" inputId="inactiveSwitch"></p-toggleswitch>
+      <label for="inactiveSwitch" class="switch-label cursor-pointer">Mostrar inactivas</label>
+    </div>
   </div>
 
   <!-- Loading -->
@@ -84,7 +80,7 @@
             <td class="col-primary">{{ org.razonSocial }}</td>
             <td class="col-mono">{{ org.ruc }}</td>
             <td>{{ org.tipoOrganizacion.nombre || '—' }}</td>
-            <td>{{ org.ciudad }}</td>
+            <td>{{ org.ciudadCatalogo?.nombre || org.provincia?.nombre || org.ciudad || '—' }}</td>
             <td class="text-right">{{ org.totalPersonasAtendidas }}</td>
             <td class="text-center">
               <span class="estado-chip" [ngClass]="getEstadoClass(org.estado)">

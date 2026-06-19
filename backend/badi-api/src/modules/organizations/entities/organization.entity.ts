@@ -12,6 +12,8 @@ import { OrganizationType } from '../../organization-types/entities/organization
 import { Catalog } from '../../catalogs/entities/catalog.entity';
 import { AttendedGroup } from '../../attended-groups/entities/attended-group.entity';
 import { Agreement } from '../../agreements/entities/agreement.entity';
+import { Province } from '../../locations/entities/province.entity';
+import { City } from '../../locations/entities/city.entity';
 
 @Entity('organizacion')
 export class Organization {
@@ -34,8 +36,18 @@ export class Organization {
   @Column({ type: 'varchar', length: 120, nullable: true })
   email: string;
 
-  @Column({ type: 'varchar', length: 80 })
+  @Column({ type: 'varchar', length: 80, nullable: true })
   ciudad: string;
+
+  /** Provincia normalizada (nullable para compatibilidad con datos existentes) */
+  @ManyToOne(() => Province, { nullable: true, eager: true })
+  @JoinColumn({ name: 'id_provincia' })
+  provincia: Province;
+
+  /** Ciudad/Cantón normalizado (nullable para compatibilidad con datos existentes) */
+  @ManyToOne(() => City, { nullable: true, eager: true })
+  @JoinColumn({ name: 'id_ciudad_catalogo' })
+  ciudadCatalogo: City;
 
   @Column({ name: 'sector_barrio', type: 'varchar', length: 120, nullable: true })
   sectorBarrio: string;

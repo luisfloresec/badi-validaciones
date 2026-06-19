@@ -39,10 +39,18 @@ export class CreateOrganizationDto {
   @MaxLength(120, { message: 'El campo email no debe exceder 120 caracteres.' })
   email?: string;
 
+  @IsOptional()
   @IsString({ message: 'El campo ciudad debe ser una cadena de texto.' })
-  @IsNotEmpty({ message: 'El campo ciudad es obligatorio.' })
   @MaxLength(80, { message: 'El campo ciudad no debe exceder 80 caracteres.' })
-  ciudad: string;
+  ciudad?: string;
+
+  @IsOptional()
+  @IsUUID('all', { message: 'El campo provinceId debe ser un UUID válido.' })
+  provinceId?: string;
+
+  @IsOptional()
+  @IsUUID('all', { message: 'El campo cityId debe ser un UUID válido.' })
+  cityId?: string;
 
   @IsOptional()
   @IsString({ message: 'El campo sectorBarrio debe ser una cadena de texto.' })

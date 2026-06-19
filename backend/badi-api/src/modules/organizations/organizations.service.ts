@@ -18,6 +18,7 @@ import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { UpdateOrganizationDto } from './dto/update-organization.dto';
 import { ReplaceRepresentativeDto } from './dto/replace-representative.dto';
 import { CreateAttendedGroupWithLeaderDto } from './dto/create-group-with-leader.dto';
+import { LocationsService } from '../locations/locations.service';
 
 @Injectable()
 export class OrganizationsService {
@@ -41,6 +42,8 @@ export class OrganizationsService {
     private readonly leadersRepository: Repository<Leader>,
 
     private readonly dataSource: DataSource,
+
+    private readonly locationsService: LocationsService,
   ) {}
 
   /**
@@ -132,7 +135,6 @@ export class OrganizationsService {
     organization.tipoOrganizacion = tipoOrg;
     organization.ruc = createDto.ruc;
     organization.razonSocial = createDto.razonSocial;
-    organization.ciudad = createDto.ciudad;
     organization.direccion = createDto.direccion;
     organization.accionSocial = accionSocial;
     organization.segmento = segmento;
@@ -149,6 +151,25 @@ export class OrganizationsService {
     if (transporte) organization.transporte = transporte;
     if (createDto.redesSociales !== undefined) organization.redesSociales = createDto.redesSociales;
     if (createDto.observaciones !== undefined) organization.observaciones = createDto.observaciones;
+
+    // Validar y asignar Provincia y Ciudad normalizada
+    if (createDto.provinceId) {
+      const provincia = await this.locationsService.validateProvince(createDto.provinceId);
+      organization.provincia = provincia;
+
+      if (createDto.cityId) {
+        const ciudadCatalogo = await this.locationsService.validateCity(
+          createDto.cityId,
+          createDto.provinceId,
+        );
+        organization.ciudadCatalogo = ciudadCatalogo;
+        // Auto-poblar campo legacy ciudad con el nombre normalizado
+        organization.ciudad = ciudadCatalogo.nombre;
+      }
+    } else if (createDto.ciudad) {
+      // Compatibilidad: si no se envía provinceId pero sí ciudad texto
+      organization.ciudad = createDto.ciudad;
+    }
 
     return this.orgsRepository.save(organization);
   }
@@ -296,6 +317,8 @@ export class OrganizationsService {
         nombreComercial: org.nombreComercial,
         email: org.email,
         ciudad: org.ciudad,
+        provincia: org.provincia || null,
+        ciudadCatalogo: org.ciudadCatalogo || null,
         sectorBarrio: org.sectorBarrio,
         direccion: org.direccion,
         referenciaDireccion: org.referenciaDireccion,
@@ -405,7 +428,6 @@ export class OrganizationsService {
     if (updateDto.razonSocial !== undefined) org.razonSocial = updateDto.razonSocial;
     if (updateDto.nombreComercial !== undefined) org.nombreComercial = updateDto.nombreComercial;
     if (updateDto.email !== undefined) org.email = updateDto.email;
-    if (updateDto.ciudad !== undefined) org.ciudad = updateDto.ciudad;
     if (updateDto.sectorBarrio !== undefined) org.sectorBarrio = updateDto.sectorBarrio;
     if (updateDto.direccion !== undefined) org.direccion = updateDto.direccion;
     if (updateDto.referenciaDireccion !== undefined) org.referenciaDireccion = updateDto.referenciaDireccion;
@@ -413,6 +435,25 @@ export class OrganizationsService {
     if (updateDto.totalPersonasAtendidas !== undefined) org.totalPersonasAtendidas = updateDto.totalPersonasAtendidas;
     if (updateDto.redesSociales !== undefined) org.redesSociales = updateDto.redesSociales;
     if (updateDto.observaciones !== undefined) org.observaciones = updateDto.observaciones;
+
+    // Actualizar Provincia y Ciudad normalizada si se envían
+    if (updateDto.provinceId) {
+      const provincia = await this.locationsService.validateProvince(updateDto.provinceId);
+      org.provincia = provincia;
+
+      if (updateDto.cityId) {
+        const ciudadCatalogo = await this.locationsService.validateCity(
+          updateDto.cityId,
+          updateDto.provinceId,
+        );
+        org.ciudadCatalogo = ciudadCatalogo;
+        // Auto-poblar campo legacy ciudad
+        org.ciudad = ciudadCatalogo.nombre;
+      }
+    } else if (updateDto.ciudad !== undefined) {
+      // Compatibilidad con actualización directa del campo texto
+      org.ciudad = updateDto.ciudad;
+    }
 
     return this.orgsRepository.save(org);
   }

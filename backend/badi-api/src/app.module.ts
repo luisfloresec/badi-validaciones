@@ -14,6 +14,7 @@ import { AttendedGroupsModule } from './modules/attended-groups/attended-groups.
 import { LeadersModule } from './modules/leaders/leaders.module';
 import { AgreementsModule } from './modules/agreements/agreements.module';
 import { SchedulesModule } from './modules/schedules/schedules.module';
+import { LocationsModule } from './modules/locations/locations.module';
 
 @Module({
   imports: [
@@ -57,6 +58,8 @@ import { SchedulesModule } from './modules/schedules/schedules.module';
     AgreementsModule,
 
     SchedulesModule,
+
+    LocationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

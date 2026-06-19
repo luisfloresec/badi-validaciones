@@ -1,3 +1,9 @@
+@import "primeicons/primeicons.css";
+
+.p-component {
+  font-family: 'Inter', Roboto, "Helvetica Neue", sans-serif;
+}
+
 /* ──────────────────────────────────────
    Paleta BADI — Custom Properties
    ────────────────────────────────────── */
@@ -442,4 +448,136 @@ mat-error, .mat-mdc-form-field-error {
   --mdc-radio-selected-focus-icon-color: #015641 !important;
   --mdc-radio-selected-pressed-icon-color: #015641 !important;
   --mat-radio-checked-ripple-color: rgba(1, 86, 65, 0.12) !important;
+}
+
+/* ──────────────────────────────────────
+   PrimeNG — Dropdown Select Overrides
+   ────────────────────────────────────── */
+.badi-select-panel {
+  background-color: #ffffff !important;
+  border: 1px solid #dbe3ea !important;
+  border-radius: 8px !important;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.1), 0 4px 6px rgba(15, 23, 42, 0.05) !important;
+  padding: 6px 0 !important;
+  z-index: 1200 !important;
+}
+
+.badi-select-panel .p-select-list {
+  padding: 0 !important;
+}
+
+.badi-select-panel .p-select-option {
+  color: #1f2937 !important;
+  font-family: 'Inter', Roboto, "Helvetica Neue", sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  padding: 10px 16px !important;
+  margin: 0 6px !important;
+  border-radius: 6px !important;
+  transition: background-color 0.15s ease, color 0.15s ease !important;
+}
+
+.badi-select-panel .p-select-option:hover {
+  background-color: #f1faf7 !important;
+  color: #015641 !important;
+}
+
+.badi-select-panel .p-select-option.p-focus {
+  background-color: #f1faf7 !important;
+  color: #015641 !important;
+}
+
+.badi-select-panel .p-select-option.p-selected {
+  background-color: rgba(1, 86, 65, 0.08) !important;
+  color: #015641 !important;
+  font-weight: 600 !important;
+}
+
+/* ──────────────────────────────────────
+   BADI Snackbar Custom Styles
+   ────────────────────────────────────── */
+.badi-snackbar {
+  /* Hacemos transparente el container base para evitar bloques negros */
+  --mdc-snackbar-container-color: transparent !important;
+  --mat-mdc-snack-bar-button-color: #015641;
+  
+  .mdc-snackbar__surface {
+    background-color: #ffffff !important;
+    border-radius: 12px !important;
+    border: 1px solid #e5e7eb !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  .mat-mdc-snack-bar-label {
+    padding: 14px 16px !important;
+    font-family: 'Inter', Roboto, sans-serif !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    color: #111827 !important;
+  }
+
+  .mat-mdc-snack-bar-actions {
+    padding-right: 8px !important;
+  }
+
+  .mat-mdc-snack-bar-action {
+    color: var(--mat-mdc-snack-bar-button-color) !important;
+    background-color: transparent !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.02em !important;
+    border-radius: 6px !important;
+    transition: background-color 0.2s ease !important;
+
+    /* Desactivar ripples nativos de MDC que causan el bloque sólido oscuro al hacer hover */
+    .mat-mdc-button-persistent-ripple,
+    .mat-mdc-button-ripple,
+    .mat-mdc-button-touch-target {
+      display: none !important;
+    }
+
+    /* Hover manual limpio */
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.05) !important;
+    }
+
+    &:active {
+      background-color: rgba(0, 0, 0, 0.1) !important;
+    }
+  }
+}
+
+.badi-snackbar-warning {
+  .mdc-snackbar__surface {
+    background-color: #fffbeb !important;
+    border-color: #fcd34d !important;
+  }
+  .mat-mdc-snack-bar-label {
+    color: #92400e !important;
+  }
+  --mat-mdc-snack-bar-button-color: #92400e;
+}
+
+.badi-snackbar-error {
+  .mdc-snackbar__surface {
+    background-color: #fef2f2 !important;
+    border-color: #fecaca !important;
+  }
+  .mat-mdc-snack-bar-label {
+    color: #991b1b !important;
+  }
+  --mat-mdc-snack-bar-button-color: #991b1b;
+}
+
+.badi-snackbar-success {
+  .mdc-snackbar__surface {
+    background-color: #f0fdf4 !important;
+    border-color: #bbf7d0 !important;
+  }
+  .mat-mdc-snack-bar-label {
+    color: #166534 !important;
+  }
+  --mat-mdc-snack-bar-button-color: #166534;
 }

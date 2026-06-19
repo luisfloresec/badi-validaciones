@@ -8,8 +8,11 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatDialog } from '@angular/material/dialog';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
+import { InputTextModule } from 'primeng/inputtext';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { finalize } from 'rxjs/operators';
 import {
   OrganizationsService,
@@ -28,8 +31,11 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/compo
     MatFormFieldModule,
     MatInputModule,
     MatProgressSpinnerModule,
-    MatSlideToggleModule,
-    MatTooltipModule
+    MatTooltipModule,
+    IconFieldModule,
+    InputIconModule,
+    InputTextModule,
+    ToggleSwitchModule
   ],
   templateUrl: './organizations-placeholder.html',
   styleUrl: './organizations-placeholder.scss'

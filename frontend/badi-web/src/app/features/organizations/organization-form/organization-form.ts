@@ -10,11 +10,23 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { InputTextModule } from 'primeng/inputtext';
+import { SelectModule } from 'primeng/select';
+import { TextareaModule } from 'primeng/textarea';
+import { IftaLabelModule } from 'primeng/iftalabel';
+import { MessageModule } from 'primeng/message';
+import { FluidModule } from 'primeng/fluid';
 import {
   OrganizationsService,
   OrganizationTypeRef,
   CatalogRef
 } from '../organizations.service';
+import {
+  LocationService,
+  Province,
+  City
+} from '../../../core/services/location.service';
 
 // Custom validator for duplicate social networks
 function uniqueSocialNetworkValidator(control: AbstractControl): ValidationErrors | null {
@@ -40,7 +52,14 @@ function uniqueSocialNetworkValidator(control: AbstractControl): ValidationError
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatSnackBarModule,
+    InputTextModule,
+    SelectModule,
+    TextareaModule,
+    IftaLabelModule,
+    MessageModule,
+    FluidModule
   ],
   templateUrl: './organization-form.html',
   styleUrl: './organization-form.scss'
@@ -57,6 +76,11 @@ export class OrganizationFormComponent implements OnInit {
   segmentoList: CatalogRef[] = [];
   frecuenciaRetiroList: CatalogRef[] = [];
   transporteList: CatalogRef[] = [];
+
+  // Locations
+  provincias: Province[] = [];
+  ciudades: City[] = [];
+  loadingCities = false;
 
   // Tipos de Redes Sociales Permitidos
   socialNetworkTypes = [
@@ -78,16 +102,19 @@ export class OrganizationFormComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private orgService: OrganizationsService,
+    private locationService: LocationService,
     private router: Router,
     private route: ActivatedRoute,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private snackBar: MatSnackBar
   ) {
     this.orgForm = this.fb.group({
       tipoOrganizacionId: ['', Validators.required],
       ruc: ['', [Validators.required, Validators.pattern('^[0-9]{13}$')]],
       razonSocial: ['', Validators.required],
       email: ['', Validators.email],
-      ciudad: ['', Validators.required],
+      provinceId: ['', Validators.required],
+      cityId: [{ value: '', disabled: true }, Validators.required],
       sectorBarrio: [''],
       direccion: ['', Validators.required],
       referenciaDireccion: [''],
@@ -211,6 +238,7 @@ export class OrganizationFormComponent implements OnInit {
       segmento: this.orgService.getCatalogsByType('segmento'),
       frecuencia: this.orgService.getCatalogsByType('frecuencia_retiro'),
       transporte: this.orgService.getCatalogsByType('transporte'),
+      provincias: this.locationService.getProvinces(),
       orgDetail: orgReq
     })
     .pipe(finalize(() => {
@@ -224,6 +252,7 @@ export class OrganizationFormComponent implements OnInit {
         this.segmentoList = results.segmento;
         this.frecuenciaRetiroList = results.frecuencia;
         this.transporteList = results.transporte;
+        this.provincias = results.provincias;
         
         if (this.isEditMode && results.orgDetail) {
           this.patchOrganization(results.orgDetail.organizacion);
@@ -239,13 +268,48 @@ export class OrganizationFormComponent implements OnInit {
     });
   }
 
+  onProvinceChange(provinceId: string, cityIdToSelect?: string): void {
+    if (!provinceId) {
+      this.ciudades = [];
+      this.orgForm.get('cityId')?.setValue('');
+      this.orgForm.get('cityId')?.disable();
+      return;
+    }
+
+    this.loadingCities = true;
+    this.orgForm.get('cityId')?.disable();
+    
+    if (!cityIdToSelect) {
+      this.orgForm.get('cityId')?.setValue('');
+    }
+
+    this.locationService.getCitiesByProvince(provinceId).subscribe({
+      next: (cities: City[]) => {
+        this.ciudades = cities;
+        this.orgForm.get('cityId')?.enable();
+        if (cityIdToSelect) {
+          this.orgForm.get('cityId')?.setValue(cityIdToSelect);
+        }
+        this.loadingCities = false;
+        this.cdr.detectChanges();
+      },
+      error: (err: any) => {
+        console.error('Error loading cities:', err);
+        this.ciudades = [];
+        this.loadingCities = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
   patchOrganization(org: any): void {
     this.orgForm.patchValue({
       tipoOrganizacionId: org.tipoOrganizacion?.id || null,
       ruc: org.ruc,
       razonSocial: org.razonSocial,
       email: org.email,
-      ciudad: org.ciudad,
+      provinceId: org.provincia?.id || null,
+      cityId: org.ciudadCatalogo?.id || null,
       sectorBarrio: org.sectorBarrio,
       direccion: org.direccion,
       referenciaDireccion: org.referenciaDireccion,
@@ -257,6 +321,10 @@ export class OrganizationFormComponent implements OnInit {
       transporteId: org.transporte?.id || null,
       observaciones: org.observaciones
     });
+
+    if (org.provincia?.id) {
+      this.onProvinceChange(org.provincia.id, org.ciudadCatalogo?.id);
+    }
 
     if (org.redesSociales && Object.keys(org.redesSociales).length > 0) {
       Object.entries(org.redesSociales).forEach(([key, value]) => {
@@ -286,6 +354,13 @@ export class OrganizationFormComponent implements OnInit {
         control.markAllAsTouched();
       });
       this.formError = 'Revisa los campos obligatorios o con errores antes de guardar.';
+      this.snackBar.open('Revisa los campos resaltados antes de guardar.', 'Cerrar', { 
+        duration: 5000,
+        horizontalPosition: 'center',
+        verticalPosition: 'top',
+        panelClass: ['badi-snackbar', 'badi-snackbar-warning']
+      });
+      this.scrollToFirstInvalidControl();
       return;
     }
 
@@ -331,7 +406,8 @@ export class OrganizationFormComponent implements OnInit {
       razonSocial: formValue.razonSocial,
       nombreComercial: formValue.razonSocial,
       email: formValue.email || null,
-      ciudad: formValue.ciudad,
+      provinceId: formValue.provinceId,
+      cityId: formValue.cityId,
       sectorBarrio: formValue.sectorBarrio || null,
       direccion: formValue.direccion,
       referenciaDireccion: formValue.referenciaDireccion || null,
@@ -365,7 +441,7 @@ export class OrganizationFormComponent implements OnInit {
         },
         error: (err) => {
           console.error('Error saving organization:', err);
-          this.error = err?.error?.message || 'No se pudo guardar la organización. Revisa los datos ingresados.';
+          this.handleBackendError(err);
           this.cdr.detectChanges();
         }
       });
@@ -376,6 +452,61 @@ export class OrganizationFormComponent implements OnInit {
       this.router.navigate(['/organizations', this.orgId]);
     } else {
       this.router.navigate(['/organizations']);
+    }
+  }
+
+  // --- Helpers UX ---
+  private scrollToFirstInvalidControl(): void {
+    const firstInvalidControl = Object.keys(this.orgForm.controls).find(key => {
+      return this.orgForm.get(key)?.invalid;
+    });
+
+    if (firstInvalidControl) {
+      this.scrollToControl(firstInvalidControl);
+    }
+  }
+
+  private scrollToControl(controlName: string): void {
+    setTimeout(() => {
+      const element = document.getElementById(controlName) || document.querySelector(`[formControlName="${controlName}"]`) || document.querySelector(`[inputId="${controlName}"]`);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (typeof (element as any).focus === 'function') {
+          (element as HTMLElement).focus();
+        }
+      }
+    }, 100);
+  }
+
+  private handleBackendError(err: any): void {
+    const errorMessage = err?.error?.message || '';
+    const isArrayMessage = Array.isArray(errorMessage) ? errorMessage.join(', ') : errorMessage;
+    
+    if (isArrayMessage.includes('RUC') || isArrayMessage.includes('ruc')) {
+      this.setRucDuplicateError('Ya existe una organización con este RUC.');
+    } else {
+      const msg = isArrayMessage || 'No se pudo guardar la organización. Inténtalo nuevamente.';
+      this.snackBar.open(msg, 'Cerrar', { 
+        duration: 5000,
+        horizontalPosition: 'center',
+        verticalPosition: 'top',
+        panelClass: ['badi-snackbar', 'badi-snackbar-error']
+      });
+      this.error = msg;
+    }
+  }
+
+  private setRucDuplicateError(message: string): void {
+    this.snackBar.open(message, 'Cerrar', { 
+      duration: 5000,
+      horizontalPosition: 'center',
+      verticalPosition: 'top',
+      panelClass: ['badi-snackbar', 'badi-snackbar-error']
+    });
+    const rucControl = this.orgForm.get('ruc');
+    if (rucControl) {
+      rucControl.setErrors({ ...rucControl.errors, duplicated: true });
+      this.scrollToControl('ruc');
     }
   }
 }

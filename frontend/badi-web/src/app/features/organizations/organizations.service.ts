@@ -20,6 +20,18 @@ export interface OrganizationTypeRef {
   estado: string;
 }
 
+export interface ProvinceRef {
+  id: string;
+  nombre: string;
+  estado: string;
+}
+
+export interface CityRef {
+  id: string;
+  nombre: string;
+  estado: string;
+}
+
 /** Respuesta de GET /organizations */
 export interface OrganizationSummary {
   id: string;
@@ -27,7 +39,9 @@ export interface OrganizationSummary {
   razonSocial: string;
   nombreComercial: string | null;
   email: string | null;
-  ciudad: string;
+  ciudad: string; // Legacy
+  provincia?: ProvinceRef | null;
+  ciudadCatalogo?: CityRef | null;
   sectorBarrio: string | null;
   direccion: string;
   referenciaDireccion: string | null;

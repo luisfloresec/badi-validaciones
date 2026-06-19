@@ -1,15 +1,20 @@
 <div class="page-container">
   
-  <!-- Breadcrumb -->
-  <div class="breadcrumb">
-    <a (click)="goBack()">Organizaciones</a>
-    <mat-icon>chevron_right</mat-icon>
-    <span class="current-page">{{ isEditMode ? 'Editar' : 'Nueva' }} Organización</span>
-  </div>
+  <!-- Encabezado y Breadcrumb -->
+  <div class="header-group">
+    <div class="breadcrumb">
+      <a (click)="goBack()">
+        <mat-icon>business</mat-icon>
+        Organizaciones
+      </a>
+      <mat-icon class="separator">chevron_right</mat-icon>
+      <span class="current-page">{{ isEditMode ? 'Editar' : 'Nueva' }} Organización</span>
+    </div>
 
-  <div class="page-header">
-    <h1>{{ isEditMode ? 'Editar Organización' : 'Registrar Nueva Organización' }}</h1>
-    <p>{{ isEditMode ? 'Modifica los datos de la organización.' : 'Completa el formulario para ingresar una organización al sistema.' }}</p>
+    <div class="page-header">
+      <h1>{{ isEditMode ? 'Editar Organización' : 'Registrar Nueva Organización' }}</h1>
+      <p>{{ isEditMode ? 'Modifica los datos de la organización.' : 'Completa el formulario para ingresar una organización al sistema.' }}</p>
+    </div>
   </div>
 
   <!-- Loading Catalogos / Datos -->
@@ -28,7 +33,7 @@
   </div>
 
   <!-- Formulario -->
-  <form [formGroup]="orgForm" (ngSubmit)="onSubmit()" *ngIf="!loadingCatalogs">
+  <form [formGroup]="orgForm" (ngSubmit)="onSubmit()" *ngIf="!loadingCatalogs" class="p-fluid">
     
     <!-- Error al Guardar -->
     <div class="error-banner" *ngIf="error && orgForm.dirty">
@@ -44,43 +49,48 @@
       </div>
       <div class="form-grid">
         
-        <mat-form-field appearance="outline" class="col-half">
-          <mat-label>Tipo de organización</mat-label>
-          <mat-select formControlName="tipoOrganizacionId" placeholder="Seleccione el tipo de organización">
-            <mat-option *ngFor="let tipo of organizationTypes" [value]="tipo.id">
-              {{ tipo.nombre }}
-            </mat-option>
-          </mat-select>
-          <mat-error *ngIf="orgForm.get('tipoOrganizacionId')?.hasError('required')">El tipo es obligatorio</mat-error>
-        </mat-form-field>
+        <div class="field-container col-half">
+          <p-iftalabel>
+            <p-select formControlName="tipoOrganizacionId" inputId="tipoOrganizacionId" [options]="organizationTypes" optionLabel="nombre" optionValue="id" styleClass="w-full badi-select" appendTo="body" panelStyleClass="badi-select-panel"></p-select>
+            <label for="tipoOrganizacionId">Tipo de organización</label>
+          </p-iftalabel>
+          <small class="field-error" *ngIf="orgForm.get('tipoOrganizacionId')?.hasError('required') && (orgForm.get('tipoOrganizacionId')?.touched || formError)">
+            El tipo es obligatorio
+          </small>
+        </div>
 
-        <mat-form-field appearance="outline" class="col-half">
-          <mat-label>RUC</mat-label>
-          <input matInput formControlName="ruc" maxlength="13">
-          <mat-hint>Ejemplo: 1099999999001</mat-hint>
-          <mat-error *ngIf="orgForm.get('ruc')?.hasError('required')">El RUC es obligatorio</mat-error>
-          <mat-error *ngIf="orgForm.get('ruc')?.hasError('pattern')">Debe contener exactamente 13 números</mat-error>
-        </mat-form-field>
+        <div class="field-container col-half">
+          <p-iftalabel>
+            <input pInputText formControlName="ruc" id="ruc" maxlength="13" />
+            <label for="ruc">RUC</label>
+          </p-iftalabel>
+          <small class="field-error" *ngIf="orgForm.get('ruc')?.hasError('required') && (orgForm.get('ruc')?.touched || formError)">El RUC es obligatorio</small>
+          <small class="field-error" *ngIf="orgForm.get('ruc')?.hasError('pattern') && (orgForm.get('ruc')?.touched || formError)">Debe contener exactamente 13 números</small>
+          <small class="field-error" *ngIf="orgForm.get('ruc')?.hasError('duplicated')">Ya existe una organización con este RUC</small>
+        </div>
 
-        <mat-form-field appearance="outline" class="col-full">
-          <mat-label>Razón social</mat-label>
-          <input matInput formControlName="razonSocial">
-          <mat-hint>Ejemplo: Fundación de Apoyo Comunitario</mat-hint>
-          <mat-error *ngIf="orgForm.get('razonSocial')?.hasError('required')">La razón social es obligatoria</mat-error>
-        </mat-form-field>
+        <div class="field-container col-full">
+          <p-iftalabel>
+            <input pInputText formControlName="razonSocial" id="razonSocial" />
+            <label for="razonSocial">Razón social</label>
+          </p-iftalabel>
+          <small class="field-error" *ngIf="orgForm.get('razonSocial')?.hasError('required') && (orgForm.get('razonSocial')?.touched || formError)">La razón social es obligatoria</small>
+        </div>
 
-        <mat-form-field appearance="outline" class="col-half">
-          <mat-label>Email de contacto (Opcional)</mat-label>
-          <input matInput formControlName="email" type="email">
-          <mat-hint>Ejemplo: contacto@organizacion.org</mat-hint>
-          <mat-error *ngIf="orgForm.get('email')?.hasError('email')">Formato de email inválido</mat-error>
-        </mat-form-field>
+        <div class="field-container col-half">
+          <p-iftalabel>
+            <input pInputText formControlName="email" id="email" type="email" />
+            <label for="email">Email de contacto (Opcional)</label>
+          </p-iftalabel>
+          <small class="field-error" *ngIf="orgForm.get('email')?.hasError('email') && (orgForm.get('email')?.touched || formError)">Formato de email inválido</small>
+        </div>
 
-        <mat-form-field appearance="outline" class="col-full">
-          <mat-label>Observaciones generales (Opcional)</mat-label>
-          <textarea matInput formControlName="observaciones" rows="2"></textarea>
-          <mat-hint>Ejemplo: Organización con atención prioritaria mensual</mat-hint>
-        </mat-form-field>
+        <div class="field-container col-full">
+          <p-iftalabel>
+            <textarea pTextarea formControlName="observaciones" id="observaciones" rows="2"></textarea>
+            <label for="observaciones">Observaciones generales (Opcional)</label>
+          </p-iftalabel>
+        </div>
 
       </div>
     </div>
@@ -93,31 +103,48 @@
       </div>
       <div class="form-grid">
         
-        <mat-form-field appearance="outline" class="col-half">
-          <mat-label>Ciudad</mat-label>
-          <input matInput formControlName="ciudad">
-          <mat-hint>Ejemplo: Ibarra</mat-hint>
-          <mat-error *ngIf="orgForm.get('ciudad')?.hasError('required')">La ciudad es obligatoria</mat-error>
-        </mat-form-field>
+        <div class="field-container col-half">
+          <p-iftalabel>
+            <p-select formControlName="provinceId" inputId="provinceId" [options]="provincias" optionLabel="nombre" optionValue="id" (onChange)="onProvinceChange($event.value)" styleClass="w-full badi-select" appendTo="body" panelStyleClass="badi-select-panel"></p-select>
+            <label for="provinceId">Provincia</label>
+          </p-iftalabel>
+          <small class="field-error" *ngIf="orgForm.get('provinceId')?.hasError('required') && (orgForm.get('provinceId')?.touched || formError)">
+            La provincia es obligatoria
+          </small>
+        </div>
 
-        <mat-form-field appearance="outline" class="col-half">
-          <mat-label>Sector / Barrio (Opcional)</mat-label>
-          <input matInput formControlName="sectorBarrio">
-          <mat-hint>Ejemplo: Los Ceibos</mat-hint>
-        </mat-form-field>
+        <div class="field-container col-half">
+          <p-iftalabel>
+            <p-select formControlName="cityId" inputId="cityId" [options]="ciudades" optionLabel="nombre" optionValue="id" styleClass="w-full badi-select" appendTo="body" panelStyleClass="badi-select-panel" [emptyMessage]="orgForm.get('provinceId')?.value ? 'No hay ciudades' : 'Seleccione una provincia'"></p-select>
+            <label for="cityId">Ciudad / Cantón</label>
+          </p-iftalabel>
+          <mat-spinner *ngIf="loadingCities" diameter="20" style="position: absolute; right: 40px; top: 12px;"></mat-spinner>
+          <small class="field-error" *ngIf="orgForm.get('cityId')?.hasError('required') && (orgForm.get('cityId')?.touched || formError)">
+            La ciudad / cantón es obligatoria
+          </small>
+        </div>
 
-        <mat-form-field appearance="outline" class="col-full">
-          <mat-label>Dirección exacta</mat-label>
-          <input matInput formControlName="direccion">
-          <mat-hint>Ejemplo: Av. Principal y Calle Secundaria</mat-hint>
-          <mat-error *ngIf="orgForm.get('direccion')?.hasError('required')">La dirección es obligatoria</mat-error>
-        </mat-form-field>
+        <div class="field-container col-half">
+          <p-iftalabel>
+            <input pInputText formControlName="sectorBarrio" id="sectorBarrio" />
+            <label for="sectorBarrio">Sector / Barrio (Opcional)</label>
+          </p-iftalabel>
+        </div>
 
-        <mat-form-field appearance="outline" class="col-full">
-          <mat-label>Referencia de dirección (Opcional)</mat-label>
-          <input matInput formControlName="referenciaDireccion">
-          <mat-hint>Ejemplo: Frente al parque central</mat-hint>
-        </mat-form-field>
+        <div class="field-container col-full">
+          <p-iftalabel>
+            <input pInputText formControlName="direccion" id="direccion" />
+            <label for="direccion">Dirección exacta</label>
+          </p-iftalabel>
+          <small class="field-error" *ngIf="orgForm.get('direccion')?.hasError('required') && (orgForm.get('direccion')?.touched || formError)">La dirección es obligatoria</small>
+        </div>
+
+        <div class="field-container col-full">
+          <p-iftalabel>
+            <input pInputText formControlName="referenciaDireccion" id="referenciaDireccion" />
+            <label for="referenciaDireccion">Referencia de dirección (Opcional)</label>
+          </p-iftalabel>
+        </div>
 
       </div>
     </div>
@@ -130,58 +157,52 @@
       </div>
       <div class="form-grid">
         
-        <mat-form-field appearance="outline" class="col-half">
-          <mat-label>Acción social</mat-label>
-          <mat-select formControlName="accionSocialId" placeholder="Seleccione la acción social">
-            <mat-option *ngFor="let item of accionSocialList" [value]="item.id">
-              {{ item.nombre }}
-            </mat-option>
-          </mat-select>
-          <mat-error *ngIf="orgForm.get('accionSocialId')?.hasError('required')">Obligatorio</mat-error>
-        </mat-form-field>
+        <div class="field-container col-half">
+          <p-iftalabel>
+            <p-select formControlName="accionSocialId" inputId="accionSocialId" [options]="accionSocialList" optionLabel="nombre" optionValue="id" styleClass="w-full badi-select" appendTo="body" panelStyleClass="badi-select-panel"></p-select>
+            <label for="accionSocialId">Acción social</label>
+          </p-iftalabel>
+          <small class="field-error" *ngIf="orgForm.get('accionSocialId')?.hasError('required') && (orgForm.get('accionSocialId')?.touched || formError)">Obligatorio</small>
+        </div>
 
-        <mat-form-field appearance="outline" class="col-half">
-          <mat-label>Segmento</mat-label>
-          <mat-select formControlName="segmentoId" placeholder="Seleccione el segmento">
-            <mat-option *ngFor="let item of segmentoList" [value]="item.id">
-              {{ item.nombre }}
-            </mat-option>
-          </mat-select>
-          <mat-error *ngIf="orgForm.get('segmentoId')?.hasError('required')">Obligatorio</mat-error>
-        </mat-form-field>
+        <div class="field-container col-half">
+          <p-iftalabel>
+            <p-select formControlName="segmentoId" inputId="segmentoId" [options]="segmentoList" optionLabel="nombre" optionValue="id" styleClass="w-full badi-select" appendTo="body" panelStyleClass="badi-select-panel"></p-select>
+            <label for="segmentoId">Segmento</label>
+          </p-iftalabel>
+          <small class="field-error" *ngIf="orgForm.get('segmentoId')?.hasError('required') && (orgForm.get('segmentoId')?.touched || formError)">Obligatorio</small>
+        </div>
 
-        <mat-form-field appearance="outline" class="col-half">
-          <mat-label>Total personas atendidas</mat-label>
-          <input matInput formControlName="totalPersonasAtendidas" type="number" min="0">
-          <mat-hint>Ejemplo: 50</mat-hint>
-          <mat-error *ngIf="orgForm.get('totalPersonasAtendidas')?.hasError('required')">Obligatorio</mat-error>
-          <mat-error *ngIf="orgForm.get('totalPersonasAtendidas')?.hasError('min')">No puede ser negativo</mat-error>
-        </mat-form-field>
+        <div class="field-container col-half">
+          <p-iftalabel>
+            <input pInputText formControlName="totalPersonasAtendidas" id="totalPersonasAtendidas" type="number" min="0" />
+            <label for="totalPersonasAtendidas">Total personas atendidas</label>
+          </p-iftalabel>
+          <small class="field-error" *ngIf="orgForm.get('totalPersonasAtendidas')?.hasError('required') && (orgForm.get('totalPersonasAtendidas')?.touched || formError)">Obligatorio</small>
+          <small class="field-error" *ngIf="orgForm.get('totalPersonasAtendidas')?.hasError('min') && (orgForm.get('totalPersonasAtendidas')?.touched || formError)">No puede ser negativo</small>
+        </div>
 
-        <mat-form-field appearance="outline" class="col-half">
-          <mat-label>Cuota de recuperación estimada ($) (Opcional)</mat-label>
-          <input matInput formControlName="cuotaRecuperacionEstimada" type="number" min="0" step="0.01">
-          <mat-hint>Ejemplo: 15.50</mat-hint>
-          <mat-error *ngIf="orgForm.get('cuotaRecuperacionEstimada')?.hasError('min')">No puede ser negativo</mat-error>
-        </mat-form-field>
+        <div class="field-container col-half">
+          <p-iftalabel>
+            <input pInputText formControlName="cuotaRecuperacionEstimada" id="cuotaRecuperacionEstimada" type="number" min="0" step="0.01" />
+            <label for="cuotaRecuperacionEstimada">Cuota de recuperación estimada ($) (Opcional)</label>
+          </p-iftalabel>
+          <small class="field-error" *ngIf="orgForm.get('cuotaRecuperacionEstimada')?.hasError('min') && (orgForm.get('cuotaRecuperacionEstimada')?.touched || formError)">No puede ser negativo</small>
+        </div>
 
-        <mat-form-field appearance="outline" class="col-half">
-          <mat-label>Frecuencia de retiro (Opcional)</mat-label>
-          <mat-select formControlName="frecuenciaRetiroId" placeholder="Seleccione la frecuencia">
-            <mat-option *ngFor="let item of frecuenciaRetiroList" [value]="item.id">
-              {{ item.nombre }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
+        <div class="field-container col-half">
+          <p-iftalabel>
+            <p-select formControlName="frecuenciaRetiroId" inputId="frecuenciaRetiroId" [options]="frecuenciaRetiroList" optionLabel="nombre" optionValue="id" styleClass="w-full badi-select" appendTo="body" panelStyleClass="badi-select-panel"></p-select>
+            <label for="frecuenciaRetiroId">Frecuencia de retiro (Opcional)</label>
+          </p-iftalabel>
+        </div>
 
-        <mat-form-field appearance="outline" class="col-half">
-          <mat-label>Transporte (Opcional)</mat-label>
-          <mat-select formControlName="transporteId" placeholder="Seleccione el tipo de transporte">
-            <mat-option *ngFor="let item of transporteList" [value]="item.id">
-              {{ item.nombre }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
+        <div class="field-container col-half">
+          <p-iftalabel>
+            <p-select formControlName="transporteId" inputId="transporteId" [options]="transporteList" optionLabel="nombre" optionValue="id" styleClass="w-full badi-select" appendTo="body" panelStyleClass="badi-select-panel"></p-select>
+            <label for="transporteId">Transporte (Opcional)</label>
+          </p-iftalabel>
+        </div>
 
       </div>
     </div>
@@ -207,25 +228,30 @@
 
         <div class="social-row" *ngFor="let control of socialNetworks.controls; let i = index" [formGroupName]="i">
           
-          <mat-form-field appearance="outline" class="social-select">
-            <mat-label>Tipo</mat-label>
-            <mat-select formControlName="tipo" placeholder="Seleccione una red">
-              <mat-option *ngFor="let type of socialNetworkTypes" [value]="type.value">
-                {{ type.label }}
-              </mat-option>
-            </mat-select>
-            <mat-error *ngIf="control.get('tipo')?.hasError('required')">Elige un tipo</mat-error>
-          </mat-form-field>
+          <div class="field-container social-select">
+            <p-iftalabel>
+              <p-select formControlName="tipo" inputId="tipo_{{i}}" [options]="socialNetworkTypes" optionLabel="label" optionValue="value" styleClass="w-full badi-select" appendTo="body" panelStyleClass="badi-select-panel"></p-select>
+              <label for="tipo_{{i}}">Tipo</label>
+            </p-iftalabel>
+            <small class="field-error" *ngIf="control.get('tipo')?.hasError('required') && (control.get('tipo')?.touched || formError)">Elige un tipo</small>
+          </div>
 
-          <mat-form-field appearance="outline" class="social-input">
-            <mat-label>Enlace o referencia</mat-label>
-            <span matTextPrefix *ngIf="getPrefix(control.get('tipo')?.value)">
-              {{ getPrefix(control.get('tipo')?.value) }}&nbsp;
-            </span>
-            <input matInput formControlName="valor">
-            <mat-hint>Ejemplo: {{ getSocialNetworkPlaceholder(control.get('tipo')?.value || '') }}</mat-hint>
-            <mat-error *ngIf="control.get('valor')?.hasError('required')">Campo obligatorio o vacío</mat-error>
-          </mat-form-field>
+          <div class="field-container social-input">
+            <p-iftalabel>
+              <input pInputText formControlName="valor" id="valor_{{i}}" />
+              <label for="valor_{{i}}">Enlace o referencia</label>
+            </p-iftalabel>
+            <ng-container [ngSwitch]="control.get('tipo')?.value">
+              <small class="field-hint" *ngSwitchCase="'whatsapp'">Ejemplo: https://wa.me/593987654321</small>
+              <small class="field-hint" *ngSwitchCase="'pagina_web'">Ejemplo: https://organizacion.org</small>
+              <small class="field-hint" *ngSwitchCase="'otro'">Ejemplo: https://otro-enlace.com/organizacion</small>
+              <small class="field-hint" *ngSwitchDefault>
+                <ng-container *ngIf="control.get('tipo')?.value">Ejemplo: {{ getPrefix(control.get('tipo')?.value) }}organizacion</ng-container>
+                <ng-container *ngIf="!control.get('tipo')?.value">Ejemplo: seleccione la red social e ingrese el enlace completo</ng-container>
+              </small>
+            </ng-container>
+            <small class="field-error" *ngIf="control.get('valor')?.hasError('required') && (control.get('valor')?.touched || formError)">Campo obligatorio o vacío</small>
+          </div>
 
           <button mat-icon-button color="warn" type="button" class="btn-remove" (click)="removeSocialNetwork(i)">
             <mat-icon>delete</mat-icon>
