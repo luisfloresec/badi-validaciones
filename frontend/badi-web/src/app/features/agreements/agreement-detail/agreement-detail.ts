@@ -13,6 +13,7 @@ import { AgreementFormDialogComponent } from '../agreement-form-dialog/agreement
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog';
 import { ScheduleService, ScheduledDelivery } from '../../schedule/schedule.service';
 import { ScheduleFormDialogComponent } from '../../schedule/schedule-form-dialog/schedule-form-dialog';
+import { DocumentSectionComponent } from '../../documents/document-section/document-section';
 
 @Component({
   selector: 'app-agreement-detail',
@@ -23,7 +24,8 @@ import { ScheduleFormDialogComponent } from '../../schedule/schedule-form-dialog
     MatButtonModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
-    RouterModule
+    RouterModule,
+    DocumentSectionComponent
   ],
   templateUrl: './agreement-detail.html',
   styleUrls: ['../../organizations/organization-detail/organization-detail.scss', './agreement-detail.scss']

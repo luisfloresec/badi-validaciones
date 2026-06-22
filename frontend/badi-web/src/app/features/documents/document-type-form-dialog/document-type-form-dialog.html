@@ -1,0 +1,112 @@
+<h2 mat-dialog-title>
+  <mat-icon>{{ isEdit ? 'edit' : 'add_circle_outline' }}</mat-icon>
+  {{ isEdit ? 'Editar tipo documental' : 'Nuevo tipo documental' }}
+</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="form-grid">
+
+    <!-- Nombre -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Nombre del tipo</mat-label>
+      <input matInput formControlName="nombre" placeholder="Ej: Convenio firmado">
+      <mat-error *ngIf="form.get('nombre')?.hasError('required')">El nombre es obligatorio</mat-error>
+      <mat-error *ngIf="form.get('nombre')?.hasError('maxlength')">Máximo 120 caracteres</mat-error>
+    </mat-form-field>
+
+    <!-- Código -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Código interno</mat-label>
+      <input matInput formControlName="codigo" placeholder="Ej: convenio-firmado" [disabled]="isEdit">
+      <mat-hint>Solo letras minúsculas, números y guiones. No se puede cambiar después de creado.</mat-hint>
+      <mat-error *ngIf="form.get('codigo')?.hasError('required')">El código es obligatorio</mat-error>
+      <mat-error *ngIf="form.get('codigo')?.hasError('pattern')">Solo letras minúsculas, números y guiones (a-z, 0-9, -)</mat-error>
+    </mat-form-field>
+
+    <!-- Descripción -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Descripción (opcional)</mat-label>
+      <textarea matInput formControlName="descripcion" rows="2"
+                placeholder="Breve descripción del uso de este tipo"></textarea>
+    </mat-form-field>
+
+    <!-- Tamaño máximo -->
+    <mat-form-field appearance="outline">
+      <mat-label>Tamaño máximo (MB)</mat-label>
+      <input matInput type="number" formControlName="tamanoMaximoMb" min="1" max="50">
+      <mat-error *ngIf="form.get('tamanoMaximoMb')?.hasError('required')">Requerido</mat-error>
+      <mat-error *ngIf="form.get('tamanoMaximoMb')?.hasError('min')">Mínimo 1 MB</mat-error>
+      <mat-error *ngIf="form.get('tamanoMaximoMb')?.hasError('max')">Máximo 50 MB</mat-error>
+    </mat-form-field>
+
+    <!-- Extensiones -->
+    <div class="field-section full-width">
+      <label class="field-label">Extensiones permitidas</label>
+      <div class="quick-select mb-2">
+        <button type="button" mat-stroked-button class="btn-xs"
+                *ngFor="let ext of EXTENSIONES_COMUNES"
+                [class.active]="extensiones.includes(ext)"
+                (click)="toggleExtension(ext)">
+          .{{ ext }}
+        </button>
+      </div>
+      <div class="chips-container">
+        <span class="chip-tag" *ngFor="let ext of extensiones">
+          .{{ ext }}
+          <button type="button" class="chip-remove" (click)="removeExtension(ext)">
+            <mat-icon style="font-size:14px;width:14px;height:14px;">close</mat-icon>
+          </button>
+        </span>
+        <span class="empty-chips" *ngIf="extensiones.length === 0">Ninguna seleccionada</span>
+      </div>
+    </div>
+
+    <!-- Entidades Permitidas -->
+    <div class="field-section full-width">
+      <label class="field-label">Entidades donde aplica</label>
+      <div class="quick-select">
+        <button type="button" mat-stroked-button class="btn-xs"
+                *ngFor="let ent of ENTIDADES"
+                [class.active]="entidades.includes(ent)"
+                (click)="toggleEntidad(ent)">
+          {{ ent }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Toggles de reglas -->
+    <div class="toggles-section full-width">
+      <h4 class="toggles-title">Reglas de validación</h4>
+      <div class="toggle-row">
+        <mat-slide-toggle formControlName="requiereEntidadRelacionada" color="primary">
+          Requiere entidad relacionada (obligatorio al cargar)
+        </mat-slide-toggle>
+      </div>
+      <div class="toggle-row">
+        <mat-slide-toggle formControlName="permiteCargaGeneral" color="primary">
+          Permite carga general (sin entidad específica)
+        </mat-slide-toggle>
+      </div>
+      <div class="toggle-row">
+        <mat-slide-toggle formControlName="requiereFechaDocumento" color="primary">
+          Requiere fecha del documento
+        </mat-slide-toggle>
+      </div>
+      <div class="toggle-row">
+        <mat-slide-toggle formControlName="observacionesObligatorias" color="primary">
+          Observaciones obligatorias
+        </mat-slide-toggle>
+      </div>
+    </div>
+
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close [disabled]="isSaving">Cancelar</button>
+  <button mat-flat-button class="btn-primary" (click)="onSubmit()" [disabled]="isSaving">
+    <mat-spinner diameter="18" *ngIf="isSaving" class="spinner-inline"></mat-spinner>
+    <mat-icon *ngIf="!isSaving">save</mat-icon>
+    {{ isSaving ? 'Guardando...' : (isEdit ? 'Guardar cambios' : 'Crear tipo') }}
+  </button>
+</mat-dialog-actions>

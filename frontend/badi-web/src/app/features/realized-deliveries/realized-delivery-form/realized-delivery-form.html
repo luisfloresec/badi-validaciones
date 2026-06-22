@@ -1,0 +1,109 @@
+<div class="container mt-4">
+  <div class="d-flex align-items-center mb-4">
+    <button mat-icon-button (click)="router.navigate(['/schedules'])" class="me-2" matTooltip="Volver">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h1 class="mb-0">Registrar Entrega Realizada</h1>
+  </div>
+
+  <div *ngIf="isLoadingContext" class="d-flex justify-content-center p-5">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+
+  <div *ngIf="error && !isLoadingContext" class="alert alert-danger">
+    <mat-icon class="me-2 align-middle">error</mat-icon>
+    <span class="align-middle">{{ error }}</span>
+  </div>
+
+  <mat-card *ngIf="!isLoadingContext && !error && scheduledDelivery" class="mb-4">
+    <mat-card-header class="bg-light pb-3 border-bottom">
+      <mat-card-title class="fs-5">Contexto Programado</mat-card-title>
+    </mat-card-header>
+    <mat-card-content class="pt-3">
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <strong>Organización:</strong> {{ scheduledDelivery.convenio?.organizacion?.nombre || 'Desconocida' }}
+        </div>
+        <div class="col-md-6 mb-3">
+          <strong>Convenio:</strong> {{ scheduledDelivery.convenio?.codigoConvenio || 'Sin Código' }}
+        </div>
+        <div class="col-md-6 mb-3">
+          <strong>Fecha Programada:</strong> {{ scheduledDelivery.fechaProgramada | date:'dd/MM/yyyy' }}
+        </div>
+        <div class="col-md-6 mb-3" *ngIf="scheduledDelivery.descripcion">
+          <strong>Descripción:</strong> {{ scheduledDelivery.descripcion }}
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card *ngIf="!isLoadingContext && !error" class="badi-card">
+    <mat-card-header>
+      <mat-card-title>Datos de la Entrega</mat-card-title>
+    </mat-card-header>
+    <mat-card-content class="pt-3">
+      <form [formGroup]="deliveryForm" (ngSubmit)="onSubmit()" class="badi-form">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Fecha de Realización</mat-label>
+              <input matInput type="date" formControlName="fechaRealizacion" required>
+              <mat-error *ngIf="deliveryForm.get('fechaRealizacion')?.hasError('required')">
+                Fecha es requerida
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Kilos Entregados</mat-label>
+              <input matInput type="number" step="0.01" formControlName="kilosEntregados" required>
+              <span matTextSuffix>kg</span>
+              <mat-error *ngIf="deliveryForm.get('kilosEntregados')?.hasError('required')">Requerido</mat-error>
+              <mat-error *ngIf="deliveryForm.get('kilosEntregados')?.hasError('min')">Debe ser mayor a 0</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Personas Atendidas</mat-label>
+              <input matInput type="number" formControlName="personasAtendidas" required>
+              <mat-error *ngIf="deliveryForm.get('personasAtendidas')?.hasError('required')">Requerido</mat-error>
+              <mat-error *ngIf="deliveryForm.get('personasAtendidas')?.hasError('min')">Debe ser mayor o igual a 0</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Beneficiarios Directos (Opcional)</mat-label>
+              <input matInput type="number" formControlName="beneficiariosAtendidos">
+            </mat-form-field>
+          </div>
+
+          <div class="col-12 mb-3">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Detalle de Productos Entregados</mat-label>
+              <textarea matInput formControlName="detalleProductos" rows="3" required></textarea>
+              <mat-error *ngIf="deliveryForm.get('detalleProductos')?.hasError('required')">El detalle es obligatorio</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="col-12 mb-3">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Observaciones (Opcional)</mat-label>
+              <textarea matInput formControlName="observaciones" rows="2"></textarea>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-4">
+          <button mat-button type="button" [routerLink]="['/schedules']">Cancelar</button>
+          <button mat-flat-button color="primary" type="submit" [disabled]="deliveryForm.invalid || isSaving">
+            <mat-icon *ngIf="isSaving">sync</mat-icon>
+            {{ isSaving ? 'Guardando...' : 'Guardar Entrega' }}
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

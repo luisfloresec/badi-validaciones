@@ -37,7 +37,9 @@
           <button mat-stroked-button (click)="editOrganization()">
             <mat-icon>edit</mat-icon> Editar organización
           </button>
-          <button mat-flat-button class="btn-primary" disabled>
+          <button mat-flat-button class="btn-primary" 
+                  *ngIf="detail.organizacion.estado !== 'Inactiva'"
+                  (click)="docSection.openUploadDialog()">
             <mat-icon>attach_file</mat-icon> Asociar documento
           </button>
         </div>
@@ -443,42 +445,55 @@
         </ng-template>
       </div>
     </div>
+    <!-- 4.6. Entregas Realizadas -->
+    <div class="badi-card section-card">
+      <div class="badi-card-header">
+        <mat-icon class="badi-card-icon">local_shipping</mat-icon>
+        <div class="header-content">
+          <h2>Entregas Realizadas</h2>
+        </div>
+      </div>
+      <div class="badi-card-content">
+        <div class="table-wrapper" *ngIf="realizedDeliveries?.length; else noDeliveries">
+          <table class="badi-table">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Convenio</th>
+                <th>Kilos Entregados</th>
+                <th>Estado</th>
+                <th class="actions-col">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let delivery of realizedDeliveries">
+                <td>{{ delivery.fechaRealizacion | date:'dd/MM/yyyy' }}</td>
+                <td>{{ delivery.convenio?.codigoConvenio }}</td>
+                <td>{{ delivery.kilosEntregados }} kg</td>
+                <td><span class="badge bg-success">{{ delivery.estado }}</span></td>
+                <td class="actions-col">
+                  <button mat-icon-button color="primary" [routerLink]="['/realized-deliveries', delivery.id]" matTooltip="Ver detalle">
+                    <mat-icon>visibility</mat-icon>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <ng-template #noDeliveries>
+          <p class="empty-text">No hay entregas registradas todavía.</p>
+        </ng-template>
+      </div>
+    </div>
 
     <!-- 5. Documentos asociados -->
-    <div class="badi-card section-card">
-      <div class="section-header-flex">
-        <div class="badi-card-header mb-0">
-          <mat-icon class="badi-card-icon">description</mat-icon>
-          <h2>Documentos asociados</h2>
-        </div>
-        <button mat-button class="btn-primary-text" disabled>
-          <mat-icon>attach_file</mat-icon> Asociar documento
-        </button>
-      </div>
-      
-      <div class="table-wrapper mt-3" *ngIf="detail.documentos.length > 0; else noDocs">
-        <table class="badi-table">
-          <thead>
-            <tr>
-              <th>Tipo de documento</th>
-              <th>Nombre del documento</th>
-              <th>Fecha de carga</th>
-              <th class="text-center">Estado</th>
-              <th class="text-center">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- Preparado para cuando haya documentos reales -->
-          </tbody>
-        </table>
-      </div>
-      <ng-template #noDocs>
-        <div class="state-container compact">
-          <mat-icon class="state-icon">folder_off</mat-icon>
-          <p>Sin documentos registrados todavía.</p>
-        </div>
-      </ng-template>
-    </div>
+    <app-document-section
+      #docSection
+      entityType="ORGANIZACION"
+      [entityId]="detail.organizacion.id"
+      [entityName]="detail.organizacion.razonSocial"
+      [readonly]="detail.organizacion.estado === 'Inactiva'">
+    </app-document-section>
 
     <!-- 6. Acciones Administrativas -->
     <div class="badi-card section-card admin-card">

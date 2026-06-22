@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
@@ -47,7 +47,8 @@ export class ScheduleFormDialogComponent implements OnInit {
     private agreementsService: AgreementsService,
     private snackBar: MatSnackBar,
     public dialogRef: MatDialogRef<ScheduleFormDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { fecha: Date; agreementId?: string }
+    @Inject(MAT_DIALOG_DATA) public data: { fecha: Date; agreementId?: string },
+    private cdr: ChangeDetectorRef
   ) {
     this.agreementLocked = !!data.agreementId;
     this.form = this.fb.group({
@@ -77,6 +78,7 @@ export class ScheduleFormDialogComponent implements OnInit {
       error: () => {
         this.snackBar.open('Error al cargar convenios', 'Cerrar', { duration: 3000 });
         this.agreementsLoading = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -89,7 +91,7 @@ export class ScheduleFormDialogComponent implements OnInit {
   getAgreementLabel(agreement: Agreement): string {
     const code = agreement.codigoConvenio || 'S/C';
     const org = agreement.organizacion?.razonSocial || agreement.organizacion?.nombreComercial || 'Organización';
-    return `${code} — ${org}`;
+    return `${org} — Convenio ${code}`;
   }
 
   get descripcionLength(): number {
@@ -136,6 +138,7 @@ export class ScheduleFormDialogComponent implements OnInit {
           { duration: 5000 }
         );
         this.isLoading = false;
+        this.cdr.detectChanges();
       }
     });
   }

@@ -1,0 +1,143 @@
+<div class="page-container">
+
+  <!-- Breadcrumb -->
+  <div class="breadcrumb">
+    <a routerLink="/documents">Gestión Documental</a>
+    <mat-icon>chevron_right</mat-icon>
+    <span class="current-page">Tipos Documentales</span>
+  </div>
+
+  <!-- Header -->
+  <div class="page-header">
+    <div class="page-header-content">
+      <div class="page-header-left">
+        <mat-icon class="page-header-icon">category</mat-icon>
+        <div>
+          <h1>Tipos Documentales</h1>
+          <p class="page-subtitle">Administra las categorías y reglas de clasificación de documentos</p>
+        </div>
+      </div>
+      <div class="page-header-actions">
+        <button mat-stroked-button routerLink="/documents">
+          <mat-icon>arrow_back</mat-icon> Volver
+        </button>
+        <button mat-flat-button class="btn-primary" (click)="openForm()">
+          <mat-icon>add</mat-icon> Nuevo tipo
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="state-container" *ngIf="loading">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Cargando tipos documentales...</p>
+  </div>
+
+  <!-- Error -->
+  <div class="state-container state-error" *ngIf="!loading && error">
+    <mat-icon class="state-icon">cloud_off</mat-icon>
+    <p><strong>{{ error }}</strong></p>
+    <button mat-stroked-button (click)="loadTypes()">Reintentar</button>
+  </div>
+
+  <!-- Tabla -->
+  <div class="badi-card" *ngIf="!loading && !error">
+    <table mat-table [dataSource]="types" class="badi-mat-table w-100">
+
+      <!-- Nombre -->
+      <ng-container matColumnDef="nombre">
+        <th mat-header-cell *matHeaderCellDef>Nombre</th>
+        <td mat-cell *matCellDef="let t">
+          <span class="fw-600">{{ t.nombre }}</span>
+          <span class="d-block text-muted small">{{ t.descripcion || '—' }}</span>
+        </td>
+      </ng-container>
+
+      <!-- Código -->
+      <ng-container matColumnDef="codigo">
+        <th mat-header-cell *matHeaderCellDef>Código</th>
+        <td mat-cell *matCellDef="let t">
+          <code class="badge-code">{{ t.codigo }}</code>
+        </td>
+      </ng-container>
+
+      <!-- Entidades Permitidas -->
+      <ng-container matColumnDef="entidades">
+        <th mat-header-cell *matHeaderCellDef>Entidades</th>
+        <td mat-cell *matCellDef="let t">
+          <div class="chips-row">
+            <span class="chip-sm chip-info" *ngFor="let e of t.entidadesPermitidas">{{ e }}</span>
+            <span class="text-muted small" *ngIf="!t.entidadesPermitidas?.length">—</span>
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Extensiones -->
+      <ng-container matColumnDef="extensiones">
+        <th mat-header-cell *matHeaderCellDef>Extensiones</th>
+        <td mat-cell *matCellDef="let t">
+          <span class="chips-row">
+            <span class="chip-sm chip-outline" *ngFor="let ext of t.extensionesPermitidas">.{{ ext }}</span>
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Tamaño -->
+      <ng-container matColumnDef="tamano">
+        <th mat-header-cell *matHeaderCellDef>Máx.</th>
+        <td mat-cell *matCellDef="let t">{{ t.tamanoMaximoMb }} MB</td>
+      </ng-container>
+
+      <!-- Reglas -->
+      <ng-container matColumnDef="reglas">
+        <th mat-header-cell *matHeaderCellDef>Reglas</th>
+        <td mat-cell *matCellDef="let t">
+          <span class="small text-muted">{{ reglasLabel(t) }}</span>
+        </td>
+      </ng-container>
+
+      <!-- Estado -->
+      <ng-container matColumnDef="estado">
+        <th mat-header-cell *matHeaderCellDef class="text-center">Estado</th>
+        <td mat-cell *matCellDef="let t" class="text-center">
+          <span class="estado-chip" [ngClass]="getEstadoClass(t.estado)">{{ t.estado }}</span>
+        </td>
+      </ng-container>
+
+      <!-- Acciones -->
+      <ng-container matColumnDef="acciones">
+        <th mat-header-cell *matHeaderCellDef class="text-center">Acciones</th>
+        <td mat-cell *matCellDef="let t" class="text-center actions-cell">
+          <button mat-icon-button color="primary" matTooltip="Editar" (click)="openForm(t)">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button color="warn" matTooltip="Desactivar"
+                  *ngIf="t.estado === 'Activo'"
+                  (click)="deactivate(t)">
+            <mat-icon>block</mat-icon>
+          </button>
+          <button mat-icon-button color="primary" matTooltip="Reactivar"
+                  *ngIf="t.estado !== 'Activo'"
+                  (click)="activate(t)">
+            <mat-icon>restore</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+          [ngClass]="{'inactive-row': row.estado !== 'Activo'}"></tr>
+    </table>
+
+    <!-- Empty state -->
+    <div class="empty-state py-5 text-center" *ngIf="types.length === 0">
+      <mat-icon class="text-muted" style="font-size:48px;width:48px;height:48px;">category</mat-icon>
+      <p class="empty-text mt-2">No hay tipos documentales registrados.</p>
+      <button mat-flat-button class="btn-primary mt-2" (click)="openForm()">
+        <mat-icon>add</mat-icon> Crear primer tipo
+      </button>
+    </div>
+  </div>
+
+</div>

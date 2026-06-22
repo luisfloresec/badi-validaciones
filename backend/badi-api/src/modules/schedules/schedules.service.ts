@@ -91,7 +91,7 @@ export class SchedulesService {
 
     const delivery = new ScheduledDelivery();
     delivery.convenio = agreement;
-    delivery.fechaProgramada = new Date(createDto.fechaProgramada);
+    delivery.fechaProgramada = createDto.fechaProgramada as any;
     delivery.descripcion = createDto.descripcion as any;
     delivery.observaciones = createDto.observaciones as any;
 
@@ -282,7 +282,7 @@ export class SchedulesService {
       delivery.fechaOriginal = delivery.fechaProgramada;
     }
 
-    delivery.fechaProgramada = new Date(rescheduleDto.nuevaFecha);
+    delivery.fechaProgramada = rescheduleDto.nuevaFecha as any;
     delivery.motivoReprogramacion = rescheduleDto.motivoReprogramacion;
     delivery.estado = 'Reprogramado';
 

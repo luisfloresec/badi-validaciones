@@ -123,16 +123,13 @@
 
   <div class="page-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;">
 
-    <!-- Documentos Asociados (Placeholder) -->
-    <div class="badi-card section-card">
-      <div class="badi-card-header">
-        <mat-icon class="badi-card-icon">description</mat-icon>
-        <h2>Documentos asociados</h2>
-      </div>
-      <div class="badi-card-body pt-0">
-        <p class="empty-text">No existen documentos asociados a este convenio.</p>
-      </div>
-    </div>
+    <!-- Documentos Asociados -->
+    <app-document-section
+      entityType="CONVENIO"
+      [entityId]="agreement.id"
+      [entityName]="'Convenio ' + (agreement.codigoConvenio || 'S/N')"
+      [readonly]="isHistorico()">
+    </app-document-section>
 
     <!-- Cronograma de entregas -->
     <div class="badi-card section-card">

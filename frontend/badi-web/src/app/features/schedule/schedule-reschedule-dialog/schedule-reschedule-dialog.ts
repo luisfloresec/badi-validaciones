@@ -1,4 +1,4 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
@@ -39,7 +39,8 @@ export class ScheduleRescheduleDialogComponent {
     private scheduleService: ScheduleService,
     private snackBar: MatSnackBar,
     public dialogRef: MatDialogRef<ScheduleRescheduleDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { id: string; fechaActual: string }
+    @Inject(MAT_DIALOG_DATA) public data: { id: string; fechaActual: string },
+    private cdr: ChangeDetectorRef
   ) {
     this.form = this.fb.group({
       nuevaFecha: [null, Validators.required],
@@ -84,6 +85,7 @@ export class ScheduleRescheduleDialogComponent {
           { duration: 5000 }
         );
         this.isLoading = false;
+        this.cdr.detectChanges();
       }
     });
   }

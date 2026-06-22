@@ -26,8 +26,22 @@ export const routes: Routes = [
       },
       { path: 'users', loadComponent: () => import('./features/users/users-placeholder/users-placeholder').then(m => m.UsersPlaceholderComponent) },
       { path: 'roles', loadComponent: () => import('./features/roles/roles-placeholder/roles-placeholder').then(m => m.RolesPlaceholderComponent) },
-      { path: 'documents', loadComponent: () => import('./features/documents/documents-placeholder/documents-placeholder').then(m => m.DocumentsPlaceholderComponent) },
+      {
+        path: 'documents',
+        children: [
+          { path: '', loadComponent: () => import('./features/documents/documents-list/documents-list').then(m => m.DocumentsListComponent) },
+          { path: 'types', loadComponent: () => import('./features/documents/document-types-list/document-types-list').then(m => m.DocumentTypesListComponent) }
+        ]
+      },
       { path: 'schedule', loadComponent: () => import('./features/schedule/schedule-calendar/schedule-calendar').then(m => m.ScheduleCalendarComponent) },
+      {
+        path: 'realized-deliveries',
+        children: [
+          { path: '', loadComponent: () => import('./features/realized-deliveries/realized-deliveries-list/realized-deliveries-list').then(m => m.RealizedDeliveriesListComponent) },
+          { path: 'new', loadComponent: () => import('./features/realized-deliveries/realized-delivery-form/realized-delivery-form').then(m => m.RealizedDeliveryFormComponent) },
+          { path: ':id', loadComponent: () => import('./features/realized-deliveries/realized-delivery-detail/realized-delivery-detail').then(m => m.RealizedDeliveryDetailComponent) }
+        ]
+      },
       { path: 'audit', loadComponent: () => import('./features/audit/audit-placeholder/audit-placeholder').then(m => m.AuditPlaceholderComponent) },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]

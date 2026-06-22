@@ -15,6 +15,8 @@ import { LeadersModule } from './modules/leaders/leaders.module';
 import { AgreementsModule } from './modules/agreements/agreements.module';
 import { SchedulesModule } from './modules/schedules/schedules.module';
 import { LocationsModule } from './modules/locations/locations.module';
+import { DocumentsModule } from './modules/documents/documents.module';
+import { RealizedDeliveriesModule } from './modules/realized-deliveries/realized-deliveries.module';
 
 @Module({
   imports: [
@@ -60,6 +62,10 @@ import { LocationsModule } from './modules/locations/locations.module';
     SchedulesModule,
 
     LocationsModule,
+
+    DocumentsModule,
+
+    RealizedDeliveriesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

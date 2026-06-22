@@ -1,0 +1,112 @@
+<div class="container mt-4">
+  <!-- Header con botón Volver a entregas -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex align-items-center">
+      <button mat-stroked-button (click)="goBack()" class="me-3">
+        <mat-icon>arrow_back</mat-icon> Volver a entregas
+      </button>
+      <h1 class="mb-0">Detalle de Entrega Realizada</h1>
+    </div>
+  </div>
+
+  <!-- Loading state -->
+  <div *ngIf="isLoading" class="d-flex justify-content-center p-5">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+
+  <!-- Error state -->
+  <div *ngIf="!isLoading && error" class="alert alert-danger d-flex align-items-center">
+    <mat-icon class="me-2">error_outline</mat-icon>
+    <span>{{ error }}</span>
+  </div>
+
+  <!-- Contenido principal -->
+  <div *ngIf="!isLoading && !error && delivery" class="row">
+
+    <!-- Columna Principal: Datos de ejecución -->
+    <div class="col-md-7">
+      <mat-card class="badi-card mb-4">
+        <mat-card-header>
+          <mat-card-title>Información de Ejecución</mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="pt-3">
+          <div class="row">
+
+            <div class="col-sm-6 mb-3">
+              <strong class="d-block text-muted">Fecha de Realización</strong>
+              {{ delivery.fechaRealizacion | date:'dd/MM/yyyy' }}
+            </div>
+            <div class="col-sm-6 mb-3">
+              <strong class="d-block text-muted">Estado</strong>
+              <span class="badge bg-success">{{ delivery.estado }}</span>
+            </div>
+
+            <div class="col-sm-4 mb-3">
+              <strong class="d-block text-muted">Kilos Entregados</strong>
+              {{ delivery.kilosEntregados }} kg
+            </div>
+            <div class="col-sm-4 mb-3">
+              <strong class="d-block text-muted">Personas Atendidas</strong>
+              {{ delivery.personasAtendidas }}
+            </div>
+            <div class="col-sm-4 mb-3">
+              <strong class="d-block text-muted">Beneficiarios Directos</strong>
+              {{ delivery.beneficiariosAtendidos !== null && delivery.beneficiariosAtendidos !== undefined ? delivery.beneficiariosAtendidos : 'N/A' }}
+            </div>
+
+            <div class="col-12 mb-3 mt-2">
+              <strong class="d-block text-muted">Detalle de Productos</strong>
+              <p class="mb-0">{{ delivery.detalleProductos }}</p>
+            </div>
+
+            <div class="col-12 mb-3" *ngIf="delivery.observaciones">
+              <strong class="d-block text-muted">Observaciones</strong>
+              <p class="mb-0">{{ delivery.observaciones }}</p>
+            </div>
+
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Contexto planificado (entrega programada) -->
+      <mat-card class="badi-card mb-4 bg-light" *ngIf="delivery.convenio || delivery.entregaProgramada">
+        <mat-card-header>
+          <mat-card-title class="fs-6">Contexto Planificado</mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="pt-2">
+          <div class="row">
+            <div class="col-md-6 mb-2" *ngIf="delivery.convenio?.organizacion">
+              <strong>Organización:</strong>
+              {{ delivery.convenio.organizacion.razonSocial || delivery.convenio.organizacion.nombreComercial || 'Sin nombre' }}
+            </div>
+            <div class="col-md-6 mb-2" *ngIf="delivery.convenio">
+              <strong>Convenio:</strong>
+              <a [routerLink]="['/agreements', delivery.convenio.id]">
+                {{ delivery.convenio.codigoConvenio || 'S/C' }}
+              </a>
+            </div>
+            <div class="col-12" *ngIf="delivery.entregaProgramada?.fechaProgramada">
+              <strong>Fecha que estaba programada:</strong>
+              {{ delivery.entregaProgramada.fechaProgramada | date:'dd/MM/yyyy' }}
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Trazabilidad -->
+      <div class="text-muted small mt-2">
+        Registrada el {{ delivery.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}
+      </div>
+    </div>
+
+    <!-- Columna Secundaria: Evidencias fotográficas -->
+    <div class="col-md-5">
+      <app-document-section
+        entityType="ENTREGA_REALIZADA"
+        [entityId]="delivery.id"
+        [entityName]="'Entrega de ' + delivery.kilosEntregados + 'kg el ' + (delivery.fechaRealizacion | date:'dd/MM/yyyy')"
+      ></app-document-section>
+    </div>
+
+  </div>
+</div>

@@ -185,8 +185,18 @@
     </div>
 
     <div class="dialog-actions" mat-dialog-actions>
+      <!-- Acciones cuando YA existe una Entrega Realizada o el estado es Realizado -->
+      <ng-container *ngIf="realizedDeliveryId && !editMode">
+        <button mat-flat-button color="primary" class="btn-primary" (click)="viewRealizedDelivery()">
+          <mat-icon>visibility</mat-icon> Ver entrega
+        </button>
+      </ng-container>
+
       <!-- Acciones solo si es editable (Programado o Reprogramado) y no estamos en edit mode -->
       <ng-container *ngIf="isEditable && !editMode">
+        <button *ngIf="canRegisterDelivery" mat-flat-button color="primary" class="btn-primary" (click)="registerRealizedDelivery()">
+          <mat-icon>check_circle</mat-icon> Registrar entrega realizada
+        </button>
         <button mat-stroked-button class="btn-action-edit" (click)="enterEditMode()">
           <mat-icon>edit</mat-icon> Editar
         </button>

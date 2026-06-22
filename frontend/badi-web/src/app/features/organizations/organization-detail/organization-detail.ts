@@ -19,6 +19,8 @@ import { GroupLeaderFormDialogComponent } from './group-leader-form-dialog/group
 import { LeaderFormDialogComponent } from './leader-form-dialog/leader-form-dialog';
 import { AgreementFormDialogComponent } from '../../agreements/agreement-form-dialog/agreement-form-dialog';
 import { AgreementsService } from '../../agreements/agreements.service';
+import { DocumentSectionComponent } from '../../documents/document-section/document-section';
+import { RealizedDeliveriesService, RealizedDelivery } from '../../realized-deliveries/realized-deliveries.service';
 
 @Component({
   selector: 'app-organization-detail',
@@ -29,7 +31,8 @@ import { AgreementsService } from '../../agreements/agreements.service';
     MatButtonModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
-    RouterModule
+    RouterModule,
+    DocumentSectionComponent
   ],
   templateUrl: './organization-detail.html',
   styleUrl: './organization-detail.scss'
@@ -40,6 +43,7 @@ export class OrganizationDetailComponent implements OnInit {
   loading = true;
   deactivating = false;
   error: string | null = null;
+  realizedDeliveries: RealizedDelivery[] = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -48,7 +52,8 @@ export class OrganizationDetailComponent implements OnInit {
     private cdr: ChangeDetectorRef,
     private snackBar: MatSnackBar,
     private dialog: MatDialog,
-    private agreementsService: AgreementsService
+    private agreementsService: AgreementsService,
+    private realizedDeliveriesService: RealizedDeliveriesService
   ) {}
 
   ngOnInit(): void {
@@ -83,6 +88,14 @@ export class OrganizationDetailComponent implements OnInit {
           this.cdr.detectChanges();
         }
       });
+
+    this.realizedDeliveriesService.findByOrganization(id).subscribe({
+      next: (deliveries) => {
+        this.realizedDeliveries = deliveries;
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Error loading realized deliveries', err)
+    });
   }
 
   goBack(): void {

@@ -1,0 +1,55 @@
+<h2 mat-dialog-title>Reemplazar Documento</h2>
+
+<mat-dialog-content>
+  <div class="alert alert-warning mt-2 mb-4">
+    <strong>Atención:</strong> Esta acción no sobrescribe el archivo anterior. Creará una nueva versión del documento y marcará el actual como "Reemplazado".
+  </div>
+
+  <div class="current-doc-info mb-4 p-3 bg-light rounded border">
+    <p class="mb-1 fw-bold">{{ doc.titulo }}</p>
+    <p class="mb-0 text-muted small d-flex align-items-center">
+      <mat-icon class="icon-sm me-1">insert_drive_file</mat-icon>
+      Actual: {{ doc.nombreOriginal }}
+    </p>
+  </div>
+
+  <form [formGroup]="replaceForm" class="badi-form">
+    <div class="mb-3">
+      <label class="form-label fw-500">Nuevo Archivo</label>
+      <div class="file-drop-area" [class.has-file]="!!selectedFile">
+        <input type="file" class="file-input" (change)="onFileSelected($event)" 
+               [accept]="'.' + doc.tipoDocumento.extensionesPermitidas.join(',.')">
+        
+        <div class="file-message text-center" *ngIf="!selectedFile">
+          <mat-icon class="upload-icon">find_replace</mat-icon>
+          <p>Haga clic o arrastre el nuevo archivo aquí</p>
+          <small class="text-muted d-block mt-1">Solo se permiten: {{ doc.tipoDocumento.extensionesPermitidas.join(', ') }}</small>
+        </div>
+        
+        <div class="file-selected text-center" *ngIf="selectedFile">
+          <mat-icon class="text-primary fs-1 mb-2">insert_drive_file</mat-icon>
+          <p class="mb-0 fw-bold">{{ selectedFile.name }}</p>
+          <small class="text-muted">{{ (selectedFile.size / 1024 / 1024) | number:'1.0-2' }} MB</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="mb-1">
+      <mat-form-field appearance="outline" class="w-100">
+        <mat-label>Motivo del Reemplazo</mat-label>
+        <textarea matInput formControlName="motivoReemplazo" rows="3" required placeholder="Ej: Se detectó un error en la página 2 y se sube la versión corregida."></textarea>
+        <mat-error *ngIf="replaceForm.get('motivoReemplazo')?.hasError('required')">El motivo es obligatorio.</mat-error>
+        <mat-error *ngIf="replaceForm.get('motivoReemplazo')?.hasError('minlength')">Debe ingresar al menos 5 caracteres.</mat-error>
+      </mat-form-field>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close [disabled]="isUploading">Cancelar</button>
+  <button mat-flat-button color="accent" (click)="onSubmit()" [disabled]="replaceForm.invalid || !selectedFile || isUploading">
+    <mat-icon *ngIf="!isUploading">find_replace</mat-icon>
+    <mat-spinner diameter="20" *ngIf="isUploading" class="me-2"></mat-spinner>
+    {{ isUploading ? 'Reemplazando...' : 'Reemplazar Versión' }}
+  </button>
+</mat-dialog-actions>
