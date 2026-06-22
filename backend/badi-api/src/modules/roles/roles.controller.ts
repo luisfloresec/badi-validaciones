@@ -6,19 +6,27 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  NotImplementedException,
 } from '@nestjs/common';
 import { RolesService } from './roles.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
+import { Roles } from '../auth/decorators/roles.decorator';
 
+@Roles('Administrador')
 @Controller('roles')
 export class RolesController {
   constructor(private readonly rolesService: RolesService) {}
 
-  /** POST /roles — Crear un nuevo rol */
   @Post()
   create(@Body() createRoleDto: CreateRoleDto) {
     return this.rolesService.create(createRoleDto);
+  }
+
+  /** GET /roles/all — Listar roles (activos e inactivos) */
+  @Get('all')
+  findAllAll() {
+    return this.rolesService.findAllAll();
   }
 
   /** GET /roles — Listar roles activos */
@@ -46,5 +54,11 @@ export class RolesController {
   @Patch(':id/deactivate')
   deactivate(@Param('id', ParseUUIDPipe) id: string) {
     return this.rolesService.deactivate(id);
+  }
+
+  /** PATCH /roles/:id/activate — Reactivar rol (estado -> Activo) */
+  @Patch(':id/activate')
+  activate(@Param('id', ParseUUIDPipe) id: string) {
+    return this.rolesService.activate(id);
   }
 }

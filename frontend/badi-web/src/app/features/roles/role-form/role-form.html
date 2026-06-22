@@ -1,0 +1,40 @@
+<h2 mat-dialog-title>{{ mode === 'create' ? 'Nuevo Rol' : 'Editar Rol' }}</h2>
+<mat-dialog-content>
+  <form [formGroup]="form" class="badi-form">
+    
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Nombre</mat-label>
+        <input matInput formControlName="nombre" placeholder="Ej. Administrador">
+        <mat-error *ngIf="form.get('nombre')?.hasError('required')">El nombre es obligatorio</mat-error>
+      </mat-form-field>
+    </div>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Descripción</mat-label>
+        <textarea matInput formControlName="descripcion" placeholder="Ej. Acceso completo al sistema" rows="3"></textarea>
+      </mat-form-field>
+    </div>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Perfil de Acceso</mat-label>
+        <mat-select formControlName="perfilAcceso">
+          <mat-option value="Administrador">Administrador</mat-option>
+          <mat-option value="Gestión Social">Gestión Social</mat-option>
+          <mat-option value="Auditor">Auditor</mat-option>
+        </mat-select>
+        <mat-hint>El perfil de acceso define qué permisos tendrá este rol dentro del sistema.</mat-hint>
+        <mat-error *ngIf="form.get('perfilAcceso')?.hasError('required')">El perfil es obligatorio</mat-error>
+      </mat-form-field>
+    </div>
+
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close [disabled]="loading">Cancelar</button>
+  <button mat-flat-button class="btn-primary" (click)="onSubmit()" [disabled]="form.invalid || loading">
+    {{ mode === 'create' ? 'Crear rol' : 'Guardar cambios' }}
+  </button>
+</mat-dialog-actions>

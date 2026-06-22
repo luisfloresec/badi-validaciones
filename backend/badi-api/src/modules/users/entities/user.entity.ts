@@ -4,6 +4,7 @@ import {
   Entity,
   OneToMany,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { UserRole } from '../../user-roles/entities/user-role.entity';
 
@@ -33,8 +34,14 @@ export class User {
   @Column({ type: 'varchar', length: 20, default: 'Activo' })
   estado: string;
 
+  @Column({ name: 'requiere_cambio_password', type: 'boolean', default: false })
+  requiereCambioPassword: boolean;
+
   @CreateDateColumn({ name: 'fecha_creacion', type: 'timestamp' })
   fechaCreacion: Date;
+
+  @UpdateDateColumn({ name: 'fecha_actualizacion', type: 'timestamp', nullable: true })
+  fechaActualizacion: Date;
 
   @OneToMany(() => UserRole, (userRole) => userRole.usuario)
   usuarioRoles: UserRole[];

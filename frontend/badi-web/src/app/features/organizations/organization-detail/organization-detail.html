@@ -33,7 +33,7 @@
         <button mat-button class="btn-back" (click)="goBack()">
           <mat-icon>arrow_back</mat-icon> Volver a Organizaciones
         </button>
-        <div class="action-buttons">
+        <div class="action-buttons" *ngIf="authService.canEdit()">
           <button mat-stroked-button (click)="editOrganization()">
             <mat-icon>edit</mat-icon> Editar organización
           </button>
@@ -165,7 +165,7 @@
           <mat-icon class="badi-card-icon">person</mat-icon>
           <h2>Representantes</h2>
         </div>
-        <div class="action-buttons-inline" *ngIf="detail.organizacion.estado !== 'Inactiva'">
+        <div class="action-buttons-inline" *ngIf="detail.organizacion.estado !== 'Inactiva' && authService.canEdit()">
           <ng-container *ngIf="activeRepresentative">
             <button mat-button class="btn-secondary-text" (click)="editRepresentative()">
               <mat-icon>edit</mat-icon> Editar datos
@@ -224,7 +224,7 @@
           <mat-icon class="badi-card-icon">groups</mat-icon>
           <h2>Grupos Atendidos y Dirigentes</h2>
         </div>
-        <button *ngIf="detail.organizacion.estado !== 'Inactiva'" mat-button class="btn-primary-text" 
+        <button *ngIf="detail.organizacion.estado !== 'Inactiva' && authService.canEdit()" mat-button class="btn-primary-text" 
                 (click)="openGroupForm('create')">
           <mat-icon>add</mat-icon> Agregar grupo atendido
         </button>
@@ -245,7 +245,7 @@
                 <mat-icon>people</mat-icon>
                 <span>{{ item.grupo.numeroPersonas }}</span>
               </div>
-              <div class="action-buttons-mini" *ngIf="item.grupo.estado !== 'Inactivo' && detail.organizacion.estado !== 'Inactiva'">
+              <div class="action-buttons-mini" *ngIf="item.grupo.estado !== 'Inactivo' && detail.organizacion.estado !== 'Inactiva' && authService.canEdit()">
                 <button mat-icon-button color="primary" matTooltip="Editar grupo" (click)="openGroupForm('edit', item.grupo)">
                   <mat-icon>edit</mat-icon>
                 </button>
@@ -283,7 +283,7 @@
           <div class="leader-subcard">
             <div class="leader-subcard-header">
               <h4>Dirigente Activo</h4>
-              <button *ngIf="!getActiveLeader(item) && item.grupo.estado !== 'Inactivo' && detail.organizacion.estado !== 'Inactiva'" mat-button class="btn-primary-text btn-small" (click)="openLeaderForm(item.grupo.id, 'create')">
+              <button *ngIf="!getActiveLeader(item) && item.grupo.estado !== 'Inactivo' && detail.organizacion.estado !== 'Inactiva' && authService.canEdit()" mat-button class="btn-primary-text btn-small" (click)="openLeaderForm(item.grupo.id, 'create')">
                 <mat-icon>add</mat-icon> Agregar dirigente
               </button>
             </div>
@@ -317,7 +317,7 @@
                 </div>
               </div>
               
-              <div class="leader-btn-actions" *ngIf="item.grupo.estado !== 'Inactivo' && detail.organizacion.estado !== 'Inactiva'">
+              <div class="leader-btn-actions" *ngIf="item.grupo.estado !== 'Inactivo' && detail.organizacion.estado !== 'Inactiva' && authService.canEdit()">
                 <button mat-stroked-button class="btn-xs outline" (click)="openLeaderForm(item.grupo.id, 'edit', activeLeader)">
                   <mat-icon>edit</mat-icon> Editar datos
                 </button>
@@ -374,7 +374,7 @@
           <mat-icon class="badi-card-icon">handshake</mat-icon>
           <h2>Convenios</h2>
         </div>
-        <button mat-button class="btn-primary-text" (click)="openAgreementForm()" [disabled]="detail.organizacion.estado === 'Inactiva'">
+        <button mat-button class="btn-primary-text" (click)="openAgreementForm()" *ngIf="authService.canEdit()" [disabled]="detail.organizacion.estado === 'Inactiva'">
           <mat-icon>add</mat-icon> Registrar convenio
         </button>
       </div>
@@ -428,7 +428,7 @@
                   <button mat-icon-button color="warn"
                           matTooltip="Anular convenio"
                           (click)="deactivateAgreement(conv.id)"
-                          *ngIf="(conv.estado === 'Registrado' || conv.estado === 'Activo') && detail.organizacion.estado !== 'Inactiva'">
+                          *ngIf="(conv.estado === 'Registrado' || conv.estado === 'Activo') && detail.organizacion.estado !== 'Inactiva' && authService.canEdit()">
                     <mat-icon>block</mat-icon>
                   </button>
                   <!-- Histórico: indicador para finalizados/anulados -->
@@ -492,11 +492,11 @@
       entityType="ORGANIZACION"
       [entityId]="detail.organizacion.id"
       [entityName]="detail.organizacion.razonSocial"
-      [readonly]="detail.organizacion.estado === 'Inactiva'">
+      [readonly]="detail.organizacion.estado === 'Inactiva' || !authService.canEdit()">
     </app-document-section>
 
     <!-- 6. Acciones Administrativas -->
-    <div class="badi-card section-card admin-card">
+    <div class="badi-card section-card admin-card" *ngIf="authService.canEdit()">
       <div class="badi-card-header mb-0">
         <mat-icon class="badi-card-icon color-warn">admin_panel_settings</mat-icon>
         <h2>Acciones administrativas</h2>

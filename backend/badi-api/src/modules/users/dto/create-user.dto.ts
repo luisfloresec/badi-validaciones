@@ -5,6 +5,8 @@ import {
   IsString,
   MaxLength,
   MinLength,
+  IsArray,
+  IsUUID,
 } from 'class-validator';
 import { IsCedulaEcuatoriana } from '../../../common/validators/cedula-ecuatoriana.validator';
 
@@ -32,6 +34,15 @@ export class CreateUserDto {
     message: 'El campo teléfono no debe exceder 20 caracteres.',
   })
   telefono?: string;
+
+  @IsOptional()
+  @IsString()
+  estado?: string;
+
+  @IsArray()
+  @IsUUID('4', { each: true })
+  @IsOptional()
+  roleIds?: string[];
 
   @IsEmail({}, { message: 'El campo email debe tener un formato válido.' })
   @IsNotEmpty({ message: 'El campo email es obligatorio.' })

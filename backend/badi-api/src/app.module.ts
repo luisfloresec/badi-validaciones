@@ -1,8 +1,12 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AuthModule } from './modules/auth/auth.module';
+import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
+import { RolesGuard } from './modules/auth/guards/roles.guard';
 import { RolesModule } from './modules/roles/roles.module';
 import { UsersModule } from './modules/users/users.module';
 import { UserRolesModule } from './modules/user-roles/user-roles.module';
@@ -17,11 +21,19 @@ import { SchedulesModule } from './modules/schedules/schedules.module';
 import { LocationsModule } from './modules/locations/locations.module';
 import { DocumentsModule } from './modules/documents/documents.module';
 import { RealizedDeliveriesModule } from './modules/realized-deliveries/realized-deliveries.module';
+import { AuditModule } from './modules/audit/audit.module';
+import { SeedModule } from './modules/seed/seed.module';
+import { ClsModule } from 'nestjs-cls';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+    }),
+
+    ClsModule.forRoot({
+      global: true,
+      middleware: { mount: true },
     }),
 
     TypeOrmModule.forRootAsync({
@@ -38,6 +50,8 @@ import { RealizedDeliveriesModule } from './modules/realized-deliveries/realized
         synchronize: true,
       }),
     }),
+
+    AuthModule,
 
     RolesModule,
 
@@ -66,8 +80,18 @@ import { RealizedDeliveriesModule } from './modules/realized-deliveries/realized
     DocumentsModule,
 
     RealizedDeliveriesModule,
+
+    AuditModule,
+
+    SeedModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    // Guards globales: primero autenticación, luego autorización por rol
+    { provide: APP_GUARD, useClass: JwtAuthGuard },
+    { provide: APP_GUARD, useClass: RolesGuard },
+  ],
 })
 export class AppModule {}
+

@@ -22,11 +22,13 @@ import { CreateDocumentDto } from './dto/create-document.dto';
 import { UpdateDocumentDto } from './dto/update-document.dto';
 import { ReplaceDocumentDto } from './dto/replace-document.dto';
 import { DocumentFiltersDto } from './dto/document-filters.dto';
+import { Roles } from '../auth/decorators/roles.decorator';
 
 @Controller('documents')
 export class DocumentsController {
   constructor(private readonly documentsService: DocumentsService) {}
 
+  @Roles('Administrador', 'Gestión Social')
   @Post('upload')
   @HttpCode(HttpStatus.CREATED)
   @UseInterceptors(FileInterceptor('file'))
@@ -95,6 +97,7 @@ export class DocumentsController {
     return this.documentsService.findOne(id);
   }
 
+  @Roles('Administrador', 'Gestión Social')
   @Patch(':id')
   async update(
     @Param('id', ParseUUIDPipe) id: string,
@@ -103,6 +106,7 @@ export class DocumentsController {
     return this.documentsService.update(id, updateDocumentDto);
   }
 
+  @Roles('Administrador', 'Gestión Social')
   @Patch(':id/replace')
   @UseInterceptors(FileInterceptor('file'))
   async replace(
@@ -121,11 +125,13 @@ export class DocumentsController {
     return this.documentsService.replace(id, dto, file);
   }
 
+  @Roles('Administrador', 'Gestión Social')
   @Patch(':id/deactivate')
   async deactivate(@Param('id', ParseUUIDPipe) id: string) {
     return this.documentsService.deactivate(id);
   }
 
+  @Roles('Administrador', 'Gestión Social')
   @Patch(':id/annul')
   async annul(@Param('id', ParseUUIDPipe) id: string) {
     return this.documentsService.annul(id);

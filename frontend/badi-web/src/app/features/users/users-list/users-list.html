@@ -1,0 +1,77 @@
+<div class="page-container">
+
+  <!-- Encabezado -->
+  <div class="page-header-row">
+    <div class="page-header">
+      <h1>Usuarios</h1>
+      <p>Gestión de cuentas de acceso al sistema</p>
+    </div>
+    <button mat-flat-button class="btn-primary" (click)="createUser()">
+      <mat-icon>person_add</mat-icon>
+      Nuevo usuario
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div class="state-container" *ngIf="loading">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Cargando usuarios...</p>
+  </div>
+
+  <!-- Error -->
+  <div class="state-container state-error" *ngIf="!loading && error">
+    <mat-icon class="state-icon">cloud_off</mat-icon>
+    <p><strong>{{ error }}</strong></p>
+    <button mat-stroked-button (click)="loadUsers()">
+      <mat-icon>refresh</mat-icon> Reintentar
+    </button>
+  </div>
+
+  <!-- Empty -->
+  <div class="state-container" *ngIf="!loading && !error && users.length === 0">
+    <mat-icon class="state-icon">group_off</mat-icon>
+    <p><strong>No hay usuarios registrados.</strong></p>
+  </div>
+
+  <!-- Tabla -->
+  <div class="badi-card table-card" *ngIf="!loading && !error && users.length > 0">
+    <div class="table-wrapper">
+      <table class="org-table">
+        <thead>
+          <tr>
+            <th>Nombres y Apellidos</th>
+            <th>Email</th>
+            <th>Roles</th>
+            <th class="text-center">Estado</th>
+            <th class="text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of users">
+            <td class="col-primary">{{ user.nombres }} {{ user.apellidos }}</td>
+            <td>{{ user.email }}</td>
+            <td>
+              <span class="chip-info" *ngFor="let rol of user.roles">{{ rol.nombre }}</span>
+            </td>
+            <td class="text-center">
+              <span class="estado-chip" [ngClass]="getEstadoClass(user.estado)">
+                {{ user.estado }}
+              </span>
+            </td>
+            <td class="text-center col-actions">
+              <button mat-icon-button color="primary" matTooltip="Editar usuario" (click)="editUser(user)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button color="warn" matTooltip="Desactivar usuario" 
+                      *ngIf="user.estado === 'Activo'"
+                      (click)="deactivateUser(user)">
+                <mat-icon>block</mat-icon>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>

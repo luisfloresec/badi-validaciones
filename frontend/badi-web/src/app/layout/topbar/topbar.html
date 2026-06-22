@@ -18,9 +18,21 @@
       <mat-icon>notifications_none</mat-icon>
     </button>
     <div class="topbar-divider"></div>
-    <div class="user-profile">
-      <span class="user-name">Daniela Sánchez</span>
-      <div class="avatar">DS</div>
+    <div class="user-profile" [matMenuTriggerFor]="userMenu">
+      <span class="user-name">{{ authService.getFullName() }}</span>
+      <div class="avatar relative overflow-hidden">
+        <span>{{ authService.getInitials() }}</span>
+      </div>
     </div>
+    <mat-menu #userMenu="matMenu">
+      <button mat-menu-item routerLink="/profile">
+        <mat-icon>person</mat-icon>
+        <span>Mi perfil</span>
+      </button>
+      <button mat-menu-item (click)="authService.logout()">
+        <mat-icon>exit_to_app</mat-icon>
+        <span>Cerrar sesión</span>
+      </button>
+    </mat-menu>
   </div>
 </mat-toolbar>

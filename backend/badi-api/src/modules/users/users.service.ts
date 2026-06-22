@@ -2,30 +2,34 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User } from './entities/user.entity';
+import { Role } from '../roles/entities/role.entity';
+import { UserRole } from '../user-roles/entities/user-role.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+
+export type UserResponse = Omit<User, 'passwordHash' | 'usuarioRoles'> & { roles: { id: string; nombre: string; perfilAcceso: string }[] };
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    @InjectRepository(Role)
+    private readonly rolesRepository: Repository<Role>,
+    @InjectRepository(UserRole)
+    private readonly userRolesRepository: Repository<UserRole>,
   ) {}
 
   /**
-   * Crea un nuevo usuario.
-   * Hashea la contraseña con bcrypt antes de guardar.
-   * Valida unicidad de email y cédula.
+   * Crea un nuevo usuario y le asigna roles si se envían en roleIds.
    */
-  async create(
-    createUserDto: CreateUserDto,
-  ): Promise<Omit<User, 'passwordHash'>> {
-    // Verificar email único
+  async create(createUserDto: CreateUserDto): Promise<UserResponse> {
     const existsByEmail = await this.usersRepository.findOne({
       where: { email: createUserDto.email },
     });
@@ -33,7 +37,6 @@ export class UsersService {
       throw new ConflictException('Ya existe un usuario con este email.');
     }
 
-    // Verificar cédula única si se proporciona
     if (createUserDto.cedula) {
       const existsByCedula = await this.usersRepository.findOne({
         where: { cedula: createUserDto.cedula },
@@ -43,8 +46,7 @@ export class UsersService {
       }
     }
 
-    // Separar password del resto y hashear
-    const { password, ...userData } = createUserDto;
+    const { password, roleIds, ...userData } = createUserDto;
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
@@ -52,49 +54,49 @@ export class UsersService {
       ...userData,
       passwordHash,
     });
+    const savedUser = await this.usersRepository.save(user);
 
-    const saved = await this.usersRepository.save(user);
-    return this.excludePasswordHash(saved);
+    if (roleIds && roleIds.length > 0) {
+      await this.assignRoles(savedUser, roleIds);
+    }
+
+    return this.findOne(savedUser.id);
   }
 
   /**
-   * Lista todos los usuarios con estado Activo.
-   * Nunca devuelve passwordHash.
+   * Lista todos los usuarios con estado Activo, incluyendo sus roles mapeados.
    */
-  async findAll(): Promise<Omit<User, 'passwordHash'>[]> {
+  async findAll(): Promise<UserResponse[]> {
     const users = await this.usersRepository.find({
       where: { estado: 'Activo' },
+      relations: { usuarioRoles: { rol: true } },
     });
-    return users.map((user) => this.excludePasswordHash(user));
+    return users.map((user) => this.mapUserResponse(user));
   }
 
   /**
    * Busca un usuario por su UUID.
-   * Lanza NotFoundException si no existe.
    */
-  async findOne(id: string): Promise<Omit<User, 'passwordHash'>> {
-    const user = await this.usersRepository.findOne({ where: { id } });
+  async findOne(id: string): Promise<UserResponse> {
+    const user = await this.usersRepository.findOne({
+      where: { id },
+      relations: { usuarioRoles: { rol: true } },
+    });
     if (!user) {
       throw new NotFoundException(`Usuario con id ${id} no encontrado.`);
     }
-    return this.excludePasswordHash(user);
+    return this.mapUserResponse(user);
   }
 
   /**
-   * Actualiza campos permitidos de un usuario.
-   * Si se envía password, se re-hashea.
-   * No permite modificar estado (usar deactivate para eso).
+   * Actualiza campos de un usuario y sobrescribe sus roles si se envían roleIds.
    */
-  async update(
-    id: string,
-    updateUserDto: UpdateUserDto,
-  ): Promise<Omit<User, 'passwordHash'>> {
+  async update(id: string, updateUserDto: UpdateUserDto): Promise<UserResponse> {
     const user = await this.usersRepository.findOne({ where: { id } });
     if (!user) {
       throw new NotFoundException(`Usuario con id ${id} no encontrado.`);
     }
 
-    // Verificar email único si está cambiando
     if (updateUserDto.email && updateUserDto.email !== user.email) {
       const existsByEmail = await this.usersRepository.findOne({
         where: { email: updateUserDto.email },
@@ -104,7 +106,6 @@ export class UsersService {
       }
     }
 
-    // Verificar cédula única si está cambiando
     if (updateUserDto.cedula && updateUserDto.cedula !== user.cedula) {
       const existsByCedula = await this.usersRepository.findOne({
         where: { cedula: updateUserDto.cedula },
@@ -114,26 +115,31 @@ export class UsersService {
       }
     }
 
-    // Separar password del DTO para manejo especial
-    const { password, ...restDto } = updateUserDto;
+    const { password, roleIds, ...restDto } = updateUserDto;
     Object.assign(user, restDto);
 
-    // Si se envía password, re-hashear
     if (password) {
       const salt = await bcrypt.genSalt(10);
       user.passwordHash = await bcrypt.hash(password, salt);
     }
 
-    const saved = await this.usersRepository.save(user);
-    return this.excludePasswordHash(saved);
+    const savedUser = await this.usersRepository.save(user);
+
+    if (roleIds !== undefined) {
+      await this.assignRoles(savedUser, roleIds);
+    }
+
+    return this.findOne(savedUser.id);
   }
 
   /**
-   * Desactiva un usuario cambiando su estado a Inactivo.
-   * No elimina físicamente el registro.
+   * Desactiva un usuario. No se permite si es el último Administrador Activo.
    */
-  async deactivate(id: string): Promise<Omit<User, 'passwordHash'>> {
-    const user = await this.usersRepository.findOne({ where: { id } });
+  async deactivate(id: string): Promise<UserResponse> {
+    const user = await this.usersRepository.findOne({
+      where: { id },
+      relations: { usuarioRoles: { rol: true } },
+    });
     if (!user) {
       throw new NotFoundException(`Usuario con id ${id} no encontrado.`);
     }
@@ -142,18 +148,56 @@ export class UsersService {
       throw new ConflictException('El usuario ya se encuentra inactivo.');
     }
 
+    // Regla de seguridad: Si tiene rol de administrador, bloquear desactivación si no hay mas administradores
+    const hasAdminRole = user.usuarioRoles.some((ur) => ur.rol.nombre === 'Administrador');
+    if (hasAdminRole) {
+      throw new ConflictException('Por seguridad, no se puede desactivar a un usuario Administrador desde esta vía.');
+    }
+
     user.estado = 'Inactivo';
     const saved = await this.usersRepository.save(user);
-    return this.excludePasswordHash(saved);
+    return this.mapUserResponse(saved);
   }
 
   /**
-   * Excluye passwordHash de la respuesta.
-   * Garantiza que nunca se devuelve la contraseña en JSON.
+   * Asigna roles a un usuario borrando los anteriores.
    */
-  private excludePasswordHash(user: User): Omit<User, 'passwordHash'> {
+  private async assignRoles(user: User, roleIds: string[]) {
+    // Borrar roles actuales
+    await this.userRolesRepository.delete({ usuario: { id: user.id } });
+
+    if (roleIds.length === 0) return;
+
+    // Buscar nuevos roles
+    const roles = await this.rolesRepository.find({
+      where: { id: In(roleIds) },
+    });
+
+    if (roles.length !== roleIds.length) {
+      throw new BadRequestException('Algunos de los roles proporcionados no existen.');
+    }
+
+    // Crear nuevas relaciones
+    const userRolesToSave = roles.map((rol) => {
+      return this.userRolesRepository.create({
+        usuario: user,
+        rol: rol,
+      });
+    });
+
+    await this.userRolesRepository.save(userRolesToSave);
+  }
+
+  /**
+   * Transforma el arreglo de usuarioRoles a un arreglo plano de roles, y excluye el hash de contraseña.
+   */
+  private mapUserResponse(user: User): UserResponse {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { passwordHash, ...result } = user;
-    return result;
+    const { passwordHash, usuarioRoles, ...result } = user;
+    const rolesMap = (usuarioRoles || [])
+      .filter((ur) => ur.rol)
+      .map((ur) => ({ id: ur.rol.id, nombre: ur.rol.nombre, perfilAcceso: ur.rol.perfilAcceso }));
+
+    return { ...result, roles: rolesMap };
   }
 }

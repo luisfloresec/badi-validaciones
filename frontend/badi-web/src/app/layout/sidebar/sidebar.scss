@@ -200,5 +200,16 @@
         overflow: hidden;
       }
     }
+
+    .logout-btn {
+      color: rgba(255, 255, 255, 0.7);
+      flex-shrink: 0;
+      transition: color 0.2s ease, background-color 0.2s ease;
+
+      &:hover {
+        color: #ff4d4f;
+        background-color: rgba(255, 77, 79, 0.1);
+      }
+    }
   }
 }

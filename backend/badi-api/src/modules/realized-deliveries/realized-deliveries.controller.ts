@@ -1,11 +1,13 @@
 import { Controller, Get, Post, Body, Param, Patch } from '@nestjs/common';
 import { RealizedDeliveriesService } from './realized-deliveries.service';
 import { CreateRealizedDeliveryDto } from './dto/create-realized-delivery.dto';
+import { Roles } from '../auth/decorators/roles.decorator';
 
 @Controller('realized-deliveries')
 export class RealizedDeliveriesController {
   constructor(private readonly realizedDeliveriesService: RealizedDeliveriesService) {}
 
+  @Roles('Administrador', 'Gestión Social')
   @Post()
   create(@Body() createRealizedDeliveryDto: CreateRealizedDeliveryDto) {
     return this.realizedDeliveriesService.create(createRealizedDeliveryDto);
@@ -36,6 +38,7 @@ export class RealizedDeliveriesController {
     return this.realizedDeliveriesService.findBySchedule(scheduleId);
   }
 
+  @Roles('Administrador', 'Gestión Social')
   @Patch(':id/annul')
   annul(@Param('id') id: string) {
     // Pendiente de implementación debido a la complejidad de restaurar estados en cascada

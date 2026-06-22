@@ -21,6 +21,7 @@ import { AgreementFormDialogComponent } from '../../agreements/agreement-form-di
 import { AgreementsService } from '../../agreements/agreements.service';
 import { DocumentSectionComponent } from '../../documents/document-section/document-section';
 import { RealizedDeliveriesService, RealizedDelivery } from '../../realized-deliveries/realized-deliveries.service';
+import { AuthService } from '../../../core/auth/auth.service';
 
 @Component({
   selector: 'app-organization-detail',
@@ -53,7 +54,8 @@ export class OrganizationDetailComponent implements OnInit {
     private snackBar: MatSnackBar,
     private dialog: MatDialog,
     private agreementsService: AgreementsService,
-    private realizedDeliveriesService: RealizedDeliveriesService
+    private realizedDeliveriesService: RealizedDeliveriesService,
+    public authService: AuthService
   ) {}
 
   ngOnInit(): void {

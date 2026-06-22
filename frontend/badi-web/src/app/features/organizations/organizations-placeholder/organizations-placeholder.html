@@ -6,7 +6,7 @@
       <h1>Organizaciones</h1>
       <p>Gestión de organizaciones sociales registradas</p>
     </div>
-    <button mat-flat-button class="btn-primary" (click)="createOrganization()">
+    <button mat-flat-button class="btn-primary" (click)="createOrganization()" *ngIf="authService.canEdit()">
       <mat-icon>add</mat-icon>
       Nueva organización
     </button>
@@ -93,18 +93,18 @@
               </button>
               
               <ng-container *ngIf="org.estado !== 'Inactiva'">
-                <button mat-icon-button matTooltip="Editar organización" (click)="editOrganization(org.id)">
+                <button mat-icon-button matTooltip="Editar organización" (click)="editOrganization(org.id)" *ngIf="authService.canEdit()">
                   <mat-icon>edit</mat-icon>
                 </button>
                 <button mat-icon-button color="warn" matTooltip="Desactivar organización" 
-                        (click)="deactivateOrganization(org.id, org.razonSocial)">
+                        (click)="deactivateOrganization(org.id, org.razonSocial)" *ngIf="authService.canEdit()">
                   <mat-icon>block</mat-icon>
                 </button>
               </ng-container>
 
               <ng-container *ngIf="org.estado === 'Inactiva'">
                 <button mat-icon-button color="primary" matTooltip="Reactivar organización" 
-                        (click)="activateOrganization(org.id, org.razonSocial)">
+                        (click)="activateOrganization(org.id, org.razonSocial)" *ngIf="authService.hasRole('Administrador')">
                   <mat-icon>restore</mat-icon>
                 </button>
               </ng-container>

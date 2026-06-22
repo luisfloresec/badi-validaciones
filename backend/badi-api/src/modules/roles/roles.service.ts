@@ -46,6 +46,13 @@ export class RolesService {
   }
 
   /**
+   * Lista todos los roles (Activos e Inactivos).
+   */
+  async findAllAll(): Promise<Role[]> {
+    return this.rolesRepository.find();
+  }
+
+  /**
    * Busca un rol por su UUID.
    * Lanza NotFoundException si no existe.
    */
@@ -68,8 +75,13 @@ export class RolesService {
       throw new NotFoundException(`Rol con id ${id} no encontrado.`);
     }
 
+    const officialRoles = ['Administrador', 'Gestión Social', 'Auditor'];
+
     // Verificar nombre único si está cambiando
     if (updateRoleDto.nombre && updateRoleDto.nombre !== role.nombre) {
+      if (officialRoles.includes(role.nombre)) {
+        throw new ConflictException('No se puede cambiar el nombre de un rol oficial.');
+      }
       const existsByName = await this.rolesRepository.findOne({
         where: { nombre: updateRoleDto.nombre },
       });
@@ -92,11 +104,32 @@ export class RolesService {
       throw new NotFoundException(`Rol con id ${id} no encontrado.`);
     }
 
+    if (role.nombre === 'Administrador') {
+      throw new ConflictException('No se puede desactivar el rol Administrador.');
+    }
+
     if (role.estado === 'Inactivo') {
       throw new ConflictException('El rol ya se encuentra inactivo.');
     }
 
     role.estado = 'Inactivo';
+    return this.rolesRepository.save(role);
+  }
+
+  /**
+   * Reactiva un rol cambiando su estado a Activo.
+   */
+  async activate(id: string): Promise<Role> {
+    const role = await this.rolesRepository.findOne({ where: { id } });
+    if (!role) {
+      throw new NotFoundException(`Rol con id ${id} no encontrado.`);
+    }
+
+    if (role.estado === 'Activo') {
+      throw new ConflictException('El rol ya se encuentra activo.');
+    }
+
+    role.estado = 'Activo';
     return this.rolesRepository.save(role);
   }
 }

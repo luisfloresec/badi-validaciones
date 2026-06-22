@@ -11,6 +11,7 @@ import {
 import { OrganizationsService } from './organizations.service';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { UpdateOrganizationDto } from './dto/update-organization.dto';
+import { Roles } from '../auth/decorators/roles.decorator';
 
 import { ReplaceRepresentativeDto } from './dto/replace-representative.dto';
 import { CreateAttendedGroupWithLeaderDto } from './dto/create-group-with-leader.dto';
@@ -20,6 +21,7 @@ export class OrganizationsController {
   constructor(private readonly organizationsService: OrganizationsService) {}
 
   /** POST /organizations — Crear una nueva organización */
+  @Roles('Administrador', 'Gestión Social')
   @Post()
   create(@Body() createDto: CreateOrganizationDto) {
     return this.organizationsService.create(createDto);
@@ -50,6 +52,7 @@ export class OrganizationsController {
   }
 
   /** PATCH /organizations/:id — Actualizar datos de organización */
+  @Roles('Administrador', 'Gestión Social')
   @Patch(':id')
   update(
     @Param('id', ParseUUIDPipe) id: string,
@@ -59,18 +62,21 @@ export class OrganizationsController {
   }
 
   /** PATCH /organizations/:id/deactivate — Desactivar organización */
+  @Roles('Administrador', 'Gestión Social')
   @Patch(':id/deactivate')
   deactivate(@Param('id', ParseUUIDPipe) id: string) {
     return this.organizationsService.deactivate(id);
   }
 
   /** PATCH /organizations/:id/activate — Reactivar organización */
+  @Roles('Administrador')
   @Patch(':id/activate')
   activate(@Param('id', ParseUUIDPipe) id: string) {
     return this.organizationsService.activate(id);
   }
 
   /** POST /organizations/:id/representatives/replace — Reemplazar representante activo */
+  @Roles('Administrador', 'Gestión Social')
   @Post(':id/representatives/replace')
   replaceRepresentative(
     @Param('id', ParseUUIDPipe) id: string,
@@ -80,6 +86,7 @@ export class OrganizationsController {
   }
 
   /** POST /organizations/:id/attended-groups/with-leader — Crear grupo con dirigente */
+  @Roles('Administrador', 'Gestión Social')
   @Post(':id/attended-groups/with-leader')
   createAttendedGroupWithLeader(
     @Param('id', ParseUUIDPipe) id: string,

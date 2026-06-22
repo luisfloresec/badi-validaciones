@@ -1,10 +1,17 @@
 import { Routes } from '@angular/router';
 import { AppShellComponent } from './layout/app-shell/app-shell';
+import { authGuard } from './core/auth/auth.guard';
+import { roleGuard } from './core/auth/role.guard';
 
 export const routes: Routes = [
   {
+    path: 'login',
+    loadComponent: () => import('./features/auth/login/login').then(m => m.LoginComponent)
+  },
+  {
     path: '',
     component: AppShellComponent,
+    canActivate: [authGuard],
     children: [
       { path: 'dashboard', loadComponent: () => import('./features/dashboard/dashboard-placeholder/dashboard-placeholder').then(m => m.DashboardPlaceholderComponent) },
       {
@@ -24,8 +31,18 @@ export const routes: Routes = [
           { path: ':id', loadComponent: () => import('./features/agreements/agreement-detail/agreement-detail').then(m => m.AgreementDetailComponent) }
         ]
       },
-      { path: 'users', loadComponent: () => import('./features/users/users-placeholder/users-placeholder').then(m => m.UsersPlaceholderComponent) },
-      { path: 'roles', loadComponent: () => import('./features/roles/roles-placeholder/roles-placeholder').then(m => m.RolesPlaceholderComponent) },
+      { 
+        path: 'users', 
+        loadComponent: () => import('./features/users/users-list/users-list').then(m => m.UsersListComponent),
+        canActivate: [roleGuard],
+        data: { roles: ['Administrador'] }
+      },
+      { 
+        path: 'roles', 
+        loadComponent: () => import('./features/roles/roles-list/roles-list').then(m => m.RolesListComponent),
+        canActivate: [roleGuard],
+        data: { roles: ['Administrador'] }
+      },
       {
         path: 'documents',
         children: [
@@ -42,8 +59,15 @@ export const routes: Routes = [
           { path: ':id', loadComponent: () => import('./features/realized-deliveries/realized-delivery-detail/realized-delivery-detail').then(m => m.RealizedDeliveryDetailComponent) }
         ]
       },
-      { path: 'audit', loadComponent: () => import('./features/audit/audit-placeholder/audit-placeholder').then(m => m.AuditPlaceholderComponent) },
+      { 
+        path: 'audit', 
+        loadComponent: () => import('./features/audit/audit-list/audit-list').then(m => m.AuditListComponent),
+        canActivate: [roleGuard],
+        data: { roles: ['Administrador', 'Auditor'] }
+      },
+      { path: 'profile', loadComponent: () => import('./features/profile/profile-detail/profile-detail').then(m => m.ProfileDetailComponent) },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
-  }
+  },
+  { path: '**', redirectTo: 'login' }
 ];

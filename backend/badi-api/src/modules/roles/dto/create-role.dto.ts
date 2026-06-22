@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, MaxLength, IsIn } from 'class-validator';
 
 export class CreateRoleDto {
   @IsString({ message: 'El campo nombre debe ser una cadena de texto.' })
@@ -9,4 +9,10 @@ export class CreateRoleDto {
   @IsOptional()
   @IsString({ message: 'El campo descripcion debe ser una cadena de texto.' })
   descripcion?: string;
+
+  @IsNotEmpty({ message: 'El campo perfilAcceso es obligatorio.' })
+  @IsIn(['Administrador', 'Gestión Social', 'Auditor'], {
+    message: 'El perfil de acceso debe ser Administrador, Gestión Social o Auditor.',
+  })
+  perfilAcceso: string;
 }

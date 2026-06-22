@@ -9,7 +9,9 @@ import {
 } from '@nestjs/common';
 import { UserRolesService } from './user-roles.service';
 import { AssignRoleDto } from './dto/assign-role.dto';
+import { Roles } from '../auth/decorators/roles.decorator';
 
+@Roles('Administrador')
 @Controller('user-roles')
 export class UserRolesController {
   constructor(private readonly userRolesService: UserRolesService) {}

@@ -1,4 +1,5 @@
 import { PartialType } from '@nestjs/mapped-types';
+import { IsOptional, IsIn } from 'class-validator';
 import { CreateRoleDto } from './create-role.dto';
 
 /**
@@ -6,4 +7,8 @@ import { CreateRoleDto } from './create-role.dto';
  * El campo 'estado' no se incluye porque no forma parte de CreateRoleDto;
  * para desactivar un rol se usa el endpoint dedicado PATCH /roles/:id/deactivate.
  */
-export class UpdateRoleDto extends PartialType(CreateRoleDto) {}
+export class UpdateRoleDto extends PartialType(CreateRoleDto) {
+  @IsOptional()
+  @IsIn(['Activo', 'Inactivo'], { message: 'El estado debe ser Activo o Inactivo.' })
+  estado?: string;
+}

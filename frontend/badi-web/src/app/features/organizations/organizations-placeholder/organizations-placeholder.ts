@@ -19,6 +19,7 @@ import {
   OrganizationSummary
 } from '../organizations.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/components/confirm-dialog/confirm-dialog';
+import { AuthService } from '../../../core/auth/auth.service';
 
 @Component({
   selector: 'app-organizations-placeholder',
@@ -54,7 +55,8 @@ export class OrganizationsPlaceholderComponent implements OnInit {
     private orgService: OrganizationsService,
     private router: Router,
     private cdr: ChangeDetectorRef,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    public authService: AuthService
   ) {}
 
   ngOnInit(): void {

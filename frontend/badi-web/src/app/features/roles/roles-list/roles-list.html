@@ -1,0 +1,81 @@
+<div class="page-container">
+
+  <!-- Encabezado -->
+  <div class="page-header-row">
+    <div class="page-header">
+      <h1>Roles y Permisos</h1>
+      <p>Gestión de roles y niveles de acceso del sistema</p>
+    </div>
+    <div class="header-actions">
+      <button mat-flat-button color="primary" (click)="createRole()">
+        <mat-icon>add</mat-icon> Nuevo rol
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="state-container" *ngIf="loading">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Cargando roles...</p>
+  </div>
+
+  <!-- Error -->
+  <div class="state-container state-error" *ngIf="!loading && error">
+    <mat-icon class="state-icon">cloud_off</mat-icon>
+    <p><strong>{{ error }}</strong></p>
+    <button mat-stroked-button (click)="loadRoles()">
+      <mat-icon>refresh</mat-icon> Reintentar
+    </button>
+  </div>
+
+  <!-- Empty -->
+  <div class="state-container" *ngIf="!loading && !error && roles.length === 0">
+    <mat-icon class="state-icon">security</mat-icon>
+    <p><strong>No hay roles registrados.</strong></p>
+  </div>
+
+  <!-- Tabla -->
+  <div class="badi-card table-card" *ngIf="!loading && !error && roles.length > 0">
+    <div class="table-wrapper">
+      <table class="org-table">
+        <thead>
+          <tr>
+            <th>Nombre del Rol</th>
+            <th>Descripción</th>
+            <th>Perfil de Acceso</th>
+            <th class="text-center">Estado</th>
+            <th class="text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let role of roles">
+            <td class="col-primary">{{ role.nombre }}</td>
+            <td class="text-secondary">{{ role.descripcion || 'Sin descripción' }}</td>
+            <td class="text-secondary">{{ role.perfilAcceso }}</td>
+            <td class="text-center">
+              <span class="estado-chip" [ngClass]="getEstadoClass(role.estado)">
+                {{ role.estado }}
+              </span>
+            </td>
+            <td class="text-center col-actions">
+              <button mat-icon-button color="primary" matTooltip="Editar rol" (click)="editRole(role)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button color="warn" matTooltip="Desactivar rol" 
+                      *ngIf="role.estado === 'Activo'"
+                      (click)="deactivateRole(role)">
+                <mat-icon>block</mat-icon>
+              </button>
+              <button mat-icon-button class="text-success" matTooltip="Reactivar rol" 
+                      *ngIf="role.estado === 'Inactivo'"
+                      (click)="activateRole(role)">
+                <mat-icon>check_circle</mat-icon>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
