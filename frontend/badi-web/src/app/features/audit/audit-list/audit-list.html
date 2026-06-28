@@ -1,24 +1,48 @@
 <div class="page-container">
 
-  <!-- Encabezado -->
-  <div class="page-header-row">
-    <div class="page-header">
-      <h1>Auditoría</h1>
-      <p>Registro de actividades y cambios en el sistema</p>
+  <!-- Breadcrumb y Encabezado -->
+  <div class="header-group">
+    <div class="breadcrumb">
+      <a routerLink="/dashboard">
+        <mat-icon>home</mat-icon>
+        Inicio
+      </a>
+      <mat-icon class="separator">chevron_right</mat-icon>
+      <span class="current-page">Auditoría y Trazabilidad</span>
     </div>
-    <button mat-stroked-button (click)="loadLogs()" [disabled]="loading">
-      <mat-icon>refresh</mat-icon>
-      Actualizar
-    </button>
+
+    <div class="page-header-row">
+      <div class="page-header">
+        <h1>Auditoría y Trazabilidad</h1>
+        <p>Registro de actividades, eventos de seguridad y control de cambios en el sistema BADI</p>
+      </div>
+      <button mat-stroked-button class="btn-refresh" (click)="loadLogs()" [disabled]="loading">
+        <mat-icon>refresh</mat-icon>
+        Actualizar
+      </button>
+    </div>
   </div>
 
-  <!-- Loading -->
+  <!-- Barra de búsqueda fiel a las guías -->
+  <div class="search-bar" *ngIf="!loading && !error && logs.length > 0">
+    <p-iconfield class="search-field">
+      <p-inputicon styleClass="pi pi-search"></p-inputicon>
+      <input pInputText type="text"
+             class="w-full"
+             placeholder="Buscar por usuario, acción, entidad, resumen..."
+             [(ngModel)]="filters.search"
+             (ngModelChange)="applyFilters()" />
+      <p-inputicon *ngIf="filters.search" styleClass="pi pi-times" style="cursor: pointer;" (click)="filters.search=''; applyFilters()"></p-inputicon>
+    </p-iconfield>
+  </div>
+
+  <!-- Loading State -->
   <div class="state-container" *ngIf="loading">
     <mat-spinner diameter="40"></mat-spinner>
     <p>Cargando registros de auditoría...</p>
   </div>
 
-  <!-- Error -->
+  <!-- Error State -->
   <div class="state-container state-error" *ngIf="!loading && error">
     <mat-icon class="state-icon">cloud_off</mat-icon>
     <p><strong>{{ error }}</strong></p>
@@ -27,67 +51,56 @@
     </button>
   </div>
 
-  <!-- Empty -->
+  <!-- Empty State -->
   <div class="state-container" *ngIf="!loading && !error && logs.length === 0">
-    <mat-icon class="state-icon">history_edu</mat-icon>
-    <p><strong>No hay registros de auditoría.</strong></p>
-    <p class="state-hint">Las acciones realizadas en el sistema aparecerán aquí.</p>
+    <mat-icon class="state-icon">plagiarism</mat-icon>
+    <p><strong>No se encontraron registros de auditoría que coincidan con la búsqueda.</strong></p>
   </div>
 
-  <!-- Tabla -->
+  <!-- Tabla de Auditoría -->
   <div class="badi-card table-card" *ngIf="!loading && !error && logs.length > 0">
     <div class="table-wrapper">
       <table class="org-table">
         <thead>
           <tr>
-            <th>Fecha y Hora</th>
-            <th>Usuario</th>
-            <th>Acción</th>
-            <th>Módulo</th>
-            <th>Entidad</th>
-            <th>IP</th>
-            <th class="text-center">Detalle</th>
+            <th class="text-left">Fecha y Hora</th>
+            <th class="text-left">Usuario</th>
+            <th class="text-left">Acción</th>
+            <th class="text-left">Módulo / Entidad</th>
+            <th class="text-left">Registro Afectado</th>
+            <th class="text-left">Resumen</th>
+            <th class="text-left">IP</th>
+            <th class="text-center">Acciones</th>
           </tr>
         </thead>
         <tbody>
-          <ng-container *ngFor="let log of logs">
-            <tr>
-              <td class="col-mono">{{ log.fechaHora | date:'dd/MM/yyyy HH:mm:ss' }}</td>
-              <td>{{ log.user ? log.user.nombres + ' ' + log.user.apellidos : 'Sistema / Anónimo' }}</td>
-              <td>
-                <span class="estado-chip" [ngClass]="getBadgeClass(log.accion)">{{ log.accion }}</span>
-              </td>
-              <td>{{ log.modulo }}</td>
-              <td>{{ log.entidad }} <span *ngIf="log.entidadId" class="text-muted">({{ log.entidadId.substring(0,8) }}...)</span></td>
-              <td class="col-mono">{{ log.userIp || '—' }}</td>
-              <td class="text-center col-actions">
-                <button mat-icon-button (click)="toggleDetails(log)" matTooltip="Ver detalle JSON">
-                  <mat-icon>{{ log.showDetails ? 'expand_less' : 'expand_more' }}</mat-icon>
-                </button>
-              </td>
-            </tr>
-            <tr *ngIf="log.showDetails" class="detail-row">
-              <td colspan="7">
-                <div class="diff-container">
-                  <div class="diff-col" *ngIf="log.datosAnteriores">
-                    <strong>Datos Anteriores:</strong>
-                    <pre>{{ formatData(log.datosAnteriores) }}</pre>
-                  </div>
-                  <div class="diff-col" *ngIf="log.datosNuevos">
-                    <strong>Datos Nuevos:</strong>
-                    <pre>{{ formatData(log.datosNuevos) }}</pre>
-                  </div>
-                </div>
-              </td>
-            </tr>
-          </ng-container>
+          <tr *ngFor="let log of logs">
+            <td class="col-mono">{{ log.fechaHora | date:'dd/MM/yyyy HH:mm:ss' }}</td>
+            <td class="col-primary">{{ log.user ? log.user.nombres + ' ' + log.user.apellidos : 'Sistema / Anónimo' }}</td>
+            <td>
+              <span class="estado-chip" [ngClass]="getBadgeClass(log.accion)">{{ log.accion }}</span>
+            </td>
+            <td><strong>{{ log.modulo }}</strong> <span class="text-muted">/ {{ log.entidad }}</span></td>
+            <td class="col-mono text-ellipsis" [matTooltip]="log.entidadId || 'N/A'">{{ (log.entidadId && log.entidadId.length > 12) ? (log.entidadId.substring(0,12) + '...') : (log.entidadId || 'N/A') }}</td>
+            <td>{{ getResumen(log) }}</td>
+            <td class="col-mono">{{ log.userIp || '—' }}</td>
+            <td class="text-center col-actions">
+              <button mat-icon-button matTooltip="Ver detalle de auditoría" (click)="viewDetail(log)">
+                <mat-icon>visibility</mat-icon>
+              </button>
+            </td>
+          </tr>
         </tbody>
       </table>
     </div>
+
+    <!-- Paginador Angular Material -->
     <mat-paginator [length]="total"
                    [pageSize]="pageSize"
+                   [pageIndex]="pageIndex"
                    [pageSizeOptions]="[20, 50, 100]"
-                   (page)="onPageChange($event)">
+                   (page)="onPageChange($event)"
+                   showFirstLastButtons>
     </mat-paginator>
   </div>
 

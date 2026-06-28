@@ -1,4 +1,6 @@
-import { Component, Input, OnInit, ChangeDetectorRef } from '@angular/core';
+import {
+  Component, Input, OnInit, OnDestroy, ChangeDetectorRef
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -6,9 +8,13 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { finalize } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 import { DocumentsService, Document } from '../documents.service';
 import { DocumentUploadDialogComponent } from '../document-upload-dialog/document-upload-dialog';
+import { AuthService } from '../../../core/auth/auth.service';
 
 @Component({
   selector: 'app-document-section',
@@ -24,7 +30,7 @@ import { DocumentUploadDialogComponent } from '../document-upload-dialog/documen
   templateUrl: './document-section.html',
   styleUrls: ['./document-section.scss']
 })
-export class DocumentSectionComponent implements OnInit {
+export class DocumentSectionComponent implements OnInit, OnDestroy {
   @Input() entityType!: 'ORGANIZACION' | 'CONVENIO' | 'ENTREGA_REALIZADA';
   @Input() entityId!: string;
   @Input() entityName?: string;
@@ -35,16 +41,25 @@ export class DocumentSectionComponent implements OnInit {
   loading = true;
   error: string | null = null;
 
+  /** Map of docId → SafeUrl blob for image previews */
+  blobUrls = new Map<string, SafeUrl>();
+  loadingImages = new Map<string, boolean>();
+  /** Track blob URLs to revoke on destroy */
+  private rawBlobUrls: string[] = [];
+  private subs: Subscription[] = [];
+
   constructor(
     private documentsService: DocumentsService,
     private dialog: MatDialog,
     private snackBar: MatSnackBar,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private sanitizer: DomSanitizer,
+    private http: HttpClient,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
     if (!this.entityType || !this.entityId) {
-      console.error('DocumentSectionComponent requires entityType and entityId');
       this.error = 'Faltan parámetros requeridos';
       this.loading = false;
       return;
@@ -52,16 +67,21 @@ export class DocumentSectionComponent implements OnInit {
     this.loadDocuments();
   }
 
+  ngOnDestroy(): void {
+    // Revoke all created blob URLs to avoid memory leaks
+    this.rawBlobUrls.forEach(url => URL.revokeObjectURL(url));
+    this.subs.forEach(s => s.unsubscribe());
+  }
+
   loadDocuments() {
     this.loading = true;
     this.error = null;
-    
-    // We reuse getAll but passing the entity context
-    this.documentsService.getAll({
+
+    const sub = this.documentsService.getAll({
       entidadRelacionada: this.entityType,
       idEntidadRelacionada: this.entityId,
-      estado: 'Activo', // We probably only want active documents in the section view
-      limit: 50 // Fetch all relevant for the entity up to a limit
+      estado: 'Activo',
+      limit: 50
     })
     .pipe(finalize(() => {
       this.loading = false;
@@ -70,12 +90,53 @@ export class DocumentSectionComponent implements OnInit {
     .subscribe({
       next: (res) => {
         this.documents = res.data;
+        // Pre-load image previews for image documents
+        res.data.forEach(doc => {
+          if (this.isImage(doc)) {
+            this.loadImageBlob(doc);
+          }
+        });
       },
-      error: (err) => {
+      error: () => {
         this.error = 'Error al cargar documentos asociados';
         this.snackBar.open('Error al cargar documentos asociados', 'Cerrar', { duration: 3000 });
       }
     });
+    this.subs.push(sub);
+  }
+
+  /** Fetch image bytes with auth token and create a local blob URL */
+  private loadImageBlob(doc: Document): void {
+    const token = this.authService.getToken();
+    if (!token) return;
+
+    this.loadingImages.set(doc.id, true);
+    const url = this.documentsService.getViewUrl(doc.id);
+    const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
+
+    const sub = this.http.get(url, { headers, responseType: 'blob' }).subscribe({
+      next: (blob) => {
+        const objectUrl = URL.createObjectURL(blob);
+        this.rawBlobUrls.push(objectUrl);
+        this.blobUrls.set(doc.id, this.sanitizer.bypassSecurityTrustUrl(objectUrl));
+        this.loadingImages.set(doc.id, false);
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.loadingImages.set(doc.id, false);
+        this.cdr.detectChanges();
+      }
+    });
+    this.subs.push(sub);
+  }
+
+  /** Get the safe blob URL for an image doc */
+  getImageBlobUrl(doc: Document): SafeUrl | null {
+    return this.blobUrls.get(doc.id) ?? null;
+  }
+
+  isImageLoading(doc: Document): boolean {
+    return this.loadingImages.get(doc.id) ?? false;
   }
 
   openUploadDialog() {
@@ -99,12 +160,48 @@ export class DocumentSectionComponent implements OnInit {
     });
   }
 
+  /** Download with auth token via blob trick */
   download(doc: Document) {
-    window.open(this.documentsService.getDownloadUrl(doc.id), '_blank');
+    const token = this.authService.getToken();
+    if (!token) return;
+
+    const url = this.documentsService.getDownloadUrl(doc.id);
+    const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
+
+    this.http.get(url, { headers, responseType: 'blob' }).subscribe({
+      next: (blob) => {
+        const objectUrl = URL.createObjectURL(blob);
+        const a = globalThis.document.createElement('a');
+        a.href = objectUrl;
+        a.download = doc.nombreOriginal || `${doc.titulo}.${doc.extension}`;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(objectUrl), 5000);
+      },
+      error: () => {
+        this.snackBar.open('Error al descargar el archivo', 'Cerrar', { duration: 3000 });
+      }
+    });
   }
 
+  /** Open/view document in a new tab with auth token */
   viewInline(doc: Document) {
-    window.open(this.documentsService.getViewUrl(doc.id), '_blank');
+    const token = this.authService.getToken();
+    if (!token) return;
+
+    const url = this.documentsService.getViewUrl(doc.id);
+    const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
+
+    this.http.get(url, { headers, responseType: 'blob' }).subscribe({
+      next: (blob) => {
+        const objectUrl = URL.createObjectURL(blob);
+        window.open(objectUrl, '_blank');
+        // Revoke after delay
+        setTimeout(() => URL.revokeObjectURL(objectUrl), 30000);
+      },
+      error: () => {
+        this.snackBar.open('No se pudo abrir el documento', 'Cerrar', { duration: 3000 });
+      }
+    });
   }
 
   formatBytes(bytes: number) {
@@ -121,7 +218,30 @@ export class DocumentSectionComponent implements OnInit {
     return imgExts.includes(ext);
   }
 
-  getImageUrl(doc: Document): string {
-    return this.documentsService.getViewUrl(doc.id);
+  getDocIcon(doc: Document): string {
+    const ext = doc.extension?.toLowerCase().replace('.', '') || '';
+    if (['pdf'].includes(ext)) return 'picture_as_pdf';
+    if (['doc', 'docx'].includes(ext)) return 'description';
+    if (['xls', 'xlsx'].includes(ext)) return 'table_chart';
+    if (['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(ext)) return 'image';
+    return 'insert_drive_file';
+  }
+
+  getDocIconColor(doc: Document): string {
+    const ext = doc.extension?.toLowerCase().replace('.', '') || '';
+    if (['pdf'].includes(ext)) return '#ef4444';
+    if (['doc', 'docx'].includes(ext)) return '#3b82f6';
+    if (['xls', 'xlsx'].includes(ext)) return '#22c55e';
+    if (['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(ext)) return '#8b5cf6';
+    return '#6b7280';
+  }
+
+  getDocBgColor(doc: Document): string {
+    const ext = doc.extension?.toLowerCase().replace('.', '') || '';
+    if (['pdf'].includes(ext)) return '#fef2f2';
+    if (['doc', 'docx'].includes(ext)) return '#eff6ff';
+    if (['xls', 'xlsx'].includes(ext)) return '#f0fdf4';
+    if (['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(ext)) return '#f5f3ff';
+    return '#f3f4f6';
   }
 }

@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
@@ -9,6 +9,15 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { InputTextModule } from 'primeng/inputtext';
+import { SelectModule } from 'primeng/select';
+import { TextareaModule } from 'primeng/textarea';
+import { IftaLabelModule } from 'primeng/iftalabel';
+import { FluidModule } from 'primeng/fluid';
+import { ButtonModule } from 'primeng/button';
+import { DatePickerModule } from 'primeng/datepicker';
 import { DocumentsService } from '../documents.service';
 import { DocumentTypesService, DocumentType } from '../document-types.service';
 
@@ -24,7 +33,16 @@ import { DocumentTypesService, DocumentType } from '../document-types.service';
     MatInputModule,
     MatSelectModule,
     MatIconModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    InputTextModule,
+    SelectModule,
+    TextareaModule,
+    IftaLabelModule,
+    FluidModule,
+    ButtonModule,
+    DatePickerModule
   ],
   templateUrl: './document-upload-dialog.html',
   styleUrls: ['./document-upload-dialog.scss']
@@ -39,6 +57,7 @@ export class DocumentUploadDialogComponent implements OnInit {
   // Context passed when opened from an Organization or Agreement
   prefilledEntity: string | null = null;
   prefilledEntityId: string | null = null;
+  entityName: string | null = null;
 
   // origenCarga determined from dialog data: ORGANIZACION, CONVENIO, or GESTION_DOCUMENTAL
   get origenCarga(): string {
@@ -54,10 +73,12 @@ export class DocumentUploadDialogComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) public data: any,
     private documentsService: DocumentsService,
     private documentTypesService: DocumentTypesService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private cdr: ChangeDetectorRef
   ) {
     if (data?.entidadRelacionada) this.prefilledEntity = data.entidadRelacionada;
     if (data?.idEntidadRelacionada) this.prefilledEntityId = data.idEntidadRelacionada;
+    if (data?.entityName) this.entityName = data.entityName;
 
     this.uploadForm = this.fb.group({
       tipoDocumentoId: ['', Validators.required],
@@ -87,11 +108,13 @@ export class DocumentUploadDialogComponent implements OnInit {
         // By default, if opened from central repo, we set it to GENERAL
         this.uploadForm.patchValue({ entidadRelacionada: 'GENERAL' });
       }
+      this.cdr.detectChanges();
     });
 
     this.uploadForm.get('tipoDocumentoId')?.valueChanges.subscribe(id => {
       this.selectedType = this.documentTypes.find(t => t.id === id) || null;
       this.updateValidatorsBasedOnType();
+      this.cdr.detectChanges();
     });
   }
 
@@ -115,6 +138,7 @@ export class DocumentUploadDialogComponent implements OnInit {
           this.snackBar.open(`Extensión .${ext} no permitida.`, 'Cerrar', { duration: 3000 });
           this.selectedFile = null;
           event.target.value = '';
+          this.cdr.detectChanges();
           return;
         }
         
@@ -123,11 +147,26 @@ export class DocumentUploadDialogComponent implements OnInit {
           this.snackBar.open(`El archivo excede los ${this.selectedType.tamanoMaximoMb}MB permitidos.`, 'Cerrar', { duration: 3000 });
           this.selectedFile = null;
           event.target.value = '';
+          this.cdr.detectChanges();
           return;
         }
       }
       this.selectedFile = file;
+      this.cdr.detectChanges();
     }
+  }
+
+  formatDisplayDate(date: Date | string | null): string {
+    if (!date) return 'Seleccione una fecha';
+
+    const value = typeof date === 'string' ? new Date(date + 'T00:00:00') : date;
+    if (isNaN(value.getTime())) return 'Seleccione una fecha';
+
+    return new Intl.DateTimeFormat('es-EC', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    }).format(value);
   }
 
   onSubmit() {
@@ -136,10 +175,12 @@ export class DocumentUploadDialogComponent implements OnInit {
       if (!this.selectedFile) {
         this.snackBar.open('Debe seleccionar un archivo', 'Cerrar', { duration: 3000 });
       }
+      this.cdr.detectChanges();
       return;
     }
 
     this.isUploading = true;
+    this.cdr.detectChanges();
     const formValue = this.uploadForm.getRawValue();
 
     // Build a clean payload: fechaDocumento as YYYY-MM-DD string, origenCarga as plain string
@@ -175,11 +216,13 @@ export class DocumentUploadDialogComponent implements OnInit {
     this.documentsService.upload(payload, this.selectedFile).subscribe({
       next: (doc) => {
         this.isUploading = false;
+        this.cdr.detectChanges();
         this.snackBar.open('Documento subido con éxito', 'Cerrar', { duration: 3000 });
         this.dialogRef.close(doc);
       },
       error: (err) => {
         this.isUploading = false;
+        this.cdr.detectChanges();
         this.snackBar.open(
           'No se pudo subir el documento. Revisa la fecha y el origen de carga.',
           'Cerrar',

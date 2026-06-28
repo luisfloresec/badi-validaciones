@@ -53,4 +53,7 @@ export class CreateUserDto {
   @IsNotEmpty({ message: 'El campo password es obligatorio.' })
   @MinLength(8, { message: 'La contraseña debe tener al menos 8 caracteres.' })
   password: string;
+
+  @IsOptional()
+  requiereCambioPassword?: boolean;
 }

@@ -5,7 +5,7 @@
       <p class="subtitle">Gestión de convenios con organizaciones</p>
     </div>
     <div class="header-actions">
-      <button mat-button class="btn-secondary-text mr-2" routerLink="/agreements/types">
+      <button mat-button class="btn-secondary-outlined" routerLink="/agreements/types">
         <mat-icon>category</mat-icon> Tipos de Convenio
       </button>
       <button mat-flat-button color="primary" class="btn-primary" (click)="openAgreementForm()">
@@ -28,7 +28,7 @@
         <button mat-button color="primary" (click)="loadAgreements()">Reintentar</button>
       </div>
 
-      <table mat-table [dataSource]="agreements" class="badi-table" *ngIf="!loading && !error && agreements.length > 0">
+      <table mat-table [dataSource]="paginatedAgreements" class="badi-table" *ngIf="!loading && !error && agreements.length > 0">
 
         <ng-container matColumnDef="codigo">
           <th mat-header-cell *matHeaderCellDef> Código </th>
@@ -117,6 +117,15 @@
         <mat-icon>handshake</mat-icon>
         <p>No se encontraron convenios registrados.</p>
       </div>
+
+      <!-- Paginador Angular Material -->
+      <mat-paginator [length]="totalItems"
+                     [pageSize]="pageSize"
+                     [pageIndex]="pageIndex"
+                     [pageSizeOptions]="[5, 10, 25, 50]"
+                     (page)="onPageChange($event)"
+                     showFirstLastButtons>
+      </mat-paginator>
     </div>
   </div>
 </div>

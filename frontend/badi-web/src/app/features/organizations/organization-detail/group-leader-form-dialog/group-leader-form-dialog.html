@@ -1,12 +1,13 @@
 <div class="dialog-container">
   <div class="dialog-header">
-    <h2 mat-dialog-title>
-      <ng-container *ngIf="data.mode === 'create'">Agregar Grupo Atendido</ng-container>
-      <ng-container *ngIf="data.mode === 'edit'">Editar Grupo Atendido</ng-container>
-    </h2>
-    <button mat-icon-button class="close-button" mat-dialog-close [disabled]="loading">
-      <mat-icon>close</mat-icon>
-    </button>
+    <div class="header-title">
+      <mat-icon>{{ data.mode === 'create' ? 'group_add' : 'manage_accounts' }}</mat-icon>
+      <h2 mat-dialog-title>
+        <ng-container *ngIf="data.mode === 'create'">Agregar Grupo Atendido</ng-container>
+        <ng-container *ngIf="data.mode === 'edit'">Editar Grupo Atendido</ng-container>
+      </h2>
+    </div>
+    <p-button icon="pi pi-times" [text]="true" severity="secondary" mat-dialog-close [disabled]="loading" />
   </div>
 
   <div class="dialog-content" mat-dialog-content>
@@ -15,136 +16,177 @@
       <span>{{ error }}</span>
     </div>
 
-    <form [formGroup]="form" class="badi-form">
+    <form [formGroup]="form" class="badi-form p-fluid">
       <h3 class="section-subtitle">Datos del Grupo</h3>
       
-      <mat-form-field appearance="outline" class="w-100">
-        <mat-label>Nombre del Grupo</mat-label>
-        <input matInput formControlName="nombre" />
-        <mat-hint>Ejemplo: Adultos mayores sector norte</mat-hint>
-        <mat-error *ngIf="form.get('nombre')?.hasError('required')">El nombre es obligatorio.</mat-error>
-        <mat-error *ngIf="form.get('nombre')?.hasError('maxlength')">Máximo 150 caracteres.</mat-error>
-      </mat-form-field>
+      <div class="form-row">
+        <div class="field-container col-full">
+          <p-iftalabel>
+            <input pInputText formControlName="nombre" id="nombre" />
+            <label for="nombre">Nombre del Grupo</label>
+          </p-iftalabel>
+          <small class="field-hint">Ejemplo: Adultos mayores sector norte</small>
+          <small class="field-error" *ngIf="form.get('nombre')?.hasError('required') && form.get('nombre')?.touched">El nombre es obligatorio.</small>
+          <small class="field-error" *ngIf="form.get('nombre')?.hasError('maxlength') && form.get('nombre')?.touched">Máximo 150 caracteres.</small>
+        </div>
+      </div>
 
       <div class="form-row">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>Grupo Etario</mat-label>
-          <mat-select formControlName="grupoEtarioId" placeholder="Seleccione el grupo etario">
-            <mat-option *ngFor="let g of gruposEtarios" [value]="g.id">{{ g.nombre }}</mat-option>
-          </mat-select>
-          <mat-error *ngIf="form.get('grupoEtarioId')?.hasError('required')">Requerido.</mat-error>
-        </mat-form-field>
-
-        <div class="w-100" style="display: flex; flex-direction: column;">
-          <mat-form-field appearance="outline" class="w-100" style="margin-bottom: 0;">
-            <mat-label>Vulnerabilidades</mat-label>
-            <mat-select formControlName="vulnerabilidadIds" multiple placeholder="Seleccione una o varias vulnerabilidades">
-              <mat-select-trigger>
-                <span *ngIf="form.get('vulnerabilidadIds')?.value?.length === 1">1 opción seleccionada</span>
-                <span *ngIf="form.get('vulnerabilidadIds')?.value?.length > 1">{{ form.get('vulnerabilidadIds')?.value?.length }} opciones seleccionadas</span>
-              </mat-select-trigger>
-              <mat-option *ngFor="let v of vulnerabilidades" [value]="v.id">{{ v.nombre }}</mat-option>
-            </mat-select>
-            <mat-error *ngIf="form.get('vulnerabilidadIds')?.hasError('required')">Debe seleccionar al menos una vulnerabilidad.</mat-error>
-          </mat-form-field>
-
-          <div class="badi-chips-container" *ngIf="form.get('vulnerabilidadIds')?.value?.length > 0">
-            <div class="badi-chip" *ngFor="let id of form.get('vulnerabilidadIds')?.value">
-              <span>{{ getOptionName(vulnerabilidades, id) }}</span>
-              <button type="button" class="chip-remove" (click)="removeSelectedOption('vulnerabilidadIds', id)">
-                <mat-icon>close</mat-icon>
-              </button>
+        <div class="field-container col-half">
+          <div class="special-field">
+            <div class="special-field-content">
+              <span class="special-field-label">Grupo Etario</span>
+              <div class="special-field-control">
+                <mat-form-field appearance="outline" class="w-full special-mat-field">
+                  <mat-select formControlName="grupoEtarioId" placeholder="Seleccione grupo etario">
+                    <mat-option *ngFor="let grupo of gruposEtarios" [value]="grupo.id">
+                      {{ grupo.nombre }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
             </div>
+          </div>
+          <small class="field-error" *ngIf="form.get('grupoEtarioId')?.hasError('required') && form.get('grupoEtarioId')?.touched">
+            Requerido.
+          </small>
+        </div>
+
+        <div class="field-container col-half">
+          <div class="special-field">
+            <div class="special-field-content">
+              <span class="special-field-label">Vulnerabilidades</span>
+              <div class="special-field-control">
+                <mat-form-field appearance="outline" class="w-full special-mat-field">
+                  <mat-select formControlName="vulnerabilidadIds" multiple placeholder="Seleccione vulnerabilidades">
+                    <mat-select-trigger>
+                      {{ selectedVulnerabilidades.length ? selectedVulnerabilidades.length + ' seleccionada(s)' : 'Seleccione vulnerabilidades' }}
+                    </mat-select-trigger>
+                    <mat-option *ngFor="let vulnerabilidad of vulnerabilidades" [value]="vulnerabilidad.id">
+                      {{ vulnerabilidad.nombre }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+            </div>
+          </div>
+          <small class="field-error" *ngIf="form.get('vulnerabilidadIds')?.hasError('required') && form.get('vulnerabilidadIds')?.touched">
+            Debe seleccionar al menos una vulnerabilidad.
+          </small>
+
+          <div class="vulnerability-chip-list" *ngIf="selectedVulnerabilidades.length">
+            <button
+              type="button"
+              class="vulnerability-chip"
+              *ngFor="let vuln of selectedVulnerabilidades"
+              (click)="removeVulnerabilidad(vuln.id)">
+              <span>{{ vuln.nombre }}</span>
+              <mat-icon>close</mat-icon>
+            </button>
           </div>
         </div>
       </div>
 
       <div class="form-row">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>Número de personas</mat-label>
-          <input matInput type="number" formControlName="numeroPersonas" min="1" />
-          <mat-hint>Ejemplo: 35</mat-hint>
-          <mat-error *ngIf="form.get('numeroPersonas')?.hasError('required')">Requerido.</mat-error>
-          <mat-error *ngIf="form.get('numeroPersonas')?.hasError('min')">Debe ser al menos 1.</mat-error>
-        </mat-form-field>
+        <div class="field-container col-half">
+          <p-iftalabel>
+            <input pInputText type="number" formControlName="numeroPersonas" id="numeroPersonas" min="1" />
+            <label for="numeroPersonas">Número de personas</label>
+          </p-iftalabel>
+          <small class="field-hint">Ejemplo: 35</small>
+          <small class="field-error" *ngIf="form.get('numeroPersonas')?.hasError('required') && form.get('numeroPersonas')?.touched">Requerido.</small>
+          <small class="field-error" *ngIf="form.get('numeroPersonas')?.hasError('min') && form.get('numeroPersonas')?.touched">Debe ser al menos 1.</small>
+        </div>
       </div>
 
-      <mat-form-field appearance="outline" class="w-100">
-        <mat-label>Observaciones (Opcional)</mat-label>
-        <textarea matInput formControlName="observaciones" rows="2"></textarea>
-        <mat-hint>Ejemplo: Grupo con atención mensual prioritaria</mat-hint>
-      </mat-form-field>
+      <div class="form-row">
+        <div class="field-container col-full">
+          <p-iftalabel>
+            <textarea pTextarea formControlName="observaciones" id="observaciones" rows="2"></textarea>
+            <label for="observaciones">Observaciones (Opcional)</label>
+          </p-iftalabel>
+          <small class="field-hint">Ejemplo: Grupo con atención mensual prioritaria</small>
+        </div>
+      </div>
 
       <!-- SECCION DIRIGENTE INICIAL (Solo en CREATE) -->
       <ng-container *ngIf="data.mode === 'create'">
         <mat-divider class="my-3"></mat-divider>
         <h3 class="section-subtitle">Dirigente Inicial</h3>
         
-        <mat-radio-group formControlName="leaderOption" class="leader-options">
-          <mat-radio-button value="use_active" *ngIf="data.hasActiveRepresentative">
-            Usar representante activo de la organización
-          </mat-radio-button>
-          <mat-radio-button value="new_leader">
-            Registrar dirigente nuevo
-          </mat-radio-button>
-        </mat-radio-group>
+        <div class="leader-options">
+          <div class="radio-option" *ngIf="data.hasActiveRepresentative">
+            <p-radiobutton formControlName="leaderOption" value="use_active" inputId="use_active"></p-radiobutton>
+            <label for="use_active">Usar representante activo de la organización</label>
+          </div>
+          <div class="radio-option">
+            <p-radiobutton formControlName="leaderOption" value="new_leader" inputId="new_leader"></p-radiobutton>
+            <label for="new_leader">Registrar dirigente nuevo</label>
+          </div>
+        </div>
 
         <!-- Formulario nuevo dirigente -->
         <div class="new-leader-form" *ngIf="form.get('leaderOption')?.value === 'new_leader'">
           <div class="form-row">
-            <mat-form-field appearance="outline" class="w-100">
-              <mat-label>Nombres</mat-label>
-              <input matInput formControlName="nombres" />
-              <mat-hint>Ejemplo: María Fernanda</mat-hint>
-              <mat-error *ngIf="form.get('nombres')?.hasError('required')">Requerido.</mat-error>
-            </mat-form-field>
+            <div class="field-container col-half">
+              <p-iftalabel>
+                <input pInputText formControlName="nombres" id="leader_nombres" />
+                <label for="leader_nombres">Nombres</label>
+              </p-iftalabel>
+              <small class="field-hint">Ejemplo: María Fernanda</small>
+              <small class="field-error" *ngIf="form.get('nombres')?.hasError('required') && form.get('nombres')?.touched">Requerido.</small>
+            </div>
 
-            <mat-form-field appearance="outline" class="w-100">
-              <mat-label>Apellidos</mat-label>
-              <input matInput formControlName="apellidos" />
-              <mat-hint>Ejemplo: Imbaquingo Flores</mat-hint>
-              <mat-error *ngIf="form.get('apellidos')?.hasError('required')">Requerido.</mat-error>
-            </mat-form-field>
+            <div class="field-container col-half">
+              <p-iftalabel>
+                <input pInputText formControlName="apellidos" id="leader_apellidos" />
+                <label for="leader_apellidos">Apellidos</label>
+              </p-iftalabel>
+              <small class="field-hint">Ejemplo: Imbaquingo Flores</small>
+              <small class="field-error" *ngIf="form.get('apellidos')?.hasError('required') && form.get('apellidos')?.touched">Requerido.</small>
+            </div>
           </div>
 
-          <div class="form-row">
-            <mat-form-field appearance="outline" class="w-100">
-              <mat-label>Cédula</mat-label>
-              <input matInput formControlName="cedula" />
-              <mat-hint>Ejemplo: 1000000040</mat-hint>
-              <mat-error *ngIf="form.get('cedula')?.hasError('required')">Requerido.</mat-error>
-              <mat-error *ngIf="form.get('cedula')?.hasError('pattern')">10 dígitos.</mat-error>
-            </mat-form-field>
+          <div class="form-row mt-4">
+            <div class="field-container col-half">
+              <p-iftalabel>
+                <input pInputText formControlName="cedula" id="leader_cedula" />
+                <label for="leader_cedula">Cédula</label>
+              </p-iftalabel>
+              <small class="field-hint">Ejemplo: 1000000040</small>
+              <small class="field-error" *ngIf="form.get('cedula')?.hasError('required') && form.get('cedula')?.touched">Requerido.</small>
+              <small class="field-error" *ngIf="form.get('cedula')?.hasError('pattern') && form.get('cedula')?.touched">10 dígitos.</small>
+            </div>
 
-            <mat-form-field appearance="outline" class="w-100">
-              <mat-label>Teléfono (Opcional)</mat-label>
-              <input matInput formControlName="telefono" />
-              <mat-hint>Ejemplo: 0987654321</mat-hint>
-            </mat-form-field>
+            <div class="field-container col-half">
+              <p-iftalabel>
+                <input pInputText formControlName="telefono" id="leader_telefono" />
+                <label for="leader_telefono">Teléfono (Opcional)</label>
+              </p-iftalabel>
+              <small class="field-hint">Ejemplo: 0987654321</small>
+            </div>
           </div>
 
-          <mat-form-field appearance="outline" class="w-100">
-            <mat-label>Correo electrónico (Opcional)</mat-label>
-            <input matInput formControlName="email" type="email" />
-            <mat-hint>Ejemplo: dirigente@correo.com</mat-hint>
-            <mat-error *ngIf="form.get('email')?.hasError('email')">Formato inválido.</mat-error>
-          </mat-form-field>
+          <div class="form-row mt-4">
+            <div class="field-container col-full">
+              <p-iftalabel>
+                <input pInputText formControlName="email" id="leader_email" type="email" />
+                <label for="leader_email">Correo electrónico (Opcional)</label>
+              </p-iftalabel>
+              <small class="field-hint">Ejemplo: dirigente@correo.com</small>
+              <small class="field-error" *ngIf="form.get('email')?.hasError('email') && form.get('email')?.touched">Formato inválido.</small>
+            </div>
+          </div>
         </div>
       </ng-container>
     </form>
   </div>
 
   <div class="dialog-actions" mat-dialog-actions>
-    <button mat-stroked-button mat-dialog-close [disabled]="loading">Cancelar</button>
-    <button mat-flat-button color="primary" 
-            (click)="onSubmit()" 
-            [disabled]="form.invalid || loading"
-            class="submit-btn">
-      <mat-spinner *ngIf="loading" diameter="20" class="spinner-btn"></mat-spinner>
-      <span *ngIf="!loading">
-        <ng-container *ngIf="data.mode === 'create'">Guardar</ng-container>
-        <ng-container *ngIf="data.mode === 'edit'">Guardar cambios</ng-container>
-      </span>
-    </button>
+    <p-button label="Cancelar" [outlined]="true" severity="secondary" mat-dialog-close [disabled]="loading" />
+    <p-button [label]="data.mode === 'create' ? 'Guardar' : 'Guardar cambios'"
+              (onClick)="onSubmit()" 
+              [disabled]="form.invalid || loading"
+              [loading]="loading" />
   </div>
 </div>

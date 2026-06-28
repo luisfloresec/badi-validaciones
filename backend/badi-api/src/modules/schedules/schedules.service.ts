@@ -17,25 +17,32 @@ export class SchedulesService {
     private agreementsRepository: Repository<Agreement>,
   ) {}
 
+  private normalizeDateOnly(value: string | Date): string {
+    if (value instanceof Date) {
+      const year = value.getFullYear();
+      const month = String(value.getMonth() + 1).padStart(2, '0');
+      const day = String(value.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    return String(value).slice(0, 10);
+  }
+
   private async validateDateAndLimits(
     agreement: Agreement,
-    targetDateStr: string,
+    targetDateInput: string | Date,
     excludeDeliveryId?: string,
   ) {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const targetDateStr = this.normalizeDateOnly(targetDateInput);
+    const todayStr = this.normalizeDateOnly(new Date());
 
-    const targetDate = new Date(targetDateStr);
-    targetDate.setHours(0, 0, 0, 0);
-
-    if (targetDate < today) {
+    if (targetDateStr < todayStr) {
       throw new BadRequestException('No se puede programar en una fecha pasada.');
     }
 
     if (agreement.fechaFinEstimada) {
-      const fechaFin = new Date(agreement.fechaFinEstimada);
-      fechaFin.setHours(0, 0, 0, 0);
-      if (targetDate > fechaFin) {
+      const fechaFinStr = this.normalizeDateOnly(agreement.fechaFinEstimada as any);
+      if (targetDateStr > fechaFinStr) {
         throw new BadRequestException('La fecha programada excede la vigencia del convenio.');
       }
     }
@@ -56,9 +63,6 @@ export class SchedulesService {
       throw new BadRequestException('Ya existe una entrega programada para esta fecha en este convenio.');
     }
 
-    // Check max retiros if it's a new scheduling or changing limits
-    // Wait, if we are just rescheduling, we don't consume a NEW slot, we just move it.
-    // So if excludeDeliveryId is provided, we don't need to check maxRetiros (as it's the same delivery).
     if (!excludeDeliveryId && agreement.tipoConvenio?.maxRetiros) {
       const activeDeliveriesCount = await this.scheduledDeliveryRepository
         .createQueryBuilder('sd')
@@ -87,11 +91,12 @@ export class SchedulesService {
       throw new BadRequestException('Solo se pueden programar entregas para convenios activos.');
     }
 
-    await this.validateDateAndLimits(agreement, createDto.fechaProgramada);
+    const targetDateStr = this.normalizeDateOnly(createDto.fechaProgramada);
+    await this.validateDateAndLimits(agreement, targetDateStr);
 
     const delivery = new ScheduledDelivery();
     delivery.convenio = agreement;
-    delivery.fechaProgramada = createDto.fechaProgramada as any;
+    delivery.fechaProgramada = targetDateStr as any;
     delivery.descripcion = createDto.descripcion as any;
     delivery.observaciones = createDto.observaciones as any;
 
@@ -276,13 +281,14 @@ export class SchedulesService {
       throw new BadRequestException('Solo se pueden reprogramar entregas en estado Programado o Reprogramado.');
     }
 
-    await this.validateDateAndLimits(delivery.convenio, rescheduleDto.nuevaFecha, delivery.id);
+    const targetDateStr = this.normalizeDateOnly(rescheduleDto.nuevaFecha);
+    await this.validateDateAndLimits(delivery.convenio, targetDateStr, delivery.id);
 
     if (!delivery.fechaOriginal) {
       delivery.fechaOriginal = delivery.fechaProgramada;
     }
 
-    delivery.fechaProgramada = rescheduleDto.nuevaFecha as any;
+    delivery.fechaProgramada = targetDateStr as any;
     delivery.motivoReprogramacion = rescheduleDto.motivoReprogramacion;
     delivery.estado = 'Reprogramado';
 

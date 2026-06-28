@@ -9,7 +9,9 @@ export interface User {
   email: string;
   estado: string;
   roles?: { id: string; nombre: string }[];
+  requiereCambioPassword?: boolean;
   fechaRegistro?: Date;
+  fechaCreacion?: Date;
   fechaActualizacion?: Date;
 }
 
@@ -55,5 +57,9 @@ export class UsersService {
 
   deactivate(id: string): Observable<any> {
     return this.http.patch(`${this.apiUrl}/${id}/deactivate`, {});
+  }
+
+  activate(id: string): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/${id}/activate`, {});
   }
 }

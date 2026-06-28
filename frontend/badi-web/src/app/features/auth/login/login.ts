@@ -1,13 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { InputTextModule } from 'primeng/inputtext';
+import { PasswordModule } from 'primeng/password';
+import { ButtonModule } from 'primeng/button';
+import { MessageModule } from 'primeng/message';
 import { AuthService } from '../../../core/auth/auth.service';
 
 @Component({
@@ -16,12 +14,10 @@ import { AuthService } from '../../../core/auth/auth.service';
   imports: [
     CommonModule,
     FormsModule,
-    MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatIconModule,
-    MatProgressSpinnerModule,
+    InputTextModule,
+    PasswordModule,
+    ButtonModule,
+    MessageModule,
   ],
   templateUrl: './login.html',
   styleUrls: ['./login.scss'],
@@ -31,13 +27,12 @@ export class LoginComponent {
   password = '';
   isLoading = false;
   errorMessage = '';
-  hidePassword = true;
 
   constructor(
     private authService: AuthService,
     private router: Router,
+    private cdr: ChangeDetectorRef,
   ) {
-    // Si ya está autenticado, redirigir al dashboard o profile
     if (this.authService.isAuthenticated()) {
       const user = this.authService.getCurrentUser();
       if (user?.requiereCambioPassword) {
@@ -49,7 +44,10 @@ export class LoginComponent {
   }
 
   onSubmit(): void {
-    if (!this.email || !this.password) return;
+    if (!this.email || !this.password) {
+      this.errorMessage = 'Por favor, ingrese su correo y contraseña.';
+      return;
+    }
 
     this.isLoading = true;
     this.errorMessage = '';
@@ -69,7 +67,9 @@ export class LoginComponent {
           ? msg
           : Array.isArray(msg)
             ? msg.join('. ')
-            : 'Error al iniciar sesión. Intente nuevamente.';
+            : 'Credenciales inválidas. Por favor, verifica tu correo y contraseña.';
+        this.cdr.markForCheck();
+        this.cdr.detectChanges();
       },
     });
   }

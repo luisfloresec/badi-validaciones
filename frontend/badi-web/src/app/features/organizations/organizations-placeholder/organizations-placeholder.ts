@@ -9,6 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { InputTextModule } from 'primeng/inputtext';
@@ -33,6 +34,7 @@ import { AuthService } from '../../../core/auth/auth.service';
     MatInputModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
+    MatPaginatorModule,
     IconFieldModule,
     InputIconModule,
     InputTextModule,
@@ -45,11 +47,17 @@ export class OrganizationsPlaceholderComponent implements OnInit {
 
   organizations: OrganizationSummary[] = [];
   filtered: OrganizationSummary[] = [];
+  paginatedOrganizations: OrganizationSummary[] = [];
   searchTerm = '';
   showInactive = false;
 
   loading = true;
   error: string | null = null;
+
+  // Paginación
+  totalItems = 0;
+  pageSize = 10;
+  pageIndex = 0;
 
   constructor(
     private orgService: OrganizationsService,
@@ -83,6 +91,7 @@ export class OrganizationsPlaceholderComponent implements OnInit {
           this.error = 'No se pudieron cargar las organizaciones.';
           this.organizations = [];
           this.filtered = [];
+          this.applyFilter();
           this.cdr.detectChanges();
         }
       });
@@ -96,13 +105,28 @@ export class OrganizationsPlaceholderComponent implements OnInit {
     const term = this.searchTerm.toLowerCase().trim();
     if (!term) {
       this.filtered = this.organizations;
-      return;
+    } else {
+      this.filtered = this.organizations.filter(org =>
+        org.razonSocial.toLowerCase().includes(term) ||
+        org.ruc.toLowerCase().includes(term) ||
+        org.ciudad.toLowerCase().includes(term)
+      );
     }
-    this.filtered = this.organizations.filter(org =>
-      org.razonSocial.toLowerCase().includes(term) ||
-      org.ruc.toLowerCase().includes(term) ||
-      org.ciudad.toLowerCase().includes(term)
-    );
+    this.totalItems = this.filtered.length;
+    this.pageIndex = 0;
+    this.updatePagination();
+  }
+
+  onPageChange(event: PageEvent): void {
+    this.pageIndex = event.pageIndex;
+    this.pageSize = event.pageSize;
+    this.updatePagination();
+  }
+
+  updatePagination(): void {
+    const start = this.pageIndex * this.pageSize;
+    this.paginatedOrganizations = this.filtered.slice(start, start + this.pageSize);
+    this.cdr.detectChanges();
   }
 
   viewDetail(id: string): void {

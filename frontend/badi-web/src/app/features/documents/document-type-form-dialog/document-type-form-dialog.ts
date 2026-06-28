@@ -1,6 +1,6 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormControl } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -11,6 +11,11 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatChipsModule, MatChipInputEvent } from '@angular/material/chips';
+import { InputTextModule } from 'primeng/inputtext';
+import { TextareaModule } from 'primeng/textarea';
+import { IftaLabelModule } from 'primeng/iftalabel';
+import { ButtonModule } from 'primeng/button';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { DocumentTypesService, DocumentType, CreateDocumentTypeDto } from '../document-types.service';
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 
@@ -31,7 +36,12 @@ const EXTENSIONES_COMUNES = ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png', 'webp',
     MatIconModule,
     MatSlideToggleModule,
     MatProgressSpinnerModule,
-    MatChipsModule
+    MatChipsModule,
+    InputTextModule,
+    TextareaModule,
+    IftaLabelModule,
+    ButtonModule,
+    ToggleSwitchModule
   ],
   templateUrl: './document-type-form-dialog.html',
   styleUrls: ['./document-type-form-dialog.scss']
@@ -46,7 +56,6 @@ export class DocumentTypeFormDialogComponent implements OnInit {
   readonly EXTENSIONES_COMUNES = EXTENSIONES_COMUNES;
   readonly separatorKeysCodes = [ENTER, COMMA] as const;
 
-  // Local arrays editable for chip inputs
   extensiones: string[] = [];
   entidades: string[] = [];
 
@@ -62,7 +71,7 @@ export class DocumentTypeFormDialogComponent implements OnInit {
 
     this.form = this.fb.group({
       nombre: [this.type?.nombre || '', [Validators.required, Validators.maxLength(120)]],
-      codigo: [this.type?.codigo || '', [Validators.required, Validators.maxLength(60), Validators.pattern(/^[a-z0-9-]+$/)]],
+      codigo: [{ value: this.type?.codigo || '', disabled: this.isEdit }, [Validators.required, Validators.maxLength(60), Validators.pattern(/^[a-z0-9-]+$/)]],
       descripcion: [this.type?.descripcion || ''],
       tamanoMaximoMb: [this.type?.tamanoMaximoMb ?? 10, [Validators.required, Validators.min(1), Validators.max(50)]],
       requiereEntidadRelacionada: [this.type?.requiereEntidadRelacionada ?? false],
@@ -71,14 +80,11 @@ export class DocumentTypeFormDialogComponent implements OnInit {
       observacionesObligatorias: [this.type?.observacionesObligatorias ?? false]
     });
 
-    // Initialize chip arrays from existing type
     this.extensiones = [...(this.type?.extensionesPermitidas || ['pdf'])];
     this.entidades = [...(this.type?.entidadesPermitidas || [])];
   }
 
   ngOnInit(): void {}
-
-  // ── Chip helpers ──────────────────────────────────────────────────────────
 
   addExtension(event: MatChipInputEvent) {
     const value = (event.value || '').trim().toLowerCase().replace(/^\./, '');
@@ -108,8 +114,6 @@ export class DocumentTypeFormDialogComponent implements OnInit {
     }
   }
 
-  // ── Submit ────────────────────────────────────────────────────────────────
-
   onSubmit() {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
@@ -124,7 +128,7 @@ export class DocumentTypeFormDialogComponent implements OnInit {
 
     this.isSaving = true;
     const payload: CreateDocumentTypeDto = {
-      ...this.form.value,
+      ...this.form.getRawValue(),
       extensionesPermitidas: this.extensiones,
       entidadesPermitidas: this.entidades
     };

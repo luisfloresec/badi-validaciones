@@ -1,0 +1,94 @@
+<div class="dialog-container">
+  <div class="dialog-header">
+    <div class="header-title">
+      <mat-icon>plagiarism</mat-icon>
+      <h2 mat-dialog-title>Detalle de Registro de Auditoría</h2>
+    </div>
+    <p-button icon="pi pi-times" [text]="true" severity="secondary" mat-dialog-close />
+  </div>
+
+  <div class="dialog-content" mat-dialog-content>
+    <div class="audit-detail-view">
+      
+      <!-- Resumen General -->
+      <div class="detail-section">
+        <h3 class="section-title">Resumen de la Operación</h3>
+        <div class="detail-grid">
+          <div class="detail-item col-half">
+            <span class="label">Acción</span>
+            <span class="estado-chip" [ngClass]="getBadgeClass(log.accion)">{{ log.accion }}</span>
+          </div>
+          <div class="detail-item col-half">
+            <span class="label">Fecha y Hora</span>
+            <span class="value strong">{{ log.fechaHora | date:'dd/MM/yyyy HH:mm:ss' }}</span>
+          </div>
+          <div class="detail-item col-half">
+            <span class="label">Módulo / Entidad</span>
+            <span class="value">{{ log.modulo }} <mat-icon class="inline-arrow">chevron_right</mat-icon> {{ log.entidad }}</span>
+          </div>
+          <div class="detail-item col-half">
+            <span class="label">Registro Afectado (ID)</span>
+            <span class="value code">{{ log.entidadId || 'N/A' }}</span>
+          </div>
+          <div class="detail-item col-full">
+            <span class="label">Descripción Resumida</span>
+            <span class="value summary-text">{{ getResumen(log) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Origen y Usuario -->
+      <div class="detail-section mt-4">
+        <h3 class="section-title">Origen de la Actividad</h3>
+        <div class="detail-grid">
+          <div class="detail-item col-full">
+            <span class="label">Usuario Operador</span>
+            <div class="user-row" *ngIf="log.user">
+              <div class="user-avatar">{{ log.user.nombres.charAt(0) }}{{ log.user.apellidos.charAt(0) }}</div>
+              <div class="user-info">
+                <span class="user-name">{{ log.user.nombres }} {{ log.user.apellidos }}</span>
+                <span class="user-email">{{ log.user.email }}</span>
+              </div>
+            </div>
+            <div class="user-row system-user" *ngIf="!log.user">
+              <mat-icon>smart_toy</mat-icon>
+              <div class="user-info">
+                <span class="user-name">Sistema / Anónimo</span>
+                <span class="user-email">Operación automática o sin sesión autenticada</span>
+              </div>
+            </div>
+          </div>
+          <div class="detail-item col-half">
+            <span class="label">Dirección IP</span>
+            <span class="value code">{{ log.userIp || '—' }}</span>
+          </div>
+          <div class="detail-item col-half">
+            <span class="label">Navegador / User Agent</span>
+            <span class="value">{{ log.userAgent || '—' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- JSON Diff -->
+      <div class="detail-section mt-4" *ngIf="log.datosAnteriores || log.datosNuevos">
+        <h3 class="section-title">Trazabilidad de Datos (Formato JSON)</h3>
+        <div class="diff-box">
+          <div class="diff-column" *ngIf="log.datosAnteriores">
+            <div class="diff-header prev">Datos Anteriores</div>
+            <pre class="json-code">{{ formatData(log.datosAnteriores) }}</pre>
+          </div>
+          <div class="diff-column" *ngIf="log.datosNuevos">
+            <div class="diff-header next">Datos Nuevos</div>
+            <pre class="json-code">{{ formatData(log.datosNuevos) }}</pre>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="dialog-actions" mat-dialog-actions>
+    <p-button label="Cerrar" [outlined]="true" severity="secondary" mat-dialog-close />
+  </div>
+
+</div>

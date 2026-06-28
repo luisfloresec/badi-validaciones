@@ -4,94 +4,132 @@
       <mat-icon>event_available</mat-icon>
       <h2>Programar entrega</h2>
     </div>
-    <button mat-icon-button mat-dialog-close class="close-button">
-      <mat-icon>close</mat-icon>
-    </button>
+    <p-button icon="pi pi-times" [text]="true" severity="secondary" mat-dialog-close [disabled]="isLoading" />
   </div>
 
   <div class="dialog-content" mat-dialog-content>
-    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="badi-form">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="badi-form p-fluid">
+
+      <div class="section-title-container">
+        <h3 class="form-section-title">Datos principales</h3>
+      </div>
 
       <!-- Convenio (bloqueado si viene preseleccionado) -->
-      <ng-container *ngIf="agreementLocked && selectedAgreement; else selectAgreement">
-        <div class="locked-field">
-          <label>Convenio</label>
-          <span class="locked-value">
-            <mat-icon>lock</mat-icon>
-            {{ getAgreementLabel(selectedAgreement) }}
-          </span>
-        </div>
-      </ng-container>
+      <div class="form-row">
+        <div class="field-container col-full">
+          <ng-container *ngIf="agreementLocked && selectedAgreement; else selectAgreement">
+            <div class="special-field locked-field">
+              <div class="special-field-content">
+                <span class="special-field-label">Organización / Convenio activo</span>
+                <div class="special-field-control">
+                  <span class="special-field-value locked-value">
+                    <mat-icon class="lock-icon">lock</mat-icon>
+                    {{ getAgreementLabel(selectedAgreement) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </ng-container>
 
-      <ng-template #selectAgreement>
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>Convenio</mat-label>
-          <mat-select formControlName="agreementId"
-                      placeholder="Seleccione un convenio activo"
-                      (selectionChange)="onAgreementChange()">
-            <mat-option *ngFor="let a of agreements" [value]="a.id">
-              {{ getAgreementLabel(a) }}
-            </mat-option>
-          </mat-select>
-          <mat-error *ngIf="form.get('agreementId')?.hasError('required')">El convenio es obligatorio.</mat-error>
-          <mat-hint *ngIf="agreementsLoading">Cargando convenios...</mat-hint>
-          <mat-hint *ngIf="!agreementsLoading && agreements.length === 0">No hay convenios activos disponibles.</mat-hint>
-        </mat-form-field>
-      </ng-template>
+          <ng-template #selectAgreement>
+            <div class="special-field">
+              <div class="special-field-content">
+                <span class="special-field-label">Organización / Convenio activo</span>
+                <div class="special-field-control">
+                  <mat-form-field appearance="outline" class="w-full special-mat-field">
+                    <mat-select formControlName="agreementId"
+                                placeholder="Seleccione un convenio activo"
+                                (selectionChange)="onAgreementChange()">
+                      <mat-option *ngFor="let a of agreements" [value]="a.id">
+                        {{ getAgreementLabel(a) }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+              </div>
+            </div>
+            <small class="field-error" *ngIf="form.get('agreementId')?.hasError('required') && form.get('agreementId')?.touched">
+              El convenio es obligatorio.
+            </small>
+            <small class="field-hint" *ngIf="agreementsLoading">Cargando convenios...</small>
+            <small class="field-hint" *ngIf="!agreementsLoading && agreements.length === 0">No hay convenios activos disponibles.</small>
+          </ng-template>
 
-      <!-- Resumen del convenio seleccionado -->
-      <div class="agreement-summary" *ngIf="selectedAgreement">
-        <mat-icon>info_outline</mat-icon>
-        <div class="summary-content">
-          <span class="summary-item" *ngIf="selectedAgreement.tipoConvenio?.nombre">
-            <strong>Tipo:</strong> {{ selectedAgreement.tipoConvenio.nombre }}
-          </span>
-          <span class="summary-item" *ngIf="selectedAgreement.tipoConvenio?.maxRetiros !== null && selectedAgreement.tipoConvenio?.maxRetiros !== undefined">
-            <strong>Retiros:</strong> {{ selectedAgreement.retirosRealizados ?? 0 }} / {{ selectedAgreement.tipoConvenio.maxRetiros }}
-          </span>
-          <span class="summary-item" *ngIf="selectedAgreement.fechaFinEstimada">
-            <strong>Vigente hasta:</strong> {{ selectedAgreement.fechaFinEstimada | date:'dd/MM/yyyy' }}
-          </span>
+          <!-- Resumen del convenio seleccionado -->
+          <div class="type-summary-box" *ngIf="selectedAgreement">
+            <span class="summary-item" *ngIf="selectedAgreement.tipoConvenio?.nombre">
+              <strong>Tipo:</strong> {{ selectedAgreement.tipoConvenio.nombre }}
+            </span>
+            <span class="summary-item" *ngIf="selectedAgreement.tipoConvenio?.maxRetiros !== null && selectedAgreement.tipoConvenio?.maxRetiros !== undefined">
+              <strong>Retiros:</strong> {{ selectedAgreement.retirosRealizados ?? 0 }} / {{ selectedAgreement.tipoConvenio.maxRetiros }}
+            </span>
+            <span class="summary-item" *ngIf="selectedAgreement.fechaFinEstimada">
+              <strong>Vigente hasta:</strong> {{ selectedAgreement.fechaFinEstimada | date:'dd/MM/yyyy' }}
+            </span>
+          </div>
         </div>
       </div>
 
       <!-- Fecha programada -->
-      <mat-form-field appearance="outline" class="w-100">
-        <mat-label>Fecha programada</mat-label>
-        <input matInput [matDatepicker]="fechaPicker" formControlName="fechaProgramada" readonly (click)="fechaPicker.open()">
-        <mat-datepicker-toggle matIconSuffix [for]="fechaPicker"></mat-datepicker-toggle>
-        <mat-datepicker #fechaPicker></mat-datepicker>
-        <mat-error *ngIf="form.get('fechaProgramada')?.hasError('required')">La fecha es obligatoria.</mat-error>
-      </mat-form-field>
+      <div class="form-row">
+        <div class="field-container col-full">
+          <div class="special-field special-field-clickable" (click)="fechaPicker.open()">
+            <div class="special-field-content">
+              <span class="special-field-label">Fecha programada</span>
+              <div class="special-field-control datepicker-control-wrapper">
+                <span class="special-field-value">{{ formatDisplayDate(form.get('fechaProgramada')?.value) }}</span>
+                <mat-form-field appearance="outline" class="hidden-mat-field">
+                  <input matInput [matDatepicker]="fechaPicker" formControlName="fechaProgramada" class="hidden-datepicker-input" readonly>
+                </mat-form-field>
+              </div>
+            </div>
+            <mat-datepicker-toggle matIconSuffix [for]="fechaPicker" (click)="$event.stopPropagation()"></mat-datepicker-toggle>
+            <mat-datepicker #fechaPicker></mat-datepicker>
+          </div>
+          <small class="field-hint">Seleccione la fecha de entrega en el calendario</small>
+          <small class="field-error" *ngIf="form.get('fechaProgramada')?.hasError('required') && form.get('fechaProgramada')?.touched">La fecha es obligatoria.</small>
+        </div>
+      </div>
+
+      <div class="section-title-container">
+        <h3 class="form-section-title">Detalles de la Entrega</h3>
+      </div>
 
       <!-- Descripción -->
-      <mat-form-field appearance="outline" class="w-100">
-        <mat-label>Descripción</mat-label>
-        <textarea matInput formControlName="descripcion" rows="2"
-                  placeholder="Ej: Entrega mensual de alimentos"></textarea>
-        <mat-hint align="end">{{ descripcionLength }} / 300</mat-hint>
-        <mat-error *ngIf="form.get('descripcion')?.hasError('maxlength')">Máximo 300 caracteres.</mat-error>
-      </mat-form-field>
+      <div class="form-row">
+        <div class="field-container col-full">
+          <p-iftalabel>
+            <textarea pTextarea formControlName="descripcion" id="descripcion" rows="2"></textarea>
+            <label for="descripcion">Descripción</label>
+          </p-iftalabel>
+          <div class="field-hint-container flex justify-content-between">
+            <small class="field-hint">Ej: Entrega mensual de alimentos</small>
+            <small class="field-hint">{{ descripcionLength }} / 300</small>
+          </div>
+          <small class="field-error" *ngIf="form.get('descripcion')?.hasError('maxlength')">Máximo 300 caracteres.</small>
+        </div>
+      </div>
 
       <!-- Observaciones -->
-      <mat-form-field appearance="outline" class="w-100">
-        <mat-label>Observaciones (Opcional)</mat-label>
-        <textarea matInput formControlName="observaciones" rows="2"
-                  placeholder="Información adicional para esta entrega"></textarea>
-      </mat-form-field>
+      <div class="form-row">
+        <div class="field-container col-full">
+          <p-iftalabel>
+            <textarea pTextarea formControlName="observaciones" id="observaciones" rows="2"></textarea>
+            <label for="observaciones">Observaciones (Opcional)</label>
+          </p-iftalabel>
+          <small class="field-hint">Información adicional para esta entrega</small>
+        </div>
+      </div>
 
     </form>
   </div>
 
   <div class="dialog-actions" mat-dialog-actions>
-    <button mat-stroked-button mat-dialog-close [disabled]="isLoading">Cancelar</button>
-    <button mat-flat-button color="primary"
-            (click)="onSubmit()"
-            [disabled]="form.invalid || isLoading || agreements.length === 0"
-            class="btn-primary">
-      <mat-spinner diameter="18" *ngIf="isLoading"></mat-spinner>
-      <mat-icon *ngIf="!isLoading">event_available</mat-icon>
-      {{ isLoading ? 'Guardando...' : 'Programar entrega' }}
-    </button>
+    <p-button label="Cancelar" [outlined]="true" severity="secondary" mat-dialog-close [disabled]="isLoading" />
+    <p-button label="Programar entrega"
+              icon="pi pi-calendar-plus"
+              (onClick)="onSubmit()"
+              [disabled]="form.invalid || isLoading || agreements.length === 0"
+              [loading]="isLoading" />
   </div>
 </div>

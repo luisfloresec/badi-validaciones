@@ -76,7 +76,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let org of filtered">
+          <tr *ngFor="let org of paginatedOrganizations">
             <td class="col-primary">{{ org.razonSocial }}</td>
             <td class="col-mono">{{ org.ruc }}</td>
             <td>{{ org.tipoOrganizacion.nombre || '—' }}</td>
@@ -113,6 +113,15 @@
         </tbody>
       </table>
     </div>
+
+    <!-- Paginador Angular Material -->
+    <mat-paginator [length]="totalItems"
+                   [pageSize]="pageSize"
+                   [pageIndex]="pageIndex"
+                   [pageSizeOptions]="[5, 10, 25, 50]"
+                   (page)="onPageChange($event)"
+                   showFirstLastButtons>
+    </mat-paginator>
   </div>
 
 </div>

@@ -1,29 +1,25 @@
 <div class="page-container" *ngIf="agreement">
-  
+
+  <!-- Breadcrumb -->
   <div class="breadcrumb">
-    <a routerLink="/agreements">Convenios</a>
-    <mat-icon>chevron_right</mat-icon>
+    <a (click)="goBack()">
+      <mat-icon>handshake</mat-icon>
+      Convenios
+    </a>
+    <mat-icon class="separator">chevron_right</mat-icon>
     <span class="current-page">{{ agreement.codigoConvenio || 'S/N' }}</span>
   </div>
 
-  <div class="badi-card detail-header-card">
+  <!-- Cabecera Principal -->
+  <div class="detail-header-card badi-card">
     <div class="top-actions">
-      <button mat-button class="btn-back" (click)="goBack()">
-        <mat-icon>arrow_back</mat-icon> Volver a convenios
-      </button>
-
+      <p-button label="Volver a Convenios" icon="pi pi-arrow-left" [text]="true" severity="secondary"
+        (onClick)="goBack()" />
       <div class="action-buttons">
-        <!-- Acciones principales -->
-        <button mat-flat-button class="btn-primary" 
-                *ngIf="agreement.estado === 'Registrado'" 
-                (click)="activateAgreement()">
-          <mat-icon>check_circle_outline</mat-icon> Activar convenio
-        </button>
-        <button mat-stroked-button color="primary" 
-                *ngIf="agreement.estado === 'Registrado'" 
-                (click)="openAgreementForm()">
-          <mat-icon>edit</mat-icon> Editar convenio
-        </button>
+        <p-button label="Activar convenio" icon="pi pi-check-circle" *ngIf="agreement.estado === 'Registrado'"
+          (onClick)="activateAgreement()" />
+        <p-button label="Editar convenio" icon="pi pi-pencil" [outlined]="true" severity="secondary"
+          *ngIf="agreement.estado === 'Registrado'" (onClick)="openAgreementForm()" />
       </div>
     </div>
 
@@ -31,142 +27,283 @@
       <div class="identity-main">
         <h1>Convenio {{ agreement.codigoConvenio || 'S/N' }}</h1>
         <div class="identity-badges">
-          <span class="estado-chip" [ngClass]="getEstadoClass(agreement.estado)">{{ agreement.estado }}</span>
-          <span class="badge" *ngIf="agreement.tipoConvenio?.nombre">
-            {{ agreement.tipoConvenio.nombre }}
-          </span>
           <span class="badge badge-ruc" *ngIf="agreement.organizacion?.ruc">
             RUC: {{ agreement.organizacion.ruc }}
+          </span>
+          <span class="badge badge-tipo" *ngIf="agreement.tipoConvenio?.nombre">
+            {{ agreement.tipoConvenio.nombre }}
+          </span>
+          <span class="estado-chip" [ngClass]="getEstadoClass(agreement.estado)">
+            {{ agreement.estado }}
           </span>
         </div>
         <p class="identity-location mt-2" *ngIf="agreement.organizacion">
           <mat-icon>domain</mat-icon>
-          Organización vinculada: <strong class="ml-1">{{ agreement.organizacion.razonSocial || agreement.organizacion.nombreComercial }}</strong>
+          Organización vinculada: <strong class="ml-1">{{ agreement.organizacion.razonSocial ||
+            agreement.organizacion.nombreComercial }}</strong>
         </p>
       </div>
-    </div>
-  </div>
-
-  <div class="page-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;">
-
-    <!-- Reglas del tipo de convenio -->
-    <div class="badi-card section-card">
-      <div class="badi-card-header">
-        <mat-icon class="badi-card-icon">rule</mat-icon>
-        <h2>Reglas del Tipo de Convenio</h2>
-      </div>
-      <div class="info-grid">
-        <div class="info-item">
-          <label>Duración en meses</label>
-          <span *ngIf="agreement.tipoConvenio?.duracionMeses">{{ agreement.tipoConvenio.duracionMeses }} meses</span>
-          <span *ngIf="!agreement.tipoConvenio?.duracionMeses" class="text-muted">Sin control por tiempo</span>
-        </div>
-        <div class="info-item">
-          <label>Máximo de retiros</label>
-          <span *ngIf="agreement.tipoConvenio?.maxRetiros">{{ agreement.tipoConvenio.maxRetiros }}</span>
-          <span *ngIf="!agreement.tipoConvenio?.maxRetiros" class="text-muted">Sin límite configurado</span>
-        </div>
-        <div class="info-item full-width mt-2">
-          <label>Resumen de control</label>
-          <span class="chip-info" *ngIf="!agreement.tipoConvenio?.duracionMeses && !agreement.tipoConvenio?.maxRetiros">
-            Control manual
-          </span>
-          <span class="desc-text" *ngIf="agreement.tipoConvenio?.duracionMeses || agreement.tipoConvenio?.maxRetiros">
-            Este convenio tiene controles automáticos configurados en su tipo.
-          </span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Ciclo de vida -->
-    <div class="badi-card section-card">
-      <div class="badi-card-header">
-        <mat-icon class="badi-card-icon">history</mat-icon>
-        <h2>Ciclo de Vida</h2>
-      </div>
-      <div class="info-grid">
-        <div class="info-item">
-          <label>Fecha de creación</label>
-          <span>{{ agreement.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}</span>
-        </div>
-        <div class="info-item">
-          <label>Fecha inicio referencial</label>
-          <span>{{ agreement.fechaInicio ? (agreement.fechaInicio | date:'dd/MM/yyyy') : 'No especificada' }}</span>
-        </div>
-        <div class="info-item">
-          <label>Fecha de activación</label>
-          <span>{{ agreement.fechaActivacion ? (agreement.fechaActivacion | date:'dd/MM/yyyy') : 'Pendiente' }}</span>
-        </div>
-        <div class="info-item">
-          <label>Fecha fin estimada</label>
-          <span>{{ agreement.fechaFinEstimada ? (agreement.fechaFinEstimada | date:'dd/MM/yyyy') : 'N/A' }}</span>
-        </div>
-        <div class="info-item">
-          <label>Fecha de finalización</label>
-          <span>{{ agreement.fechaFinalizacion ? (agreement.fechaFinalizacion | date:'dd/MM/yyyy') : 'N/A' }}</span>
-        </div>
-        <div class="info-item">
-          <label>Retiros realizados</label>
-          <span style="font-weight: 600; color: #015641;">
+      <div class="identity-stats">
+        <div class="stat-box">
+          <span class="stat-value">
             {{ agreement.retirosRealizados || 0 }}
-            <ng-container *ngIf="agreement.tipoConvenio?.maxRetiros">/ {{ agreement.tipoConvenio.maxRetiros }}</ng-container>
+            <ng-container *ngIf="agreement.tipoConvenio?.maxRetiros">/ {{ agreement.tipoConvenio.maxRetiros
+              }}</ng-container>
           </span>
+          <span class="stat-label">Retiros Realizados</span>
         </div>
-        <div class="info-item full-width" *ngIf="agreement.observaciones">
-          <label>Observaciones</label>
-          <span>{{ agreement.observaciones }}</span>
+        <div class="stat-box" *ngIf="agreement.tipoConvenio?.duracionMeses">
+          <span class="stat-value">{{ agreement.tipoConvenio.duracionMeses }}</span>
+          <span class="stat-label">Meses de duración</span>
         </div>
       </div>
     </div>
-
   </div>
 
-  <div class="page-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;">
-
-    <!-- Documentos Asociados -->
-    <app-document-section
-      entityType="CONVENIO"
-      [entityId]="agreement.id"
-      [entityName]="'Convenio ' + (agreement.codigoConvenio || 'S/N')"
-      [readonly]="isHistorico()">
-    </app-document-section>
-
-    <!-- Cronograma de entregas -->
-    <div class="badi-card section-card">
-      <div class="badi-card-header">
-        <mat-icon class="badi-card-icon">calendar_month</mat-icon>
-        <h2>Cronograma y entregas</h2>
-        <span class="header-spacer"></span>
-        <button mat-stroked-button class="btn-schedule-sm"
-                *ngIf="agreement && agreement.estado === 'Activo'"
-                (click)="openScheduleForm()">
-          <mat-icon>add</mat-icon> Programar
-        </button>
+  <!-- Información General del Convenio -->
+  <!-- Información General del Convenio -->
+  <div class="organization-section-card agreement-general-section">
+    <div class="organization-section-header">
+      <div class="organization-section-title">
+        <mat-icon class="section-icon">handshake</mat-icon>
+        <h2>Información General del Convenio</h2>
       </div>
+    </div>
 
-      <!-- Loading -->
-      <div class="badi-card-body pt-0" *ngIf="deliveriesLoading">
-        <div class="schedule-loading">
-          <mat-spinner diameter="24"></mat-spinner>
-          <span>Cargando entregas...</span>
+    <div class="organization-section-body">
+      <div class="info-grid agreement-info-grid">
+
+        <!-- Fila 1 -->
+        <div class="info-item">
+          <div class="info-item-icon-wrap">
+            <mat-icon>tag</mat-icon>
+          </div>
+          <div>
+            <label>Código de convenio</label>
+            <span>{{ agreement.codigoConvenio || 'S/N' }}</span>
+          </div>
         </div>
+
+        <div class="info-item">
+          <div class="info-item-icon-wrap">
+            <mat-icon>domain</mat-icon>
+          </div>
+          <div>
+            <label>Organización</label>
+            <span>
+              {{ agreement.organizacion?.razonSocial || agreement.organizacion?.nombreComercial || 'No especificado' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <div class="info-item-icon-wrap">
+            <mat-icon>category</mat-icon>
+          </div>
+          <div>
+            <label>Tipo de convenio</label>
+            <span>{{ agreement.tipoConvenio?.nombre || 'No especificado' }}</span>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <div class="info-item-icon-wrap">
+            <mat-icon>verified</mat-icon>
+          </div>
+          <div>
+            <label>Estado</label>
+            <span class="estado-chip agreement-status-inline" [ngClass]="getEstadoClass(agreement.estado)">
+              {{ agreement.estado }}
+            </span>
+          </div>
+        </div>
+
+        <div class="info-divider full-width"></div>
+
+        <!-- Fila 2 -->
+        <div class="info-item">
+          <div class="info-item-icon-wrap">
+            <mat-icon>event</mat-icon>
+          </div>
+          <div>
+            <label>Fecha de inicio</label>
+            <span class="agreement-date-value">
+              {{ agreement.fechaInicio ? (agreement.fechaInicio | date:'dd/MM/yyyy') : 'No aplica' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <div class="info-item-icon-wrap">
+            <mat-icon>event_available</mat-icon>
+          </div>
+          <div>
+            <label>Fecha fin estimada</label>
+            <span class="agreement-date-value">
+              {{ agreement.fechaFinEstimada ? (agreement.fechaFinEstimada | date:'dd/MM/yyyy') : 'No aplica' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <div class="info-item-icon-wrap">
+            <mat-icon>check_circle</mat-icon>
+          </div>
+          <div>
+            <label>Fecha de activación</label>
+            <span class="agreement-date-value">
+              {{ agreement.fechaActivacion ? (agreement.fechaActivacion | date:'dd/MM/yyyy') : 'No aplica' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <div class="info-item-icon-wrap">
+            <mat-icon>flag</mat-icon>
+          </div>
+          <div>
+            <label>Fecha de finalización</label>
+            <span class="agreement-date-value">
+              {{ agreement.fechaFinalizacion ? (agreement.fechaFinalizacion | date:'dd/MM/yyyy') : 'No aplica' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="info-divider full-width"></div>
+
+        <!-- Fila 3 -->
+        <div class="info-item">
+          <div class="info-item-icon-wrap">
+            <mat-icon>timer</mat-icon>
+          </div>
+          <div>
+            <label>Duración en meses</label>
+            <span>
+              {{ agreement.tipoConvenio?.duracionMeses ? agreement.tipoConvenio!.duracionMeses + ' meses' : 'Sin control
+              por tiempo' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <div class="info-item-icon-wrap">
+            <mat-icon>repeat</mat-icon>
+          </div>
+          <div>
+            <label>Máximo de retiros</label>
+            <span> {{ agreement.tipoConvenio?.maxRetiros ? agreement.tipoConvenio!.maxRetiros : 'Sin límite configurado'
+              }}
+            </span>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <div class="info-item-icon-wrap">
+            <mat-icon>inventory_2</mat-icon>
+          </div>
+          <div>
+            <label>Retiros realizados</label>
+            <span class="agreement-highlight-value">{{ agreement.retirosRealizados || 0 }}</span>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <div class="info-item-icon-wrap">
+            <mat-icon>fact_check</mat-icon>
+          </div>
+          <div>
+            <label>Control del convenio</label>
+            <span>
+              {{ (agreement.tipoConvenio?.duracionMeses || agreement.tipoConvenio?.maxRetiros)
+              ? 'Controles automáticos configurados.'
+              : 'Sin controles automáticos configurados.' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="info-divider full-width"></div>
+
+        <!-- Observaciones -->
+        <div class="info-item full-width">
+          <div class="info-item-icon-wrap">
+            <mat-icon>notes</mat-icon>
+          </div>
+          <div>
+            <label>Observaciones</label>
+            <span class="obs-text">
+              {{ agreement.observaciones || 'No especificado' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="info-divider full-width"></div>
+
+        <!-- Fechas meta -->
+        <div class="info-item meta-item agreement-meta-half">
+          <div class="info-item-icon-wrap meta-icon">
+            <mat-icon>calendar_today</mat-icon>
+          </div>
+          <div>
+            <label>Fecha de creación</label>
+            <span class="agreement-date-value">
+              {{ agreement.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="info-item meta-item agreement-meta-half">
+          <div class="info-item-icon-wrap meta-icon">
+            <mat-icon>update</mat-icon>
+          </div>
+          <div>
+            <label>Última actualización</label>
+            <span class="agreement-date-value">
+              {{ agreement.fechaActualizacion ? (agreement.fechaActualizacion | date:'dd/MM/yyyy HH:mm') :
+              (agreement.fechaCreacion | date:'dd/MM/yyyy HH:mm') }}
+            </span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Documentos Asociados -->
+  <app-document-section entityType="CONVENIO" [entityId]="agreement.id"
+    [entityName]="'Convenio ' + (agreement.codigoConvenio || 'S/N')" [readonly]="isHistorico()">
+  </app-document-section>
+
+  <!-- Cronograma de entregas -->
+  <div class="organization-section-card">
+    <div class="organization-section-header">
+      <div class="organization-section-title">
+        <mat-icon class="section-icon">calendar_month</mat-icon>
+        <h2>Cronograma y entregas</h2>
+      </div>
+      <div class="organization-section-action" *ngIf="agreement && agreement.estado === 'Activo'">
+        <p-button label="Programar" icon="pi pi-plus" size="small" styleClass="organization-action-button-p"
+          (onClick)="openScheduleForm()" />
+      </div>
+    </div>
+
+    <div class="organization-section-body">
+      <!-- Loading -->
+      <div class="schedule-loading" *ngIf="deliveriesLoading">
+        <mat-spinner diameter="24"></mat-spinner>
+        <span>Cargando entregas...</span>
       </div>
 
       <!-- Lista vacía -->
-      <div class="badi-card-body pt-0" *ngIf="!deliveriesLoading && deliveries.length === 0">
-        <div class="empty-schedule">
-          <mat-icon>event_busy</mat-icon>
-          <p class="empty-text">Aún no existen entregas programadas para este convenio.</p>
-          <button mat-stroked-button class="btn-schedule-empty"
-                  *ngIf="agreement && agreement.estado === 'Activo'"
-                  (click)="openScheduleForm()">
-            <mat-icon>add</mat-icon> Programar primera entrega
-          </button>
-        </div>
+      <div class="organization-empty-state" *ngIf="!deliveriesLoading && deliveries.length === 0">
+        <mat-icon>event_busy</mat-icon>
+        <p class="mt-2">Aún no existen entregas programadas para este convenio.</p>
+        <p-button label="Programar primera entrega" icon="pi pi-plus" size="small"
+          styleClass="organization-action-button-p mt-3" *ngIf="agreement && agreement.estado === 'Activo'"
+          (onClick)="openScheduleForm()" />
       </div>
 
       <!-- Lista de entregas -->
-      <div class="badi-card-body pt-0" *ngIf="!deliveriesLoading && deliveries.length > 0">
+      <div *ngIf="!deliveriesLoading && deliveries.length > 0">
         <div class="delivery-list">
           <div class="delivery-item" *ngFor="let d of deliveries" [ngClass]="getDeliveryEstadoClass(d.estado)">
             <div class="delivery-date">
@@ -186,32 +323,34 @@
           </div>
         </div>
 
-        <a class="schedule-link" routerLink="/schedule">
+        <a class="schedule-link mt-3" routerLink="/schedule">
           <mat-icon>open_in_new</mat-icon> Ver cronograma completo
         </a>
       </div>
     </div>
-
   </div>
 
   <!-- Acciones administrativas -->
-  <div class="badi-card admin-card mb-4" *ngIf="agreement.estado === 'Activo' || agreement.estado === 'Registrado'">
-    <div class="badi-card-header">
-      <mat-icon class="badi-card-icon color-warn">admin_panel_settings</mat-icon>
-      <h2>Acciones administrativas</h2>
+  <div class="organization-section-card admin-card mb-4"
+    *ngIf="agreement.estado === 'Activo' || agreement.estado === 'Registrado'">
+    <div class="organization-section-header">
+      <div class="organization-section-title">
+        <mat-icon class="section-icon color-warn">admin_panel_settings</mat-icon>
+        <h2>Acciones administrativas</h2>
+      </div>
     </div>
-    <div class="badi-card-body pt-0">
-      
+    <div class="organization-section-body">
+
       <!-- Finalizar convenio (Solo Activo) -->
       <div class="admin-action-row" *ngIf="agreement.estado === 'Activo'">
         <div class="admin-info">
           <h3>Finalizar Convenio</h3>
-          <p>El convenio se marcará como Finalizado y pasará a ser histórico. Ya no podrá operar como convenio vigente ni reactivarse.</p>
+          <p>El convenio se marcará como Finalizado y pasará a ser histórico. Ya no podrá operar como convenio vigente
+            ni reactivarse.</p>
         </div>
         <div class="admin-btn">
-          <button mat-flat-button style="background: #2563eb; color: white;" (click)="finalizeAgreement()">
-            <mat-icon>task_alt</mat-icon> Finalizar convenio
-          </button>
+          <p-button label="Finalizar convenio" icon="pi pi-check-circle" styleClass="p-button-primary"
+            (onClick)="finalizeAgreement()" />
         </div>
       </div>
 
@@ -219,12 +358,12 @@
       <div class="admin-action-row">
         <div class="admin-info">
           <h3>Anular Convenio</h3>
-          <p>La anulación dejará el convenio sin efecto de forma irreversible. Quedará en estado Anulado para historial.</p>
+          <p>La anulación dejará el convenio sin efecto de forma irreversible. Quedará en estado Anulado para historial.
+          </p>
         </div>
         <div class="admin-btn">
-          <button mat-stroked-button color="warn" (click)="deactivateAgreement()">
-            <mat-icon>block</mat-icon> Anular convenio
-          </button>
+          <p-button label="Anular convenio" icon="pi pi-ban" severity="danger" [outlined]="true"
+            (onClick)="deactivateAgreement()" />
         </div>
       </div>
 

@@ -3,11 +3,14 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { finalize } from 'rxjs/operators';
 import { MatSelectModule } from '@angular/material/select';
+import { MatIconModule } from '@angular/material/icon';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { InputTextModule } from 'primeng/inputtext';
+import { TextareaModule } from 'primeng/textarea';
+import { ButtonModule } from 'primeng/button';
+import { IftaLabelModule } from 'primeng/iftalabel';
+import { finalize } from 'rxjs/operators';
 import { RolesService, Role } from '../roles.service';
 
 @Component({
@@ -18,9 +21,12 @@ import { RolesService, Role } from '../roles.service';
     ReactiveFormsModule,
     MatDialogModule,
     MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatSelectModule
+    MatSelectModule,
+    MatIconModule,
+    InputTextModule,
+    TextareaModule,
+    ButtonModule,
+    IftaLabelModule
   ],
   templateUrl: './role-form.html',
   styleUrl: './role-form.scss'
@@ -28,7 +34,7 @@ import { RolesService, Role } from '../roles.service';
 export class RoleFormComponent implements OnInit {
   form: FormGroup;
   loading = false;
-  mode: 'create' | 'edit';
+  mode: 'create' | 'edit' | 'detail';
   role?: Role;
 
   constructor(
@@ -36,7 +42,7 @@ export class RoleFormComponent implements OnInit {
     private rolesService: RolesService,
     private dialogRef: MatDialogRef<RoleFormComponent>,
     private snackBar: MatSnackBar,
-    @Inject(MAT_DIALOG_DATA) public data: { mode: 'create' | 'edit', role?: Role }
+    @Inject(MAT_DIALOG_DATA) public data: { mode: 'create' | 'edit' | 'detail', role?: Role }
   ) {
     this.mode = data.mode;
     this.role = data.role;
@@ -44,19 +50,22 @@ export class RoleFormComponent implements OnInit {
     this.form = this.fb.group({
       nombre: ['', Validators.required],
       descripcion: [''],
-      perfilAcceso: ['', Validators.required]
+      perfilAcceso: ['Administrador', Validators.required]
     });
 
-    if (this.mode === 'edit' && this.role) {
+    if ((this.mode === 'edit' || this.mode === 'detail') && this.role) {
       this.form.patchValue({
         nombre: this.role.nombre,
         descripcion: this.role.descripcion,
-        perfilAcceso: this.role.perfilAcceso
+        perfilAcceso: this.role.perfilAcceso || 'Administrador'
       });
       
       const officialRoles = ['Administrador', 'Gestión Social', 'Auditor'];
-      if (officialRoles.includes(this.role.nombre)) {
+      if (officialRoles.includes(this.role.nombre) || this.mode === 'detail') {
         this.form.get('nombre')?.disable();
+      }
+      if (this.mode === 'detail') {
+        this.form.disable();
       }
     }
   }
@@ -64,7 +73,15 @@ export class RoleFormComponent implements OnInit {
   ngOnInit(): void {}
 
   onSubmit(): void {
-    if (this.form.invalid) return;
+    if (this.mode === 'detail') {
+      this.dialogRef.close();
+      return;
+    }
+
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
 
     this.loading = true;
     const val = this.form.getRawValue();
@@ -100,5 +117,12 @@ export class RoleFormComponent implements OnInit {
           }
         });
     }
+  }
+
+  getPerfilClass(perfil: string): string {
+    if (perfil === 'Administrador') return 'perfil-admin';
+    if (perfil === 'Gestión Social') return 'perfil-social';
+    if (perfil === 'Auditor') return 'perfil-auditor';
+    return 'perfil-default';
   }
 }

@@ -1,174 +1,196 @@
 <div class="page-container">
-  <div class="page-header">
-    <div class="header-content">
-      <h1>Repositorio Documental</h1>
-      <p class="subtitle">Gestión centralizada de documentos digitales</p>
+
+  <!-- Encabezado -->
+  <div class="page-header-row">
+    <div class="page-header">
+      <h1>Repositorio Global</h1>
+      <p>Gestión centralizada de documentos, evidencias y respaldos del sistema BADI</p>
     </div>
     <div class="header-actions">
-      <button mat-button class="btn-secondary-text mr-2" routerLink="/documents/types">
-        <mat-icon>settings</mat-icon> Tipos Documentales
+      <button mat-stroked-button routerLink="/documents/types" class="btn-secondary">
+        <mat-icon>category</mat-icon>
+        Tipos Documentales
       </button>
-      <button mat-flat-button color="primary" class="btn-primary" (click)="openUploadDialog()">
-        <mat-icon>upload_file</mat-icon> Subir Documento
+      <button mat-flat-button class="btn-primary" (click)="openUploadDialog()">
+        <mat-icon>upload_file</mat-icon>
+        Subir documento
       </button>
     </div>
   </div>
 
-  <div class="stats-grid mb-4" *ngIf="!loadingStats && stats">
-    <div class="stat-card">
-      <div class="stat-icon bg-primary-light text-primary">
-        <mat-icon>description</mat-icon>
+  <!-- Barra de Búsqueda y Filtros (Siempre visible para no perder foco) -->
+  <div class="filter-panel">
+    <div class="filter-row">
+      <p-iconfield class="search-field">
+        <p-inputicon styleClass="pi pi-search"></p-inputicon>
+        <input pInputText type="text"
+               class="w-full"
+               placeholder="Buscar por título, archivo, observaciones, entidad..."
+               [ngModel]="filters.search"
+               (ngModelChange)="onSearchChange($event)" />
+        <p-inputicon *ngIf="filters.search" styleClass="pi pi-times" style="cursor: pointer;" (click)="filters.search=''; onSearchChange('')"></p-inputicon>
+      </p-iconfield>
+
+      <div class="filter-select">
+        <p-select [options]="documentTypes" [(ngModel)]="filters.tipoDocumentoId" (onChange)="applyFilters()"
+                  optionLabel="nombre" optionValue="id" placeholder="Tipo Documental" [showClear]="!!filters.tipoDocumentoId"
+                  styleClass="w-full badi-select" appendTo="body"></p-select>
       </div>
-      <div class="stat-content">
-        <span class="stat-label">Total Documentos</span>
-        <span class="stat-value">{{ stats.total }}</span>
+
+      <div class="filter-select">
+        <p-select [options]="[{label: 'Activo', value: 'Activo'}, {label: 'Reemplazado', value: 'Reemplazado'}, {label: 'Anulado', value: 'Anulado'}]" 
+                  [(ngModel)]="filters.estado" (onChange)="applyFilters()"
+                  optionLabel="label" optionValue="value" placeholder="Estado" [showClear]="!!filters.estado"
+                  styleClass="w-full badi-select" appendTo="body"></p-select>
+      </div>
+
+      <div class="filter-select">
+        <p-select [options]="filterEntityTypes" [(ngModel)]="filters.entityType" (onChange)="applyFilters()"
+                  optionLabel="label" optionValue="value" placeholder="Tipo de Entidad" [showClear]="!!filters.entityType"
+                  styleClass="w-full badi-select" appendTo="body"></p-select>
       </div>
     </div>
-    <div class="stat-card">
-      <div class="stat-icon bg-success-light text-success">
-        <mat-icon>cloud_done</mat-icon>
+
+    <div class="filter-row secondary-filter-row" *ngIf="filters.entityType === 'ORGANIZACION' || filters.entityType === 'CONVENIO' || fechaDesdeObj || fechaHastaObj || filters.mostrarAnulados || filters.search || filters.tipoDocumentoId || filters.estado || filters.entityType">
+      <div class="filter-select" *ngIf="filters.entityType === 'ORGANIZACION'">
+        <p-select [options]="organizations" [(ngModel)]="filters.organizacionId" (onChange)="applyFilters()"
+                  optionLabel="razonSocial" optionValue="id" placeholder="Seleccione Organización" [showClear]="!!filters.organizacionId"
+                  styleClass="w-full badi-select" appendTo="body"></p-select>
       </div>
-      <div class="stat-content">
-        <span class="stat-label">Activos</span>
-        <span class="stat-value">{{ stats.byStatus | json | slice:0:0 }}{{ (stats.byStatus[0]?.count || 0) }}</span>
+
+      <div class="filter-select" *ngIf="filters.entityType === 'CONVENIO'">
+        <p-select [options]="agreements" [(ngModel)]="filters.convenioId" (onChange)="applyFilters()"
+                  optionLabel="nombre" optionValue="id" placeholder="Seleccione Convenio" [showClear]="!!filters.convenioId"
+                  styleClass="w-full badi-select" appendTo="body"></p-select>
       </div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon bg-info-light text-info">
-        <mat-icon>storage</mat-icon>
+
+      <div class="filter-datepicker">
+        <p-datepicker [(ngModel)]="fechaDesdeObj" (onSelect)="applyFilters()" (onClear)="applyFilters()"
+                      placeholder="Fecha Desde" dateFormat="yy-mm-dd" [showClear]="!!fechaDesdeObj" styleClass="w-full" appendTo="body"></p-datepicker>
       </div>
-      <div class="stat-content">
-        <span class="stat-label">Espacio Utilizado</span>
-        <span class="stat-value">{{ formatBytes(stats.totalBytes) }}</span>
+
+      <div class="filter-datepicker">
+        <p-datepicker [(ngModel)]="fechaHastaObj" (onSelect)="applyFilters()" (onClear)="applyFilters()"
+                      placeholder="Fecha Hasta" dateFormat="yy-mm-dd" [showClear]="!!fechaHastaObj" styleClass="w-full" appendTo="body"></p-datepicker>
       </div>
+
+      <div class="switch-wrapper">
+        <p-toggleswitch [(ngModel)]="filters.mostrarAnulados" (onChange)="applyFilters()" inputId="anuladosSwitch"></p-toggleswitch>
+        <label for="anuladosSwitch" class="switch-label cursor-pointer">Mostrar anulados</label>
+      </div>
+
+      <button mat-stroked-button color="warn" class="btn-clear" (click)="clearFilters()" *ngIf="filters.search || filters.tipoDocumentoId || filters.estado || filters.entityType || filters.organizacionId || filters.convenioId || fechaDesdeObj || fechaHastaObj || filters.mostrarAnulados">
+        <mat-icon>filter_alt_off</mat-icon>
+        Limpiar Filtros
+      </button>
     </div>
   </div>
 
-  <div class="badi-card">
-    <div class="filters-container mb-3 d-flex gap-3 align-items-center flex-wrap">
-      <mat-form-field appearance="outline" class="filter-field">
-        <mat-label>Buscar</mat-label>
-        <input matInput [(ngModel)]="filters.search" placeholder="Título o nombre" (keyup.enter)="applyFilters()">
-        <mat-icon matPrefix>search</mat-icon>
-      </mat-form-field>
+  <!-- Loading -->
+  <div class="state-container" *ngIf="loading">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Cargando documentos del repositorio...</p>
+  </div>
 
-      <mat-form-field appearance="outline" class="filter-field">
-        <mat-label>Tipo</mat-label>
-        <mat-select [(ngModel)]="filters.tipoDocumentoId" (selectionChange)="applyFilters()">
-          <mat-option value="">Todos</mat-option>
-          <mat-option *ngFor="let t of documentTypes" [value]="t.id">{{t.nombre}}</mat-option>
-        </mat-select>
-      </mat-form-field>
+  <!-- Error -->
+  <div class="state-container state-error" *ngIf="!loading && error">
+    <mat-icon class="state-icon">cloud_off</mat-icon>
+    <p><strong>{{ error }}</strong></p>
+    <p class="state-hint">Verifica que el backend esté ejecutándose correctamente en http://localhost:3000</p>
+    <button mat-stroked-button (click)="loadDocuments()">
+      <mat-icon>refresh</mat-icon> Reintentar
+    </button>
+  </div>
 
-      <mat-form-field appearance="outline" class="filter-field">
-        <mat-label>Estado</mat-label>
-        <mat-select [(ngModel)]="filters.estado" (selectionChange)="applyFilters()">
-          <mat-option value="">Todos</mat-option>
-          <mat-option value="Activo">Activo</mat-option>
-          <mat-option value="Reemplazado">Reemplazado</mat-option>
-          <mat-option value="Anulado">Anulado</mat-option>
-        </mat-select>
-      </mat-form-field>
-
-      <div class="filter-actions d-flex gap-2 mb-3 align-items-center">
-        <mat-checkbox [(ngModel)]="filters.mostrarAnulados" (change)="applyFilters()" color="primary" class="mr-2">
-          Mostrar anulados
-        </mat-checkbox>
-        <button mat-button color="primary" (click)="applyFilters()">Filtrar</button>
-        <button mat-button (click)="clearFilters()">Limpiar</button>
-      </div>
+  <!-- Empty State Estético -->
+  <div class="state-container empty-repo-state" *ngIf="!loading && !error && documents.length === 0">
+    <div class="empty-icon-box">
+      <mat-icon class="state-icon">find_in_page</mat-icon>
     </div>
+    <p><strong>No se encontraron documentos en el Repositorio Global.</strong></p>
+    <p class="state-hint">No hay archivos que coincidan con los filtros actuales o el repositorio está vacío.</p>
+    <div class="empty-actions">
+      <button mat-stroked-button (click)="clearFilters()" *ngIf="filters.search || filters.tipoDocumentoId || filters.estado || filters.entityType || filters.organizacionId || filters.convenioId || fechaDesdeObj || fechaHastaObj || filters.mostrarAnulados">
+        <mat-icon>filter_alt_off</mat-icon> Limpiar filtros
+      </button>
+      <button mat-flat-button class="btn-primary" (click)="openUploadDialog()">
+        <mat-icon>upload_file</mat-icon> Subir primer documento
+      </button>
+    </div>
+  </div>
 
-    <div class="table-container">
-      <div *ngIf="loading" class="loading-state text-center p-4">
-        <mat-spinner diameter="40" class="mx-auto"></mat-spinner>
-        <p class="mt-2 text-muted">Cargando documentos...</p>
-      </div>
-
-      <div *ngIf="!loading && error" class="error-state text-center p-4">
-        <mat-icon color="warn">error_outline</mat-icon>
-        <p>{{ error }}</p>
-        <button mat-button color="primary" (click)="loadDocuments()">Reintentar</button>
-      </div>
-
-      <table mat-table [dataSource]="documents" class="badi-table" *ngIf="!loading && !error && documents.length > 0">
-
-        <ng-container matColumnDef="tipo">
-          <th mat-header-cell *matHeaderCellDef> Tipo </th>
-          <td mat-cell *matCellDef="let doc">
-            <span class="badge badge-outline-primary">{{ doc.tipoDocumento.codigo }}</span>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="titulo">
-          <th mat-header-cell *matHeaderCellDef> Título </th>
-          <td mat-cell *matCellDef="let doc" class="fw-500"> {{ doc.titulo }} </td>
-        </ng-container>
-
-        <ng-container matColumnDef="nombreArchivo">
-          <th mat-header-cell *matHeaderCellDef> Archivo </th>
-          <td mat-cell *matCellDef="let doc" class="text-muted text-sm">
-            <mat-icon class="icon-sm align-middle me-1">insert_drive_file</mat-icon>
-            {{ doc.nombreOriginal }}
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="entidad">
-          <th mat-header-cell *matHeaderCellDef> Contexto </th>
-          <td mat-cell *matCellDef="let doc">
-            <span class="badge" [ngClass]="doc.entidadRelacionada ? 'badge-secondary' : 'badge-light'">
-              {{ getEntidadLabel(doc) }}
-            </span>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="fechaCarga">
-          <th mat-header-cell *matHeaderCellDef> Fecha Carga </th>
-          <td mat-cell *matCellDef="let doc" class="col-mono"> {{ doc.fechaCarga | date:'dd/MM/yyyy HH:mm' }} </td>
-        </ng-container>
-
-        <ng-container matColumnDef="tamano">
-          <th mat-header-cell *matHeaderCellDef> Tamaño </th>
-          <td mat-cell *matCellDef="let doc" class="col-mono text-end"> {{ formatBytes(doc.tamanoBytes, 1) }} </td>
-        </ng-container>
-
-        <ng-container matColumnDef="estado">
-          <th mat-header-cell *matHeaderCellDef class="text-center"> Estado </th>
-          <td mat-cell *matCellDef="let doc" class="text-center">
-            <span class="estado-chip" [ngClass]="getEstadoClass(doc.estado)">{{ doc.estado }}</span>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="acciones">
-          <th mat-header-cell *matHeaderCellDef class="text-center"> Acciones </th>
-          <td mat-cell *matCellDef="let doc" class="text-center actions-cell">
-            <button mat-icon-button color="primary" matTooltip="Ver detalle" (click)="openDetail(doc)">
-              <mat-icon>visibility</mat-icon>
-            </button>
-            <button mat-icon-button class="text-success" matTooltip="Descargar" (click)="download(doc)">
-              <mat-icon>download</mat-icon>
-            </button>
-            <button mat-icon-button color="accent" matTooltip="Reemplazar versión" (click)="openReplaceDialog(doc)" *ngIf="doc.estado === 'Activo'">
-              <mat-icon>find_replace</mat-icon>
-            </button>
-          </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;" [ngClass]="{'inactive-row': row.estado !== 'Activo'}"></tr>
+  <!-- Tabla -->
+  <div class="badi-card table-card" *ngIf="!loading && !error && documents.length > 0">
+    <div class="table-wrapper">
+      <table class="org-table">
+        <thead>
+          <tr>
+            <th class="col-doc-info">Documento</th>
+            <th class="col-tipo">Tipo Documental</th>
+            <th class="col-entidad">Entidad Asociada</th>
+            <th class="col-fecha">Fecha Carga</th>
+            <th class="col-fecha">Fecha Doc. Físico</th>
+            <th class="col-tamano text-right">Tamaño</th>
+            <th class="col-estado text-center">Estado</th>
+            <th class="col-actions text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let doc of documents">
+            <td class="col-doc-info">
+              <div class="doc-cell">
+                <mat-icon class="file-icon">{{ getFileIcon(doc) }}</mat-icon>
+                <div class="doc-meta">
+                  <span class="doc-title" [matTooltip]="doc.titulo">{{ doc.titulo }}</span>
+                  <span class="doc-filename" [matTooltip]="doc.nombreOriginal || doc.nombreArchivo">{{ doc.nombreOriginal || doc.nombreArchivo }}</span>
+                  <span class="doc-obs" *ngIf="doc.observaciones" [matTooltip]="doc.observaciones">{{ doc.observaciones }}</span>
+                </div>
+              </div>
+            </td>
+            <td class="col-tipo" [matTooltip]="doc.tipoDocumento?.nombre || ''">{{ doc.tipoDocumento?.nombre || '—' }}</td>
+            <td class="col-entidad" [matTooltip]="getEntidadLabel(doc)">{{ getEntidadLabel(doc) }}</td>
+            <td class="col-fecha">{{ doc.fechaCarga | date:'dd/MM/yy HH:mm' }}</td>
+            <td class="col-fecha">{{ (doc.fechaDocumento | date:'dd/MM/yyyy') || '—' }}</td>
+            <td class="col-tamano text-right font-medium">{{ formatBytes(doc.tamanoBytes) }}</td>
+            <td class="col-estado text-center">
+              <span class="estado-chip" [ngClass]="getEstadoClass(doc.estado)">
+                {{ doc.estado }}
+              </span>
+            </td>
+            <td class="col-actions text-center">
+              <button mat-icon-button class="action-btn" (click)="openDetail(doc)" matTooltip="Ver detalle">
+                <mat-icon>visibility</mat-icon>
+              </button>
+              <button mat-icon-button class="action-btn" (click)="viewFile(doc)" matTooltip="Ver archivo en navegador">
+                <mat-icon>open_in_new</mat-icon>
+              </button>
+              <button mat-icon-button class="action-btn" color="primary" (click)="download(doc)" matTooltip="Descargar archivo">
+                <mat-icon>download</mat-icon>
+              </button>
+              <button mat-icon-button class="action-btn" color="primary" (click)="openMetadataDialog(doc)" *ngIf="doc.estado === 'Activo'" matTooltip="Editar metadatos">
+                <mat-icon>edit_note</mat-icon>
+              </button>
+              <button mat-icon-button class="action-btn" color="primary" (click)="openReplaceDialog(doc)" *ngIf="doc.estado === 'Activo'" matTooltip="Reemplazar archivo">
+                <mat-icon>find_replace</mat-icon>
+              </button>
+              <button mat-icon-button class="action-btn" color="warn" (click)="annulDocument(doc)" *ngIf="doc.estado === 'Activo'" matTooltip="Anular documento">
+                <mat-icon>block</mat-icon>
+              </button>
+            </td>
+          </tr>
+        </tbody>
       </table>
-
-      <div *ngIf="!loading && !error && documents.length === 0" class="empty-state">
-        <mat-icon>folder_open</mat-icon>
-        <p>No se encontraron documentos.</p>
-      </div>
-
-      <mat-paginator [length]="totalItems"
-                     [pageSize]="pageSize"
-                     [pageSizeOptions]="[5, 10, 25, 50]"
-                     (page)="onPageChange($event)"
-                     *ngIf="!error && (documents.length > 0 || totalItems > 0)">
-      </mat-paginator>
     </div>
+    
+    <mat-paginator
+      [length]="totalItems"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="[5, 10, 25, 50]"
+      [pageIndex]="pageIndex"
+      (page)="onPageChange($event)"
+      showFirstLastButtons
+      class="badi-paginator">
+    </mat-paginator>
   </div>
+
 </div>

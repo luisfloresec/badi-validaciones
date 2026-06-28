@@ -4,9 +4,7 @@
       <mat-icon>event_busy</mat-icon>
       <h2>Cancelar entrega programada</h2>
     </div>
-    <button mat-icon-button class="close-button" mat-dialog-close>
-      <mat-icon>close</mat-icon>
-    </button>
+    <p-button icon="pi pi-times" [text]="true" severity="secondary" mat-dialog-close [disabled]="isLoading" />
   </div>
 
   <div class="dialog-warning-banner">
@@ -14,22 +12,33 @@
     <span>Esta acción marcará la entrega como <strong>Cancelada</strong>. No se eliminará del sistema, pero quedará como histórica y no podrá revertirse.</span>
   </div>
 
-  <form [formGroup]="form" (ngSubmit)="onSubmit()">
-    <div class="dialog-body" mat-dialog-content>
-      <mat-form-field appearance="outline" class="full-field">
-        <mat-label>Motivo de cancelación</mat-label>
-        <textarea matInput formControlName="motivoCancelacion" rows="3" placeholder="Ej: La organización solicitó postergar indefinidamente la entrega"></textarea>
-        <mat-error *ngIf="form.get('motivoCancelacion')?.hasError('required')">El motivo es obligatorio</mat-error>
-        <mat-error *ngIf="form.get('motivoCancelacion')?.hasError('minlength')">Mínimo 5 caracteres</mat-error>
-      </mat-form-field>
-    </div>
+  <div class="dialog-content" mat-dialog-content>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="badi-form p-fluid">
+      <div class="section-title-container">
+        <h3 class="form-section-title">Motivo de Cancelación</h3>
+      </div>
 
-    <div class="dialog-actions" mat-dialog-actions>
-      <button mat-stroked-button type="button" mat-dialog-close [disabled]="isLoading">Volver</button>
-      <button mat-flat-button type="submit" class="btn-cancel-action" [disabled]="form.invalid || isLoading">
-        <mat-spinner *ngIf="isLoading" diameter="18" class="btn-spinner"></mat-spinner>
-        <span *ngIf="!isLoading">Confirmar cancelación</span>
-      </button>
-    </div>
-  </form>
+      <div class="form-row">
+        <div class="field-container col-full">
+          <p-iftalabel>
+            <textarea pTextarea formControlName="motivoCancelacion" id="motivoCancelacion" rows="3"></textarea>
+            <label for="motivoCancelacion">Motivo de cancelación</label>
+          </p-iftalabel>
+          <small class="field-hint">Ej: La organización solicitó postergar indefinidamente la entrega</small>
+          <small class="field-error" *ngIf="form.get('motivoCancelacion')?.hasError('required') && form.get('motivoCancelacion')?.touched">El motivo es obligatorio.</small>
+          <small class="field-error" *ngIf="form.get('motivoCancelacion')?.hasError('minlength') && form.get('motivoCancelacion')?.touched">Mínimo 5 caracteres.</small>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="dialog-actions" mat-dialog-actions>
+    <p-button label="Volver" [outlined]="true" severity="secondary" mat-dialog-close [disabled]="isLoading" />
+    <p-button label="Confirmar cancelación"
+              icon="pi pi-ban"
+              severity="danger"
+              (onClick)="onSubmit()"
+              [disabled]="form.invalid || isLoading"
+              [loading]="isLoading" />
+  </div>
 </div>

@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
@@ -12,6 +12,13 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { AgreementsService, AgreementType } from '../agreements.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { OrganizationsService } from '../../organizations/organizations.service';
+import { InputTextModule } from 'primeng/inputtext';
+import { SelectModule } from 'primeng/select';
+import { TextareaModule } from 'primeng/textarea';
+import { IftaLabelModule } from 'primeng/iftalabel';
+import { FluidModule } from 'primeng/fluid';
+import { ButtonModule } from 'primeng/button';
+import { DatePickerModule } from 'primeng/datepicker';
 
 @Component({
   selector: 'app-agreement-form-dialog',
@@ -26,7 +33,14 @@ import { OrganizationsService } from '../../organizations/organizations.service'
     MatSelectModule,
     MatIconModule,
     MatDatepickerModule,
-    MatNativeDateModule
+    MatNativeDateModule,
+    InputTextModule,
+    SelectModule,
+    TextareaModule,
+    IftaLabelModule,
+    FluidModule,
+    ButtonModule,
+    DatePickerModule
   ],
   templateUrl: './agreement-form-dialog.html',
   styleUrls: ['./agreement-form-dialog.scss']
@@ -49,7 +63,8 @@ export class AgreementFormDialogComponent implements OnInit {
       organizationId?: string, 
       agreement?: any,
       disableOrgSelect?: boolean 
-    }
+    },
+    private cdr: ChangeDetectorRef
   ) {
     this.isEdit = !!data.agreement;
     this.agreementEstado = data.agreement?.estado || '';
@@ -112,7 +127,7 @@ export class AgreementFormDialogComponent implements OnInit {
 
   loadTypes() {
     this.agreementsService.getTypes().subscribe({
-      next: (res) => this.types = res,
+      next: (res) => { this.types = res; this.cdr.detectChanges(); },
       error: () => this.snackBar.open('Error al cargar tipos de convenio', 'Cerrar', { duration: 3000 })
     });
   }
@@ -120,7 +135,7 @@ export class AgreementFormDialogComponent implements OnInit {
   loadOrganizations() {
     // Si estuviéramos en la pantalla general, cargamos la lista (asumiendo que existe getAll)
     this.organizationService.getAll().subscribe({
-      next: (res: any) => this.organizations = res.filter((o: any) => o.estado !== 'Inactiva'),
+      next: (res: any) => { this.organizations = res.filter((o: any) => o.estado !== 'Inactiva'); this.cdr.detectChanges(); },
       error: () => {}
     });
   }
@@ -129,10 +144,33 @@ export class AgreementFormDialogComponent implements OnInit {
     return this.agreementEstado === 'Anulado' || this.agreementEstado === 'Finalizado';
   }
 
+  get selectedTypeInfo(): AgreementType | undefined {
+    const selectedId = this.form.get('tipoConvenioId')?.value;
+    return this.types.find(t => t.id === selectedId);
+  }
+
+  formatDisplayDate(date: Date | string | null): string {
+    if (!date) return 'Seleccione una fecha';
+
+    const value = typeof date === 'string' ? new Date(date + 'T00:00:00') : date;
+    if (isNaN(value.getTime())) return 'Seleccione una fecha';
+
+    return new Intl.DateTimeFormat('es-EC', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    }).format(value);
+  }
+
   onSubmit() {
-    if (this.form.invalid || this.isReadOnly) return;
+    if (this.form.invalid || this.isReadOnly) {
+      this.form.markAllAsTouched();
+      this.cdr.detectChanges();
+      return;
+    }
 
     this.isLoading = true;
+    this.cdr.detectChanges();
     const v = this.form.getRawValue(); // gets disabled fields too
     
     const payload: any = {};
@@ -162,12 +200,15 @@ export class AgreementFormDialogComponent implements OnInit {
 
     request.subscribe({
       next: (res) => {
+        this.isLoading = false;
+        this.cdr.detectChanges();
         this.snackBar.open(`Convenio ${this.isEdit ? 'actualizado' : 'registrado'} con éxito`, 'Cerrar', { duration: 3000 });
         this.dialogRef.close(true);
       },
       error: (err) => {
-        this.snackBar.open(err.error?.message || 'Error al guardar el convenio', 'Cerrar', { duration: 3000 });
         this.isLoading = false;
+        this.cdr.detectChanges();
+        this.snackBar.open(err.error?.message || 'Error al guardar el convenio', 'Cerrar', { duration: 3000 });
       }
     });
   }

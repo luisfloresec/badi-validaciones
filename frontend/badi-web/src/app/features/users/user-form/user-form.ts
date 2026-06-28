@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { InputTextModule } from 'primeng/inputtext';
+import { ButtonModule } from 'primeng/button';
+import { IftaLabelModule } from 'primeng/iftalabel';
 import { finalize } from 'rxjs/operators';
 import { UsersService, User } from '../users.service';
 import { RolesService, Role } from '../../roles/roles.service';
@@ -20,10 +21,11 @@ import { RolesService, Role } from '../../roles/roles.service';
     ReactiveFormsModule,
     MatDialogModule,
     MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
     MatSelectModule,
-    MatIconModule
+    MatIconModule,
+    InputTextModule,
+    ButtonModule,
+    IftaLabelModule
   ],
   templateUrl: './user-form.html',
   styleUrl: './user-form.scss'
@@ -51,16 +53,20 @@ export class UserFormComponent implements OnInit {
       apellidos: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       roles: [[], Validators.required],
+      estado: ['Activo', Validators.required],
+      requiereCambioPassword: [true],
       password: ['']
     });
 
     if (this.mode === 'create') {
-      this.form.get('password')?.setValidators([Validators.required, Validators.minLength(6)]);
+      this.form.get('password')?.setValidators([Validators.required, Validators.minLength(8)]);
     } else if (this.mode === 'edit' && this.user) {
       this.form.patchValue({
         nombres: this.user.nombres,
         apellidos: this.user.apellidos,
         email: this.user.email,
+        estado: this.user.estado || 'Activo',
+        requiereCambioPassword: this.user.requiereCambioPassword !== undefined ? this.user.requiereCambioPassword : false,
         roles: this.user.roles ? this.user.roles.map(r => r.id) : []
       });
     }
@@ -79,7 +85,10 @@ export class UserFormComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.form.invalid) return;
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
 
     this.loading = true;
     const val = this.form.value;
@@ -88,10 +97,12 @@ export class UserFormComponent implements OnInit {
       nombres: val.nombres,
       apellidos: val.apellidos,
       email: val.email,
+      estado: val.estado,
+      requiereCambioPassword: val.requiereCambioPassword,
       roleIds: val.roles
     };
 
-    if (val.password) {
+    if (val.password && this.mode === 'create') {
       dto.password = val.password;
     }
 

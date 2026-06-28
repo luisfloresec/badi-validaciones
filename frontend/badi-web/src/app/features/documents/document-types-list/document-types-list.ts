@@ -10,6 +10,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatChipsModule } from '@angular/material/chips';
 import { finalize } from 'rxjs/operators';
+import { ButtonModule } from 'primeng/button';
 import { DocumentTypesService, DocumentType } from '../document-types.service';
 import { DocumentTypeFormDialogComponent } from '../document-type-form-dialog/document-type-form-dialog';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog';
@@ -26,7 +27,8 @@ import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialo
     MatTooltipModule,
     MatDialogModule,
     MatProgressSpinnerModule,
-    MatChipsModule
+    MatChipsModule,
+    ButtonModule
   ],
   templateUrl: './document-types-list.html',
   styleUrls: ['./document-types-list.scss']
@@ -54,6 +56,8 @@ export class DocumentTypesListComponent implements OnInit {
   loadTypes() {
     this.loading = true;
     this.error = null;
+    this.cdr.detectChanges();
+
     this.documentTypesService.getAll()
       .pipe(finalize(() => {
         this.loading = false;
@@ -61,12 +65,14 @@ export class DocumentTypesListComponent implements OnInit {
       }))
       .subscribe({
         next: (res) => {
-          this.types = res;
+          this.types = res ?? [];
           this.cdr.detectChanges();
         },
         error: () => {
           this.error = 'Error al cargar tipos documentales';
           this.snackBar.open('Error al cargar tipos documentales', 'Cerrar', { duration: 3000 });
+          this.types = [];
+          this.cdr.detectChanges();
         }
       });
   }

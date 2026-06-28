@@ -1,70 +1,149 @@
-<div class="container-fluid mt-4 px-4">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <div class="d-flex align-items-center">
-      <h1 class="mb-0">Entregas Realizadas</h1>
+<div class="page-container">
+
+  <!-- Encabezado -->
+  <div class="page-header-row">
+    <div class="page-header">
+      <h1>Entregas Realizadas</h1>
+      <p>Registro histórico de las entregas ejecutadas y confirmadas en el sistema BADI</p>
+    </div>
+  </div>
+
+  <!-- Tarjetas de Resumen / Indicadores -->
+  <div class="identity-stats-row" *ngIf="!isLoading && !error">
+    <div class="stat-box">
+      <div class="stat-icon-wrap">
+        <mat-icon>local_shipping</mat-icon>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value">{{ entregasMes }}</span>
+        <span class="stat-label">Entregas este mes</span>
+      </div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-icon-wrap">
+        <mat-icon>scale</mat-icon>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value">{{ kilosMes | number:'1.0-2' }} kg</span>
+        <span class="stat-label">Kilos entregados (Mes)</span>
+      </div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-icon-wrap">
+        <mat-icon>groups</mat-icon>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value">{{ personasMes }}</span>
+        <span class="stat-label">Personas atendidas (Mes)</span>
+      </div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-icon-wrap">
+        <mat-icon>history</mat-icon>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value">{{ totalKilos | number:'1.0-2' }} kg</span>
+        <span class="stat-label">Total Kilos Históricos</span>
+      </div>
     </div>
   </div>
 
   <!-- Barra de búsqueda y filtros -->
-  <mat-card class="mb-4 badi-card filter-card">
-    <mat-card-content class="d-flex gap-3 align-items-center pt-3">
-      <mat-form-field appearance="outline" class="flex-grow-1 mb-0 pb-0">
-        <mat-label>Buscar por organización o convenio</mat-label>
-        <mat-icon matPrefix>search</mat-icon>
-        <input matInput [(ngModel)]="searchTerm" (ngModelChange)="onSearch()" placeholder="Ej. Fundación Hogar...">
-        <button *ngIf="searchTerm" matSuffix mat-icon-button aria-label="Clear" (click)="searchTerm=''; onSearch()">
-          <mat-icon>close</mat-icon>
-        </button>
-      </mat-form-field>
-    </mat-card-content>
-  </mat-card>
+  <div class="search-bar" *ngIf="!isLoading && !error && deliveries.length > 0">
+    <p-iconfield class="search-field">
+      <p-inputicon styleClass="pi pi-search"></p-inputicon>
+      <input pInputText type="text"
+             class="w-full"
+             placeholder="Buscar por organización o convenio"
+             [(ngModel)]="searchTerm"
+             (ngModelChange)="onSearch()" />
+      <p-inputicon *ngIf="searchTerm" styleClass="pi pi-times" style="cursor: pointer;" (click)="searchTerm=''; onSearch()"></p-inputicon>
+    </p-iconfield>
 
-  <div *ngIf="isLoading" class="d-flex justify-content-center p-5">
+    <div class="filter-wrapper">
+      <p-select [(ngModel)]="filterEstado" [options]="estadoOptions" optionLabel="label" optionValue="value" (onChange)="onSearch()" styleClass="badi-select" placeholder="Estado"></p-select>
+    </div>
+
+    <button mat-stroked-button class="btn-clear-filters" *ngIf="searchTerm || filterEstado !== 'TODOS'" (click)="clearFilters()">
+      <mat-icon>filter_alt_off</mat-icon> Limpiar filtros
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div class="state-container" *ngIf="isLoading">
     <mat-spinner diameter="40"></mat-spinner>
+    <p>Cargando entregas realizadas...</p>
   </div>
 
-  <div *ngIf="error" class="alert alert-danger">
-    {{ error }}
+  <!-- Error -->
+  <div class="state-container state-error" *ngIf="!isLoading && error">
+    <mat-icon class="state-icon">cloud_off</mat-icon>
+    <p><strong>{{ error }}</strong></p>
+    <p class="state-hint">Verifica que el backend esté ejecutándose en http://localhost:3000</p>
+    <button mat-stroked-button (click)="loadDeliveries()">
+      <mat-icon>refresh</mat-icon> Reintentar
+    </button>
   </div>
 
-  <!-- Tabla de Resultados -->
-  <mat-card class="badi-card" *ngIf="!isLoading && !error">
-    <div class="table-responsive">
-      <table class="badi-table">
+  <!-- Empty -->
+  <div class="state-container" *ngIf="!isLoading && !error && deliveries.length === 0">
+    <mat-icon class="state-icon">local_shipping</mat-icon>
+    <p><strong>No hay entregas realizadas registradas.</strong></p>
+    <p class="state-hint">Las entregas confirmadas aparecerán aquí una vez que se ejecuten en el sistema.</p>
+  </div>
+
+  <!-- Sin resultados de búsqueda -->
+  <div class="state-container" *ngIf="!isLoading && !error && deliveries.length > 0 && filteredDeliveries.length === 0">
+    <mat-icon class="state-icon">search_off</mat-icon>
+    <p><strong>Sin resultados para "{{ searchTerm }}"</strong></p>
+    <p class="state-hint">Intenta con otro término de búsqueda o cambia el filtro de estado.</p>
+  </div>
+
+  <!-- Tabla -->
+  <div class="badi-card table-card" *ngIf="!isLoading && !error && filteredDeliveries.length > 0">
+    <div class="table-wrapper">
+      <table class="org-table">
         <thead>
           <tr>
             <th>Fecha</th>
             <th>Organización</th>
             <th>Convenio</th>
-            <th>Kilos</th>
-            <th>Estado</th>
-            <th class="actions-col">Acciones</th>
+            <th class="text-right">Kilos</th>
+            <th class="text-right">Personas Atendidas</th>
+            <th class="text-center">Estado</th>
+            <th class="text-center">Acciones</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let delivery of filteredDeliveries">
-            <td>{{ delivery.fechaRealizacion | date:'dd/MM/yyyy' }}</td>
-            <td class="fw-500">{{ delivery.convenio?.organizacion?.razonSocial || delivery.convenio?.organizacion?.nombreComercial }}</td>
-            <td>{{ delivery.convenio?.codigoConvenio }}</td>
-            <td>{{ delivery.kilosEntregados }} kg</td>
-            <td>
-              <span class="badge bg-success">{{ delivery.estado }}</span>
+          <tr *ngFor="let delivery of paginatedDeliveries">
+            <td class="col-mono">{{ delivery.fechaRealizacion | date:'dd/MM/yyyy' }}</td>
+            <td class="col-primary">{{ delivery.convenio?.organizacion?.razonSocial || delivery.convenio?.organizacion?.nombreComercial || '—' }}</td>
+            <td class="col-mono">{{ delivery.convenio?.codigoConvenio || '—' }}</td>
+            <td class="text-right">{{ delivery.kilosEntregados }} kg</td>
+            <td class="text-right">{{ delivery.personasAtendidas }}</td>
+            <td class="text-center">
+              <span class="estado-chip" [ngClass]="getEstadoClass(delivery.estado)">
+                {{ delivery.estado }}
+              </span>
             </td>
-            <td class="actions-col">
-              <button mat-icon-button color="primary" [routerLink]="['/realized-deliveries', delivery.id]" matTooltip="Ver detalle">
+            <td class="text-center col-actions">
+              <button mat-icon-button [routerLink]="['/realized-deliveries', delivery.id]" matTooltip="Ver detalle">
                 <mat-icon>visibility</mat-icon>
               </button>
-            </td>
-          </tr>
-          
-          <tr *ngIf="filteredDeliveries.length === 0">
-            <td colspan="6" class="text-center text-muted py-5">
-              <mat-icon class="d-block mx-auto mb-2 text-secondary" style="font-size: 48px; height: 48px; width: 48px;">local_shipping</mat-icon>
-              No se encontraron entregas realizadas.
             </td>
           </tr>
         </tbody>
       </table>
     </div>
-  </mat-card>
+
+    <!-- Paginador Angular Material -->
+    <mat-paginator [length]="totalItems"
+                   [pageSize]="pageSize"
+                   [pageIndex]="pageIndex"
+                   [pageSizeOptions]="[5, 10, 25, 50]"
+                   (page)="onPageChange($event)"
+                   showFirstLastButtons>
+    </mat-paginator>
+  </div>
+
 </div>

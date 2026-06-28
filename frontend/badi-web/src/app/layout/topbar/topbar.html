@@ -4,35 +4,24 @@
       currentTitle === 'Organizaciones' ? 'corporate_fare' :
       currentTitle === 'Convenios' ? 'handshake' :
       currentTitle === 'Cronograma' ? 'calendar_today' :
+      currentTitle === 'Entregas' ? 'local_shipping' :
       currentTitle === 'Repositorio Global' ? 'folder' :
       currentTitle === 'Usuarios' ? 'people' :
       currentTitle === 'Roles' ? 'admin_panel_settings' :
-      currentTitle === 'Auditoría' ? 'history' : 'apps' }}</mat-icon>
+      currentTitle === 'Auditoría' ? 'history' :
+      currentTitle === 'Administrar Perfil' ? 'person' : 'apps' }}</mat-icon>
     <span class="title-text">{{ currentTitle }}</span>
   </div>
   
   <span class="spacer"></span>
   
   <div class="user-actions">
-    <button mat-icon-button aria-label="Notificaciones" class="notification-btn">
-      <mat-icon>notifications_none</mat-icon>
-    </button>
-    <div class="topbar-divider"></div>
-    <div class="user-profile" [matMenuTriggerFor]="userMenu">
+    <p-menu #profileMenu [model]="profileItems" [popup]="true" appendTo="body" styleClass="badi-profile-menu"></p-menu>
+    <button class="user-profile-btn" (click)="profileMenu.toggle($event)">
       <span class="user-name">{{ authService.getFullName() }}</span>
       <div class="avatar relative overflow-hidden">
         <span>{{ authService.getInitials() }}</span>
       </div>
-    </div>
-    <mat-menu #userMenu="matMenu">
-      <button mat-menu-item routerLink="/profile">
-        <mat-icon>person</mat-icon>
-        <span>Mi perfil</span>
-      </button>
-      <button mat-menu-item (click)="authService.logout()">
-        <mat-icon>exit_to_app</mat-icon>
-        <span>Cerrar sesión</span>
-      </button>
-    </mat-menu>
+    </button>
   </div>
 </mat-toolbar>

@@ -1,112 +1,195 @@
-<div class="container mt-4">
-  <!-- Header con botón Volver a entregas -->
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <div class="d-flex align-items-center">
-      <button mat-stroked-button (click)="goBack()" class="me-3">
-        <mat-icon>arrow_back</mat-icon> Volver a entregas
-      </button>
-      <h1 class="mb-0">Detalle de Entrega Realizada</h1>
-    </div>
+<div class="page-container">
+  
+  <!-- Breadcrumb -->
+  <div class="breadcrumb">
+    <a (click)="goBack()">
+      <mat-icon>local_shipping</mat-icon>
+      Entregas Realizadas
+    </a>
+    <mat-icon class="separator">chevron_right</mat-icon>
+    <span *ngIf="!delivery" class="current-page">Detalle</span>
+    <span *ngIf="delivery" class="current-page">{{ delivery.convenio?.organizacion?.razonSocial || delivery.convenio?.organizacion?.nombreComercial || 'Entrega' }}</span>
   </div>
-
-  <!-- Loading state -->
-  <div *ngIf="isLoading" class="d-flex justify-content-center p-5">
+  
+  <!-- Loading -->
+  <div class="state-container" *ngIf="isLoading">
     <mat-spinner diameter="40"></mat-spinner>
+    <p>Cargando información de la entrega...</p>
   </div>
 
-  <!-- Error state -->
-  <div *ngIf="!isLoading && error" class="alert alert-danger d-flex align-items-center">
-    <mat-icon class="me-2">error_outline</mat-icon>
-    <span>{{ error }}</span>
+  <!-- Error -->
+  <div class="state-container state-error" *ngIf="!isLoading && error">
+    <mat-icon class="state-icon">cloud_off</mat-icon>
+    <p><strong>{{ error }}</strong></p>
+    <p class="state-hint">Verifica que la entrega exista y el servidor esté activo.</p>
+    <button mat-stroked-button (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon> Volver al listado
+    </button>
   </div>
 
   <!-- Contenido principal -->
-  <div *ngIf="!isLoading && !error && delivery" class="row">
+  <ng-container *ngIf="!isLoading && !error && delivery">
+    
+    <!-- 1. Cabecera -->
+    <div class="detail-header-card badi-card">
+      <div class="top-actions">
+        <p-button
+          label="Volver a Entregas Realizadas"
+          icon="pi pi-arrow-left"
+          [text]="true"
+          severity="secondary"
+          (onClick)="goBack()"
+        />
+        <div class="action-buttons" *ngIf="authService.canEdit()">
+          <p-button
+            label="Asociar evidencia"
+            icon="pi pi-paperclip"
+            *ngIf="delivery.estado !== 'Anulada'"
+            (onClick)="docSection.openUploadDialog()"
+          />
+        </div>
+      </div>
 
-    <!-- Columna Principal: Datos de ejecución -->
-    <div class="col-md-7">
-      <mat-card class="badi-card mb-4">
-        <mat-card-header>
-          <mat-card-title>Información de Ejecución</mat-card-title>
-        </mat-card-header>
-        <mat-card-content class="pt-3">
-          <div class="row">
-
-            <div class="col-sm-6 mb-3">
-              <strong class="d-block text-muted">Fecha de Realización</strong>
-              {{ delivery.fechaRealizacion | date:'dd/MM/yyyy' }}
-            </div>
-            <div class="col-sm-6 mb-3">
-              <strong class="d-block text-muted">Estado</strong>
-              <span class="badge bg-success">{{ delivery.estado }}</span>
-            </div>
-
-            <div class="col-sm-4 mb-3">
-              <strong class="d-block text-muted">Kilos Entregados</strong>
-              {{ delivery.kilosEntregados }} kg
-            </div>
-            <div class="col-sm-4 mb-3">
-              <strong class="d-block text-muted">Personas Atendidas</strong>
-              {{ delivery.personasAtendidas }}
-            </div>
-            <div class="col-sm-4 mb-3">
-              <strong class="d-block text-muted">Beneficiarios Directos</strong>
-              {{ delivery.beneficiariosAtendidos !== null && delivery.beneficiariosAtendidos !== undefined ? delivery.beneficiariosAtendidos : 'N/A' }}
-            </div>
-
-            <div class="col-12 mb-3 mt-2">
-              <strong class="d-block text-muted">Detalle de Productos</strong>
-              <p class="mb-0">{{ delivery.detalleProductos }}</p>
-            </div>
-
-            <div class="col-12 mb-3" *ngIf="delivery.observaciones">
-              <strong class="d-block text-muted">Observaciones</strong>
-              <p class="mb-0">{{ delivery.observaciones }}</p>
-            </div>
-
+      <div class="org-identity">
+        <div class="identity-main">
+          <h1>{{ delivery.convenio?.organizacion?.razonSocial || delivery.convenio?.organizacion?.nombreComercial || delivery.convenio?.organizacion?.nombre || 'Organización Desconocida' }}</h1>
+          <div class="identity-badges">
+            <span class="badge badge-ruc">Convenio: {{ delivery.convenio?.codigoConvenio || 'Sin Código' }}</span>
+            <span class="estado-chip" [ngClass]="getEstadoClass(delivery.estado)">
+              {{ delivery.estado }}
+            </span>
           </div>
-        </mat-card-content>
-      </mat-card>
-
-      <!-- Contexto planificado (entrega programada) -->
-      <mat-card class="badi-card mb-4 bg-light" *ngIf="delivery.convenio || delivery.entregaProgramada">
-        <mat-card-header>
-          <mat-card-title class="fs-6">Contexto Planificado</mat-card-title>
-        </mat-card-header>
-        <mat-card-content class="pt-2">
-          <div class="row">
-            <div class="col-md-6 mb-2" *ngIf="delivery.convenio?.organizacion">
-              <strong>Organización:</strong>
-              {{ delivery.convenio.organizacion.razonSocial || delivery.convenio.organizacion.nombreComercial || 'Sin nombre' }}
+          <p class="identity-location">
+            <mat-icon>calendar_today</mat-icon> 
+            Fecha de ejecución real: {{ delivery.fechaRealizacion | date:'dd/MM/yyyy' }}
+          </p>
+        </div>
+        <div class="identity-stats">
+          <div class="stat-box">
+            <div class="stat-icon-wrap">
+              <mat-icon>scale</mat-icon>
             </div>
-            <div class="col-md-6 mb-2" *ngIf="delivery.convenio">
-              <strong>Convenio:</strong>
-              <a [routerLink]="['/agreements', delivery.convenio.id]">
-                {{ delivery.convenio.codigoConvenio || 'S/C' }}
-              </a>
-            </div>
-            <div class="col-12" *ngIf="delivery.entregaProgramada?.fechaProgramada">
-              <strong>Fecha que estaba programada:</strong>
-              {{ delivery.entregaProgramada.fechaProgramada | date:'dd/MM/yyyy' }}
+            <div class="stat-info">
+              <span class="stat-value">{{ delivery.kilosEntregados }} kg</span>
+              <span class="stat-label">Kilos Entregados</span>
             </div>
           </div>
-        </mat-card-content>
-      </mat-card>
-
-      <!-- Trazabilidad -->
-      <div class="text-muted small mt-2">
-        Registrada el {{ delivery.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}
+          <div class="stat-box">
+            <div class="stat-icon-wrap">
+              <mat-icon>groups</mat-icon>
+            </div>
+            <div class="stat-info">
+              <span class="stat-value">{{ delivery.personasAtendidas }}</span>
+              <span class="stat-label">Personas Atendidas</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- Columna Secundaria: Evidencias fotográficas -->
-    <div class="col-md-5">
-      <app-document-section
-        entityType="ENTREGA_REALIZADA"
-        [entityId]="delivery.id"
-        [entityName]="'Entrega de ' + delivery.kilosEntregados + 'kg el ' + (delivery.fechaRealizacion | date:'dd/MM/yyyy')"
-      ></app-document-section>
+    <!-- 2. Información General y de Impacto -->
+    <div class="organization-section-card">
+      <div class="organization-section-header">
+        <div class="organization-section-title">
+          <mat-icon class="section-icon">info</mat-icon>
+          <h2>Detalles de la Entrega e Impacto</h2>
+        </div>
+      </div>
+      <div class="organization-section-body p-0">
+        <div class="info-grid">
+
+          <!-- Fila 1 -->
+          <div class="info-item">
+            <div class="info-item-icon-wrap"><mat-icon>business</mat-icon></div>
+            <div>
+              <label>Organización</label>
+              <span>{{ delivery.convenio?.organizacion?.razonSocial || delivery.convenio?.organizacion?.nombreComercial || 'Desconocida' }}</span>
+            </div>
+          </div>
+          <div class="info-item">
+            <div class="info-item-icon-wrap"><mat-icon>description</mat-icon></div>
+            <div>
+              <label>Convenio Asociado</label>
+              <span *ngIf="!delivery.convenio">Sin Convenio</span>
+              <span *ngIf="delivery.convenio">
+                <a [routerLink]="['/agreements', delivery.convenio.id]" class="text-primary-badi text-decoration-none fw-600">
+                  {{ delivery.convenio.codigoConvenio || 'Ver Convenio' }}
+                </a>
+              </span>
+            </div>
+          </div>
+          <div class="info-item">
+            <div class="info-item-icon-wrap"><mat-icon>event</mat-icon></div>
+            <div>
+              <label>Fecha Programada Inicial</label>
+              <span>{{ (delivery.entregaProgramada?.fechaProgramada | date:'dd/MM/yyyy') || '—' }}</span>
+            </div>
+          </div>
+          <div class="info-item">
+            <div class="info-item-icon-wrap"><mat-icon>groups</mat-icon></div>
+            <div>
+              <label>Beneficiarios Directos</label>
+              <span>{{ delivery.beneficiariosAtendidos !== undefined && delivery.beneficiariosAtendidos !== null ? delivery.beneficiariosAtendidos : 'No especificado' }}</span>
+            </div>
+          </div>
+
+          <!-- Fila 2: Detalle Productos -->
+          <div class="info-item full-width">
+            <div class="info-item-icon-wrap"><mat-icon>category</mat-icon></div>
+            <div>
+              <label>Productos Entregados</label>
+              <span class="d-block mt-1">{{ delivery.detalleProductos }}</span>
+            </div>
+          </div>
+
+          <!-- Fila 3: Observaciones (si hay) -->
+          <div class="info-item full-width" *ngIf="delivery.observaciones">
+            <div class="info-item-icon-wrap"><mat-icon>note</mat-icon></div>
+            <div>
+              <label>Observaciones</label>
+              <span class="d-block mt-1 obs-text">{{ delivery.observaciones }}</span>
+            </div>
+          </div>
+
+          <!-- Fila 4: Metadatos -->
+          <div class="info-item full-width meta-item">
+            <div class="info-item-icon-wrap"><mat-icon>schedule</mat-icon></div>
+            <div>
+              <label>Registro en Sistema</label>
+              <span>Registrada el {{ delivery.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
     </div>
 
-  </div>
+    <!-- 3. Documentos / Evidencias -->
+    <div class="organization-section-card">
+      <div class="organization-section-header">
+        <div class="organization-section-title">
+          <mat-icon class="section-icon">folder_special</mat-icon>
+          <h2>Evidencias y Respaldos</h2>
+        </div>
+        <div class="organization-section-action" *ngIf="authService.canEdit() && delivery.estado !== 'Anulada'">
+          <button class="organization-action-button" (click)="docSection.openUploadDialog()">
+            <mat-icon>add</mat-icon>
+            Subir evidencia
+          </button>
+        </div>
+      </div>
+      <div class="organization-section-body">
+        <p class="text-muted small mb-4">Fotografías, actas firmadas o documentos que respaldan la ejecución de la entrega.</p>
+        <app-document-section
+          #docSection
+          [entityType]="'ENTREGA_REALIZADA'"
+          [entityId]="delivery.id"
+          [entityName]="'Entrega de ' + delivery.kilosEntregados + 'kg el ' + (delivery.fechaRealizacion | date:'dd/MM/yyyy')"
+          [readonly]="!authService.canEdit()">
+        </app-document-section>
+      </div>
+    </div>
+
+  </ng-container>
+
 </div>

@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
@@ -10,6 +10,15 @@ import { MatRadioModule } from '@angular/material/radio';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatChipsModule } from '@angular/material/chips';
+import { InputTextModule } from 'primeng/inputtext';
+import { SelectModule } from 'primeng/select';
+import { TextareaModule } from 'primeng/textarea';
+import { IftaLabelModule } from 'primeng/iftalabel';
+import { FluidModule } from 'primeng/fluid';
+import { ButtonModule } from 'primeng/button';
+import { RadioButtonModule } from 'primeng/radiobutton';
+import { MultiSelectModule } from 'primeng/multiselect';
 import { OrganizationsService } from '../../organizations.service';
 
 export interface GroupLeaderDialogData {
@@ -33,7 +42,16 @@ export interface GroupLeaderDialogData {
     MatRadioModule,
     MatIconModule,
     MatProgressSpinnerModule,
-    MatDividerModule
+    MatDividerModule,
+    MatChipsModule,
+    InputTextModule,
+    SelectModule,
+    TextareaModule,
+    IftaLabelModule,
+    FluidModule,
+    ButtonModule,
+    RadioButtonModule,
+    MultiSelectModule
   ],
   templateUrl: './group-leader-form-dialog.html',
   styleUrls: ['./group-leader-form-dialog.scss']
@@ -46,11 +64,17 @@ export class GroupLeaderFormDialogComponent implements OnInit {
   gruposEtarios: any[] = [];
   vulnerabilidades: any[] = [];
 
+  get selectedVulnerabilidades() {
+    const ids = this.form.get('vulnerabilidadIds')?.value || [];
+    return this.vulnerabilidades.filter(v => ids.includes(v.id));
+  }
+
   constructor(
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<GroupLeaderFormDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: GroupLeaderDialogData,
-    private orgService: OrganizationsService
+    private orgService: OrganizationsService,
+    private cdr: ChangeDetectorRef
   ) {
     this.form = this.fb.group({
       nombre: ['', [Validators.required, Validators.maxLength(150)]],
@@ -93,11 +117,11 @@ export class GroupLeaderFormDialogComponent implements OnInit {
 
   loadCatalogs(): void {
     this.orgService.getCatalogsByType('grupo_etario').subscribe({
-      next: (res) => this.gruposEtarios = res,
+      next: (res) => { this.gruposEtarios = res; this.cdr.detectChanges(); },
       error: (err) => console.error('Error loading grupo_etario:', err)
     });
     this.orgService.getCatalogsByType('vulnerabilidad').subscribe({
-      next: (res) => this.vulnerabilidades = res,
+      next: (res) => { this.vulnerabilidades = res; this.cdr.detectChanges(); },
       error: (err) => console.error('Error loading vulnerabilidad:', err)
     });
   }
@@ -147,17 +171,29 @@ export class GroupLeaderFormDialogComponent implements OnInit {
       const newValue = control.value.filter((val: string) => val !== id);
       control.setValue(newValue);
       control.markAsDirty();
+      this.cdr.detectChanges();
     }
+  }
+
+  removeVulnerabilidad(id: string | number): void {
+    const control = this.form.get('vulnerabilidadIds');
+    const current = control?.value || [];
+    control?.setValue(current.filter((value: any) => value !== id));
+    control?.markAsDirty();
+    control?.markAsTouched();
+    this.cdr.detectChanges();
   }
 
   onSubmit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      this.cdr.detectChanges();
       return;
     }
 
     this.loading = true;
     this.error = null;
+    this.cdr.detectChanges();
     
     const v = this.form.value;
 
@@ -173,11 +209,13 @@ export class GroupLeaderFormDialogComponent implements OnInit {
       this.orgService.updateAttendedGroup(this.data.groupData.id, payload).subscribe({
         next: (res) => {
           this.loading = false;
+          this.cdr.detectChanges();
           this.dialogRef.close(res);
         },
         error: (err) => {
           this.loading = false;
           this.error = err?.error?.message || 'Ocurrió un error al editar el grupo atendido.';
+          this.cdr.detectChanges();
         }
       });
       return;
@@ -206,11 +244,13 @@ export class GroupLeaderFormDialogComponent implements OnInit {
     this.orgService.createAttendedGroupWithLeader(this.data.organizationId, payload).subscribe({
       next: (res) => {
         this.loading = false;
+        this.cdr.detectChanges();
         this.dialogRef.close(res);
       },
       error: (err) => {
         this.loading = false;
         this.error = err?.error?.message || 'Ocurrió un error al guardar el grupo y dirigente.';
+        this.cdr.detectChanges();
       }
     });
   }

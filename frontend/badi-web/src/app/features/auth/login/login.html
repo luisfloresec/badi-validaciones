@@ -1,75 +1,92 @@
-<div class="login-wrapper">
-  <div class="login-card">
-    <!-- Logo y título -->
-    <div class="login-header">
-      <img src="assets/logo-badi.png" alt="Logo BADI" class="login-logo" />
-      <h1>BADI</h1>
-      <p class="login-subtitle">Sistema de Gestión Social</p>
+<div class="login-split">
+
+  <!-- ═══ PANEL IZQUIERDO — Branding ═══ -->
+  <div class="login-brand">
+    <div class="brand-content">
+      <img src="assets/logo-badi.png" alt="Logo BADI" class="brand-logo" />
+      <h1 class="brand-title">Bienvenido</h1>
+      <p class="brand-description">
+        Sistema de Gestión Social del Banco de Alimentos de Imbabura.
+        Administra organizaciones, convenios, entregas y documentación.
+      </p>
     </div>
-
-    <!-- Error -->
-    <div class="error-banner" *ngIf="errorMessage">
-      <mat-icon>error_outline</mat-icon>
-      <span>{{ errorMessage }}</span>
+    <div class="brand-footer">
+      <span>© 2026 Banco de Alimentos de Imbabura - BADI.</span>
+      <span>Sistema desarrollado por Luis Flores.</span>
     </div>
+  </div>
 
-    <!-- Formulario -->
-    <form (ngSubmit)="onSubmit()" class="login-form">
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Correo electrónico</mat-label>
-        <mat-icon matPrefix>email</mat-icon>
-        <input
-          matInput
-          type="email"
-          [(ngModel)]="email"
-          name="email"
-          placeholder="usuario@badi.org"
-          required
-          autocomplete="email"
-        />
-      </mat-form-field>
+  <!-- ═══ PANEL DERECHO — Formulario (Estilo BADI Original) ═══ -->
+  <div class="login-form-panel">
+    <div class="form-wrapper badi-style-card">
 
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Contraseña</mat-label>
-        <mat-icon matPrefix>lock</mat-icon>
-        <input
-          matInput
-          [type]="hidePassword ? 'password' : 'text'"
-          [(ngModel)]="password"
-          name="password"
-          placeholder="Ingrese su contraseña"
-          required
-          autocomplete="current-password"
-        />
-        <button
-          mat-icon-button
-          matSuffix
-          type="button"
-          (click)="hidePassword = !hidePassword"
-          [attr.aria-label]="hidePassword ? 'Mostrar contraseña' : 'Ocultar contraseña'"
-        >
-          <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
-        </button>
-      </mat-form-field>
-
-      <button
-        mat-flat-button
-        class="login-button"
-        type="submit"
-        [disabled]="isLoading || !email || !password"
-      >
-        <mat-spinner *ngIf="isLoading" diameter="20" class="btn-spinner"></mat-spinner>
-        <span *ngIf="!isLoading">Iniciar sesión</span>
-      </button>
-
-      <div class="forgot-password-msg text-center mt-4 text-sm text-gray-500">
-        <mat-icon class="align-middle text-[16px] w-[16px] h-[16px]">info</mat-icon>
-        <span class="align-middle ml-1">¿Olvidaste tu contraseña? Para recuperar el acceso, comunícate con un administrador del sistema BADI. El administrador podrá asignarte una contraseña temporal.</span>
+      <!-- Encabezado BADI -->
+      <div class="badi-header">
+        <img src="assets/logo-badi.png" alt="Logo BADI" class="badi-header-logo" />
+        <p>Sistema de Gestión Social</p>
       </div>
-    </form>
 
-    <div class="login-footer">
-      <span>Banco de Alimentos de Imbabura</span>
+      <!-- Error -->
+      <div *ngIf="errorMessage" class="custom-error-box">
+        <i class="pi pi-exclamation-circle error-icon"></i>
+        <span class="error-text">{{ errorMessage }}</span>
+      </div>
+
+      <form (ngSubmit)="onSubmit()" class="login-form" autocomplete="on">
+
+        <!-- Email -->
+        <div class="badi-field">
+          <i class="pi pi-envelope field-icon"></i>
+          <input
+            pInputText
+            id="login-email"
+            type="email"
+            [(ngModel)]="email"
+            name="email"
+            placeholder="Correo electrónico*"
+            required
+            autocomplete="email"
+            class="badi-input"
+          />
+        </div>
+
+        <!-- Password -->
+        <div class="badi-field">
+          <i class="pi pi-lock field-icon"></i>
+          <p-password
+            id="login-password"
+            [(ngModel)]="password"
+            name="password"
+            placeholder="Contraseña*"
+            [toggleMask]="true"
+            [feedback]="false"
+            styleClass="badi-password-wrapper"
+            inputStyleClass="badi-input"
+            autocomplete="current-password"
+          />
+        </div>
+
+        <!-- Submit -->
+        <button
+          pButton
+          type="submit"
+          class="badi-submit-btn"
+          [disabled]="isLoading"
+        >
+          <i *ngIf="isLoading" class="pi pi-spin pi-spinner mr-2"></i>
+          <span>Iniciar sesión</span>
+        </button>
+
+        <!-- Forgot password info -->
+        <div class="badi-forgot-hint">
+          <i class="pi pi-info-circle hint-icon"></i>
+          <span><strong>¿Olvidaste tu contraseña?</strong> Para recuperar el acceso, comunícate con un administrador del sistema BADI. El administrador podrá asignarte una contraseña temporal.</span>
+        </div>
+      </form>
+
+      <div class="badi-form-footer">
+        Banco de Alimentos de Imbabura
+      </div>
     </div>
   </div>
 </div>

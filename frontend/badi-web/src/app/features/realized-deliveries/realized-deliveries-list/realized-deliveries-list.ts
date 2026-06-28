@@ -9,7 +9,14 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCardModule } from '@angular/material/card';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
+import { InputTextModule } from 'primeng/inputtext';
+import { SelectModule } from 'primeng/select';
+import { ButtonModule } from 'primeng/button';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { RealizedDeliveriesService, RealizedDelivery } from '../realized-deliveries.service';
+import { AuthService } from '../../../core/auth/auth.service';
 
 @Component({
   selector: 'app-realized-deliveries-list',
@@ -24,7 +31,13 @@ import { RealizedDeliveriesService, RealizedDelivery } from '../realized-deliver
     MatFormFieldModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
-    MatCardModule
+    MatCardModule,
+    MatPaginatorModule,
+    IconFieldModule,
+    InputIconModule,
+    InputTextModule,
+    SelectModule,
+    ButtonModule
   ],
   templateUrl: './realized-deliveries-list.html',
   styleUrls: ['./realized-deliveries-list.scss']
@@ -32,12 +45,33 @@ import { RealizedDeliveriesService, RealizedDelivery } from '../realized-deliver
 export class RealizedDeliveriesListComponent implements OnInit {
   deliveries: RealizedDelivery[] = [];
   filteredDeliveries: RealizedDelivery[] = [];
+  paginatedDeliveries: RealizedDelivery[] = [];
   isLoading = true;
   error: string | null = null;
   searchTerm = '';
+  filterEstado = 'TODOS';
+
+  estadoOptions = [
+    { label: 'Todos los estados', value: 'TODOS' },
+    { label: 'Registrada', value: 'Registrada' },
+    { label: 'Anulada', value: 'Anulada' }
+  ];
+
+  // Estadísticas
+  entregasMes = 0;
+  kilosMes = 0;
+  personasMes = 0;
+  totalKilos = 0;
+  entregasAnuladas = 0;
+
+  // Paginación
+  totalItems = 0;
+  pageSize = 10;
+  pageIndex = 0;
 
   constructor(
     private service: RealizedDeliveriesService,
+    public authService: AuthService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -51,31 +85,100 @@ export class RealizedDeliveriesListComponent implements OnInit {
     this.service.findAll().subscribe({
       next: (data) => {
         this.deliveries = data;
-        this.filteredDeliveries = data;
+        this.calculateStats();
         this.isLoading = false;
+        this.onSearch();
         this.cdr.detectChanges();
       },
       error: (err) => {
         this.error = 'No se pudieron cargar las entregas realizadas.';
         this.isLoading = false;
+        this.deliveries = [];
+        this.onSearch();
         this.cdr.detectChanges();
         console.error(err);
       }
     });
   }
 
+  calculateStats(): void {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth();
+
+    this.entregasMes = 0;
+    this.kilosMes = 0;
+    this.personasMes = 0;
+    this.totalKilos = 0;
+    this.entregasAnuladas = 0;
+
+    for (const d of this.deliveries) {
+      const kilos = Number(d.kilosEntregados) || 0;
+      const personas = Number(d.personasAtendidas) || 0;
+      this.totalKilos += kilos;
+
+      if (d.estado === 'Anulada') {
+        this.entregasAnuladas++;
+      }
+
+      if (d.fechaRealizacion) {
+        const dateObj = new Date(d.fechaRealizacion);
+        if (dateObj.getFullYear() === currentYear && dateObj.getMonth() === currentMonth) {
+          this.entregasMes++;
+          this.kilosMes += kilos;
+          this.personasMes += personas;
+        }
+      }
+    }
+  }
+
   onSearch(): void {
     const term = this.searchTerm.toLowerCase().trim();
-    if (!term) {
-      this.filteredDeliveries = this.deliveries;
-      return;
-    }
 
     this.filteredDeliveries = this.deliveries.filter(d => {
+      const matchesEstado = this.filterEstado === 'TODOS' || d.estado === this.filterEstado;
+      if (!matchesEstado) return false;
+
+      if (!term) return true;
+
       const orgName = d.convenio?.organizacion?.razonSocial?.toLowerCase() || '';
       const orgComercial = d.convenio?.organizacion?.nombreComercial?.toLowerCase() || '';
       const convCode = d.convenio?.codigoConvenio?.toLowerCase() || '';
       return orgName.includes(term) || orgComercial.includes(term) || convCode.includes(term);
     });
+
+    this.totalItems = this.filteredDeliveries.length;
+    this.pageIndex = 0;
+    this.updatePagination();
+  }
+
+  onPageChange(event: PageEvent): void {
+    this.pageIndex = event.pageIndex;
+    this.pageSize = event.pageSize;
+    this.updatePagination();
+  }
+
+  updatePagination(): void {
+    const start = this.pageIndex * this.pageSize;
+    this.paginatedDeliveries = this.filteredDeliveries.slice(start, start + this.pageSize);
+    this.cdr.detectChanges();
+  }
+
+  clearFilters(): void {
+    this.searchTerm = '';
+    this.filterEstado = 'TODOS';
+    this.onSearch();
+  }
+
+  getEstadoClass(estado: string): string {
+    const map: Record<string, string> = {
+      'Registrada': 'estado-registrada',
+      'Activa': 'estado-activa',
+      'Activo': 'estado-activa',
+      'Anulada': 'estado-inactiva',
+      'Inactiva': 'estado-inactiva',
+      'Inactivo': 'estado-inactiva'
+    };
+    return map[estado] || 'estado-registrada';
   }
 }

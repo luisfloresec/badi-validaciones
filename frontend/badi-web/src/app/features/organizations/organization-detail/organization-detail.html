@@ -2,9 +2,12 @@
   
   <!-- Breadcrumb -->
   <div class="breadcrumb">
-    <a (click)="goBack()">Organizaciones</a>
-    <mat-icon>chevron_right</mat-icon>
-    <span *ngIf="!detail">Detalle</span>
+    <a (click)="goBack()">
+      <mat-icon>business</mat-icon>
+      Organizaciones
+    </a>
+    <mat-icon class="separator">chevron_right</mat-icon>
+    <span *ngIf="!detail" class="current-page">Detalle</span>
     <span *ngIf="detail" class="current-page">{{ detail.organizacion.razonSocial }}</span>
   </div>
   
@@ -30,18 +33,27 @@
     <!-- 1. Cabecera -->
     <div class="detail-header-card badi-card">
       <div class="top-actions">
-        <button mat-button class="btn-back" (click)="goBack()">
-          <mat-icon>arrow_back</mat-icon> Volver a Organizaciones
-        </button>
+        <p-button
+          label="Volver a Organizaciones"
+          icon="pi pi-arrow-left"
+          [text]="true"
+          severity="secondary"
+          (onClick)="goBack()"
+        />
         <div class="action-buttons" *ngIf="authService.canEdit()">
-          <button mat-stroked-button (click)="editOrganization()">
-            <mat-icon>edit</mat-icon> Editar organización
-          </button>
-          <button mat-flat-button class="btn-primary" 
-                  *ngIf="detail.organizacion.estado !== 'Inactiva'"
-                  (click)="docSection.openUploadDialog()">
-            <mat-icon>attach_file</mat-icon> Asociar documento
-          </button>
+          <p-button
+            label="Editar organización"
+            icon="pi pi-pencil"
+            [outlined]="true"
+            severity="secondary"
+            (onClick)="editOrganization()"
+          />
+          <p-button
+            label="Asociar documento"
+            icon="pi pi-paperclip"
+            *ngIf="detail.organizacion.estado !== 'Inactiva'"
+            (onClick)="docSection.openUploadDialog()"
+          />
         </div>
       </div>
 
@@ -79,158 +91,256 @@
     </div>
 
     <!-- 2. Información General -->
-    <div class="badi-card section-card">
-      <div class="badi-card-header">
-        <mat-icon class="badi-card-icon">business</mat-icon>
-        <h2>Información General</h2>
+    <div class="organization-section-card">
+      <div class="organization-section-header">
+        <div class="organization-section-title">
+          <mat-icon class="section-icon">business</mat-icon>
+          <h2>Información General</h2>
+        </div>
       </div>
-      <div class="info-grid">
+      <div class="organization-section-body">
+        <div class="info-grid">
+
+        <!-- Fila 1: Razón social, Email, Provincia, Ciudad -->
         <div class="info-item">
-          <label>Razón social</label>
-          <span>{{ detail.organizacion.razonSocial }}</span>
-        </div>
-        <div class="info-item">
-          <label>Email de contacto</label>
-          <span>{{ detail.organizacion.email || 'No especificado' }}</span>
-        </div>
-        <div class="info-item">
-          <label>Provincia</label>
-          <span>{{ detail.organizacion.provincia?.nombre || '—' }}</span>
-        </div>
-        <div class="info-item">
-          <label>Ciudad / Cantón</label>
-          <span>{{ detail.organizacion.ciudadCatalogo?.nombre || detail.organizacion.ciudad || 'No especificado' }}</span>
-        </div>
-        <div class="info-item">
-          <label>Sector / Barrio</label>
-          <span>{{ detail.organizacion.sectorBarrio || 'No especificado' }}</span>
-        </div>
-        <div class="info-item full-width">
-          <label>Dirección</label>
-          <span>{{ detail.organizacion.direccion }}</span>
-        </div>
-        <div class="info-item full-width">
-          <label>Referencia de dirección</label>
-          <span>{{ detail.organizacion.referenciaDireccion || 'No especificado' }}</span>
-        </div>
-        <div class="info-item">
-          <label>Acción social</label>
-          <span>{{ detail.organizacion.accionSocial.nombre || 'No especificado' }}</span>
-        </div>
-        <div class="info-item">
-          <label>Segmento</label>
-          <span>{{ detail.organizacion.segmento.nombre || 'No especificado' }}</span>
-        </div>
-        <div class="info-item">
-          <label>Frecuencia de retiro</label>
-          <span>{{ detail.organizacion.frecuenciaRetiro?.nombre || 'No especificado' }}</span>
-        </div>
-        <div class="info-item">
-          <label>Transporte</label>
-          <span>{{ detail.organizacion.transporte?.nombre || 'No especificado' }}</span>
-        </div>
-        <div class="info-item full-width">
-          <label>Observaciones</label>
-          <span>{{ detail.organizacion.observaciones || 'No especificado' }}</span>
-        </div>
-        
-        <div class="info-item full-width">
-          <label>Redes sociales</label>
-          <div *ngIf="hasSocialNetworks(); else noSocials" class="socials-list">
-            <div *ngFor="let social of getSocialNetworks()" class="social-link-item">
-              <strong>{{ social.label }}:</strong> 
-              <a *ngIf="social.isUrl" [href]="social.value" target="_blank">{{ social.value }}</a>
-              <span *ngIf="!social.isUrl">{{ social.value }}</span>
-            </div>
+          <div class="info-item-icon-wrap"><mat-icon>business</mat-icon></div>
+          <div>
+            <label>Razón social</label>
+            <span>{{ detail.organizacion.razonSocial }}</span>
           </div>
-          <ng-template #noSocials>
-            <span>No especificado</span>
-          </ng-template>
+        </div>
+        <div class="info-item">
+          <div class="info-item-icon-wrap"><mat-icon>mail_outline</mat-icon></div>
+          <div>
+            <label>Email de contacto</label>
+            <span>{{ detail.organizacion.email || 'No especificado' }}</span>
+          </div>
+        </div>
+        <div class="info-item">
+          <div class="info-item-icon-wrap"><mat-icon>map</mat-icon></div>
+          <div>
+            <label>Provincia</label>
+            <span>{{ detail.organizacion.provincia?.nombre || '—' }}</span>
+          </div>
+        </div>
+        <div class="info-item">
+          <div class="info-item-icon-wrap"><mat-icon>location_city</mat-icon></div>
+          <div>
+            <label>Ciudad / Cantón</label>
+            <span>{{ detail.organizacion.ciudadCatalogo?.nombre || detail.organizacion.ciudad || 'No especificado' }}</span>
+          </div>
+        </div>
+
+        <!-- Fila 2: Sector, Dirección -->
+        <div class="info-item">
+          <div class="info-item-icon-wrap"><mat-icon>holiday_village</mat-icon></div>
+          <div>
+            <label>Sector / Barrio</label>
+            <span>{{ detail.organizacion.sectorBarrio || 'No especificado' }}</span>
+          </div>
+        </div>
+        <div class="info-item full-width-3">
+          <div class="info-item-icon-wrap"><mat-icon>location_on</mat-icon></div>
+          <div>
+            <label>Dirección</label>
+            <span>{{ detail.organizacion.direccion }}</span>
+          </div>
+        </div>
+
+        <!-- Fila 3: Referencia -->
+        <div class="info-item full-width">
+          <div class="info-item-icon-wrap"><mat-icon>assistant_direction</mat-icon></div>
+          <div>
+            <label>Referencia de dirección</label>
+            <span>{{ detail.organizacion.referenciaDireccion || 'No especificado' }}</span>
+          </div>
+        </div>
+
+        <!-- Divider sutil -->
+        <div class="info-divider full-width"></div>
+
+        <!-- Fila 4: Acción social, Segmento, Frecuencia, Transporte -->
+        <div class="info-item">
+          <div class="info-item-icon-wrap"><mat-icon>volunteer_activism</mat-icon></div>
+          <div>
+            <label>Acción social</label>
+            <span>{{ detail.organizacion.accionSocial.nombre || 'No especificado' }}</span>
+          </div>
+        </div>
+        <div class="info-item">
+          <div class="info-item-icon-wrap"><mat-icon>category</mat-icon></div>
+          <div>
+            <label>Segmento</label>
+            <span>{{ detail.organizacion.segmento.nombre || 'No especificado' }}</span>
+          </div>
+        </div>
+        <div class="info-item">
+          <div class="info-item-icon-wrap"><mat-icon>event_repeat</mat-icon></div>
+          <div>
+            <label>Frecuencia de retiro</label>
+            <span>{{ detail.organizacion.frecuenciaRetiro?.nombre || 'No especificado' }}</span>
+          </div>
+        </div>
+        <div class="info-item">
+          <div class="info-item-icon-wrap"><mat-icon>local_shipping</mat-icon></div>
+          <div>
+            <label>Transporte</label>
+            <span>{{ detail.organizacion.transporte?.nombre || 'No especificado' }}</span>
+          </div>
+        </div>
+
+        <!-- Fila 5: Observaciones -->
+        <div class="info-item full-width">
+          <div class="info-item-icon-wrap"><mat-icon>notes</mat-icon></div>
+          <div>
+            <label>Observaciones</label>
+            <span class="obs-text">{{ detail.organizacion.observaciones || 'No especificado' }}</span>
+          </div>
+        </div>
+
+        <!-- Redes sociales -->
+        <div class="info-item full-width">
+          <div class="info-item-icon-wrap"><mat-icon>share</mat-icon></div>
+          <div>
+            <label>Redes sociales</label>
+            <div *ngIf="hasSocialNetworks(); else noSocials" class="socials-list">
+              <div *ngFor="let social of getSocialNetworks()" class="social-link-item">
+                <strong>{{ social.label }}:</strong>
+                <a *ngIf="social.isUrl" [href]="social.value" target="_blank">{{ social.value }}</a>
+                <span *ngIf="!social.isUrl">{{ social.value }}</span>
+              </div>
+            </div>
+            <ng-template #noSocials><span>No especificado</span></ng-template>
+          </div>
+        </div>
+
+        <!-- Divider meta -->
+        <div class="info-divider full-width"></div>
+
+        <!-- Fechas -->
+        <div class="info-item meta-item">
+          <div class="info-item-icon-wrap meta-icon"><mat-icon>calendar_today</mat-icon></div>
+          <div>
+            <label>Fecha de registro</label>
+            <span>{{ detail.organizacion.fechaRegistro | date:'dd/MM/yyyy HH:mm' }}</span>
+          </div>
         </div>
         <div class="info-item meta-item">
-          <label>Fecha de registro</label>
-          <span>{{ detail.organizacion.fechaRegistro | date:'dd/MM/yyyy HH:mm' }}</span>
+          <div class="info-item-icon-wrap meta-icon"><mat-icon>update</mat-icon></div>
+          <div>
+            <label>Última actualización</label>
+            <span>{{ detail.organizacion.fechaActualizacion ? (detail.organizacion.fechaActualizacion | date:'dd/MM/yyyy HH:mm') : '—' }}</span>
+          </div>
         </div>
-        <div class="info-item meta-item">
-          <label>Última actualización</label>
-          <span>{{ detail.organizacion.fechaActualizacion ? (detail.organizacion.fechaActualizacion | date:'dd/MM/yyyy HH:mm') : '—' }}</span>
-        </div>
+
+      </div>
       </div>
     </div>
 
     <!-- 3. Representantes -->
-    <div class="badi-card section-card">
-      <div class="section-header-flex">
-        <div class="badi-card-header mb-0">
-          <mat-icon class="badi-card-icon">person</mat-icon>
+    <div class="organization-section-card">
+      <div class="organization-section-header">
+        <div class="organization-section-title">
+          <mat-icon class="section-icon">person</mat-icon>
           <h2>Representantes</h2>
         </div>
-        <div class="action-buttons-inline" *ngIf="detail.organizacion.estado !== 'Inactiva' && authService.canEdit()">
+        <div class="organization-section-action" *ngIf="detail.organizacion.estado !== 'Inactiva' && authService.canEdit()">
           <ng-container *ngIf="activeRepresentative">
-            <button mat-button class="btn-secondary-text" (click)="editRepresentative()">
-              <mat-icon>edit</mat-icon> Editar datos
-            </button>
-            <button mat-button class="btn-primary-text" (click)="openRepresentativeForm('replace')">
-              <mat-icon>swap_horiz</mat-icon> Reemplazar representante
-            </button>
+            <div class="action-buttons-inline">
+              <p-button
+                label="Editar"
+                icon="pi pi-pencil"
+                [outlined]="true"
+                severity="secondary"
+                size="small"
+                (onClick)="editRepresentative()"
+              />
+              <p-button
+                label="Reemplazar"
+                icon="pi pi-arrows-h"
+                [outlined]="true"
+                severity="secondary"
+                size="small"
+                (onClick)="openRepresentativeForm('replace')"
+              />
+            </div>
           </ng-container>
           <ng-container *ngIf="!activeRepresentative">
-            <button mat-button class="btn-primary-text" (click)="openRepresentativeForm('create')">
-              <mat-icon>add</mat-icon> Agregar representante
-            </button>
+            <p-button
+              label="Agregar representante"
+              icon="pi pi-user-plus"
+              size="small"
+              styleClass="organization-action-button-p"
+              (onClick)="openRepresentativeForm('create')"
+            />
           </ng-container>
         </div>
       </div>
       
-      <div class="table-wrapper mt-3" *ngIf="detail.representantes.length > 0; else noReps">
-        <table class="badi-table">
-          <thead>
-            <tr>
-              <th>Nombres y Apellidos</th>
-              <th>Cédula</th>
-              <th>Teléfono</th>
-              <th>Email</th>
-              <th class="text-center">Principal</th>
-              <th class="text-center">Estado</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let rep of detail.representantes">
-              <td class="col-primary">{{ rep.nombres }} {{ rep.apellidos }}</td>
-              <td class="col-mono">{{ rep.cedula || '—' }}</td>
-              <td>{{ rep.telefono || '—' }}</td>
-              <td>{{ rep.email || '—' }}</td>
-              <td class="text-center">
-                <mat-icon *ngIf="rep.esPrincipal" class="icon-success">check_circle</mat-icon>
-                <span *ngIf="!rep.esPrincipal">—</span>
-              </td>
-              <td class="text-center">
-                <span class="estado-chip" [ngClass]="getEstadoClass(rep.estado)">{{ rep.estado }}</span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="organization-section-body">
+        <div class="table-wrapper" *ngIf="detail.representantes.length > 0; else noReps">
+          <table class="badi-table">
+            <thead>
+              <tr>
+                <th>Nombres y Apellidos</th>
+                <th>Cédula</th>
+                <th>Teléfono</th>
+                <th>Email</th>
+                <th class="text-center">Principal</th>
+                <th class="text-center">Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let rep of detail.representantes">
+                <td class="col-primary">
+                  <div class="cell-with-avatar">
+                    <div class="avatar-circle">{{ rep.nombres.charAt(0) }}{{ rep.apellidos.charAt(0) }}</div>
+                    {{ rep.nombres }} {{ rep.apellidos }}
+                  </div>
+                </td>
+                <td class="col-mono">{{ rep.cedula || '—' }}</td>
+                <td>{{ rep.telefono || '—' }}</td>
+                <td>{{ rep.email || '—' }}</td>
+                <td class="text-center">
+                  <span class="badge-bool badge-bool-yes" *ngIf="rep.esPrincipal">Principal</span>
+                  <span class="badge-bool badge-bool-no" *ngIf="!rep.esPrincipal">No</span>
+                </td>
+                <td class="text-center">
+                  <span class="estado-chip" [ngClass]="getEstadoClass(rep.estado)">{{ rep.estado }}</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <ng-template #noReps>
+          <div class="organization-empty-state">
+            <mat-icon>person_off</mat-icon>
+            <p>No hay representantes registrados todavía.</p>
+          </div>
+        </ng-template>
       </div>
-      <ng-template #noReps>
-        <p class="empty-text">No hay representantes registrados todavía.</p>
-      </ng-template>
     </div>
 
     <!-- 4. Grupos Atendidos y Dirigentes -->
-    <!-- Se muestran si es GAD o si tienen datos registrados -->
-    <div class="badi-card section-card">
-      <div class="section-header-flex">
-        <div class="badi-card-header mb-0">
-          <mat-icon class="badi-card-icon">groups</mat-icon>
+    <div class="organization-section-card">
+      <div class="organization-section-header">
+        <div class="organization-section-title">
+          <mat-icon class="section-icon">groups</mat-icon>
           <h2>Grupos Atendidos y Dirigentes</h2>
         </div>
-        <button *ngIf="detail.organizacion.estado !== 'Inactiva' && authService.canEdit()" mat-button class="btn-primary-text" 
-                (click)="openGroupForm('create')">
-          <mat-icon>add</mat-icon> Agregar grupo atendido
-        </button>
+        <div class="organization-section-action" *ngIf="detail.organizacion.estado !== 'Inactiva' && authService.canEdit()">
+          <p-button
+            label="Agregar grupo"
+            icon="pi pi-plus"
+            size="small"
+            styleClass="organization-action-button-p"
+            (onClick)="openGroupForm('create')"
+          />
+        </div>
       </div>
 
-      <div class="groups-list" *ngIf="detail.gruposAtendidos.length > 0; else noGroups">
+      <div class="organization-section-body">
+        <div class="groups-list" *ngIf="detail.gruposAtendidos.length > 0; else noGroups">
         <div class="group-item-card" *ngFor="let item of detail.gruposAtendidos">
           
           <!-- Cabecera del Grupo -->
@@ -239,20 +349,27 @@
               <h3 class="group-title">{{ item.grupo.nombre }}</h3>
               <span class="estado-chip" [ngClass]="getEstadoClass(item.grupo.estado)">{{ item.grupo.estado }}</span>
             </div>
-            
             <div class="group-header-actions">
               <div class="group-people-badge">
                 <mat-icon>people</mat-icon>
-                <span>{{ item.grupo.numeroPersonas }}</span>
+                <span>{{ item.grupo.numeroPersonas }} personas</span>
               </div>
-              <div class="action-buttons-mini" *ngIf="item.grupo.estado !== 'Inactivo' && detail.organizacion.estado !== 'Inactiva' && authService.canEdit()">
-                <button mat-icon-button color="primary" matTooltip="Editar grupo" (click)="openGroupForm('edit', item.grupo)">
-                  <mat-icon>edit</mat-icon>
-                </button>
-                <button mat-icon-button color="warn" matTooltip="Desactivar grupo" (click)="deactivateGroup(item.grupo.id)">
-                  <mat-icon>block</mat-icon>
-                </button>
-              </div>
+              <ng-container *ngIf="item.grupo.estado !== 'Inactivo' && detail.organizacion.estado !== 'Inactiva' && authService.canEdit()">
+                <p-button
+                  icon="pi pi-pencil"
+                  [text]="true"
+                  severity="secondary"
+                  pTooltip="Editar grupo"
+                  (onClick)="openGroupForm('edit', item.grupo)"
+                />
+                <p-button
+                  icon="pi pi-ban"
+                  [text]="true"
+                  severity="danger"
+                  pTooltip="Desactivar grupo"
+                  (onClick)="deactivateGroup(item.grupo.id)"
+                />
+              </ng-container>
             </div>
           </div>
 
@@ -282,10 +399,14 @@
           <!-- Dirigente Activo (Subcard) -->
           <div class="leader-subcard">
             <div class="leader-subcard-header">
-              <h4>Dirigente Activo</h4>
-              <button *ngIf="!getActiveLeader(item) && item.grupo.estado !== 'Inactivo' && detail.organizacion.estado !== 'Inactiva' && authService.canEdit()" mat-button class="btn-primary-text btn-small" (click)="openLeaderForm(item.grupo.id, 'create')">
-                <mat-icon>add</mat-icon> Agregar dirigente
-              </button>
+              <h4><mat-icon>person_pin</mat-icon> Dirigente Activo</h4>
+              <p-button
+                label="Agregar dirigente"
+                icon="pi pi-plus"
+                size="small"
+                *ngIf="!getActiveLeader(item) && item.grupo.estado !== 'Inactivo' && detail.organizacion.estado !== 'Inactiva' && authService.canEdit()"
+                (onClick)="openLeaderForm(item.grupo.id, 'create')"
+              />
             </div>
 
             <div class="leader-empty-state" *ngIf="!getActiveLeader(item)">
@@ -318,15 +439,30 @@
               </div>
               
               <div class="leader-btn-actions" *ngIf="item.grupo.estado !== 'Inactivo' && detail.organizacion.estado !== 'Inactiva' && authService.canEdit()">
-                <button mat-stroked-button class="btn-xs outline" (click)="openLeaderForm(item.grupo.id, 'edit', activeLeader)">
-                  <mat-icon>edit</mat-icon> Editar datos
-                </button>
-                <button mat-stroked-button class="btn-xs outline" (click)="openLeaderForm(item.grupo.id, 'replace')">
-                  <mat-icon>swap_horiz</mat-icon> Reemplazar
-                </button>
-                <button mat-stroked-button color="warn" class="btn-xs warn" (click)="deactivateLeader(activeLeader.id)">
-                  <mat-icon>person_off</mat-icon> Inactivar
-                </button>
+                <p-button
+                  label="Editar datos"
+                  icon="pi pi-pencil"
+                  [outlined]="true"
+                  severity="secondary"
+                  size="small"
+                  (onClick)="openLeaderForm(item.grupo.id, 'edit', activeLeader)"
+                />
+                <p-button
+                  label="Reemplazar"
+                  icon="pi pi-arrows-h"
+                  [outlined]="true"
+                  severity="secondary"
+                  size="small"
+                  (onClick)="openLeaderForm(item.grupo.id, 'replace')"
+                />
+                <p-button
+                  label="Inactivar"
+                  icon="pi pi-user-minus"
+                  [outlined]="true"
+                  severity="danger"
+                  size="small"
+                  (onClick)="deactivateLeader(activeLeader.id)"
+                />
               </div>
             </div>
           </div>
@@ -363,23 +499,34 @@
         </div>
       </div>
       <ng-template #noGroups>
-        <p class="empty-text">No hay grupos atendidos registrados todavía.</p>
+        <div class="organization-empty-state">
+          <mat-icon>group_off</mat-icon>
+          <p>No hay grupos atendidos registrados todavía.</p>
+        </div>
       </ng-template>
+      </div>
     </div>
 
     <!-- 4.5. Convenios -->
-    <div class="badi-card section-card">
-      <div class="section-header-flex">
-        <div class="badi-card-header mb-0">
-          <mat-icon class="badi-card-icon">handshake</mat-icon>
+    <div class="organization-section-card">
+      <div class="organization-section-header">
+        <div class="organization-section-title">
+          <mat-icon class="section-icon">handshake</mat-icon>
           <h2>Convenios</h2>
         </div>
-        <button mat-button class="btn-primary-text" (click)="openAgreementForm()" *ngIf="authService.canEdit()" [disabled]="detail.organizacion.estado === 'Inactiva'">
-          <mat-icon>add</mat-icon> Registrar convenio
-        </button>
+        <div class="organization-section-action" *ngIf="authService.canEdit()">
+          <p-button
+            label="Registrar convenio"
+            icon="pi pi-plus"
+            size="small"
+            styleClass="organization-action-button-p"
+            [disabled]="detail.organizacion.estado === 'Inactiva'"
+            (onClick)="openAgreementForm()"
+          />
+        </div>
       </div>
 
-      <div class="badi-card-body pt-0">
+      <div class="organization-section-body">
         <div class="table-wrapper" *ngIf="detail.convenios?.length; else noAgreements">
           <table class="badi-table">
             <thead>
@@ -411,28 +558,30 @@
                   </span>
                 </td>
                 <td class="text-center actions-cell">
-                  <!-- Ver detalle -->
-                  <button mat-icon-button color="primary"
-                          matTooltip="Ver detalle"
-                          [routerLink]="['/agreements', conv.id]">
-                    <mat-icon>visibility</mat-icon>
-                  </button>
-                  <!-- Editar: solo si Registrado -->
-                  <button mat-icon-button class="text-muted"
-                          matTooltip="Editar convenio"
-                          (click)="editAgreement(conv)"
-                          *ngIf="conv.estado === 'Registrado' && detail.organizacion.estado !== 'Inactiva'">
-                    <mat-icon>edit</mat-icon>
-                  </button>
-                  <!-- Anular: si Registrado o Activo -->
-                  <button mat-icon-button color="warn"
-                          matTooltip="Anular convenio"
-                          (click)="deactivateAgreement(conv.id)"
-                          *ngIf="(conv.estado === 'Registrado' || conv.estado === 'Activo') && detail.organizacion.estado !== 'Inactiva' && authService.canEdit()">
-                    <mat-icon>block</mat-icon>
-                  </button>
-                  <!-- Histórico: indicador para finalizados/anulados -->
-                  <span class="historico-label" *ngIf="isHistorico(conv.estado)" matTooltip="Convenio histórico">
+                  <p-button
+                    icon="pi pi-eye"
+                    [text]="true"
+                    severity="secondary"
+                    pTooltip="Ver detalle"
+                    [routerLink]="['/agreements', conv.id]"
+                  />
+                  <p-button
+                    icon="pi pi-pencil"
+                    [text]="true"
+                    severity="secondary"
+                    pTooltip="Editar convenio"
+                    (onClick)="editAgreement(conv)"
+                    *ngIf="conv.estado === 'Registrado' && detail.organizacion.estado !== 'Inactiva'"
+                  />
+                  <p-button
+                    icon="pi pi-ban"
+                    [text]="true"
+                    severity="danger"
+                    pTooltip="Anular convenio"
+                    (onClick)="deactivateAgreement(conv.id)"
+                    *ngIf="(conv.estado === 'Registrado' || conv.estado === 'Activo') && detail.organizacion.estado !== 'Inactiva' && authService.canEdit()"
+                  />
+                  <span class="historico-label" *ngIf="isHistorico(conv.estado)" pTooltip="Convenio histórico">
                     <mat-icon>inventory_2</mat-icon>
                   </span>
                 </td>
@@ -441,19 +590,31 @@
           </table>
         </div>
         <ng-template #noAgreements>
-          <p class="empty-text">No hay convenios registrados todavía.</p>
+          <div class="organization-empty-state">
+            <mat-icon>handshake</mat-icon>
+            <p>No hay convenios registrados todavía.</p>
+          </div>
         </ng-template>
       </div>
     </div>
     <!-- 4.6. Entregas Realizadas -->
-    <div class="badi-card section-card">
-      <div class="badi-card-header">
-        <mat-icon class="badi-card-icon">local_shipping</mat-icon>
-        <div class="header-content">
+    <div class="organization-section-card">
+      <div class="organization-section-header">
+        <div class="organization-section-title">
+          <mat-icon class="section-icon">local_shipping</mat-icon>
           <h2>Entregas Realizadas</h2>
         </div>
+        <div class="organization-section-action" *ngIf="detail.organizacion.estado !== 'Inactiva' && authService.canEdit()">
+          <p-button
+            label="Programar entrega"
+            icon="pi pi-plus"
+            size="small"
+            styleClass="organization-action-button-p"
+            (onClick)="openScheduleForm()"
+          />
+        </div>
       </div>
-      <div class="badi-card-content">
+      <div class="organization-section-body">
         <div class="table-wrapper" *ngIf="realizedDeliveries?.length; else noDeliveries">
           <table class="badi-table">
             <thead>
@@ -468,20 +629,29 @@
             <tbody>
               <tr *ngFor="let delivery of realizedDeliveries">
                 <td>{{ delivery.fechaRealizacion | date:'dd/MM/yyyy' }}</td>
-                <td>{{ delivery.convenio?.codigoConvenio }}</td>
-                <td>{{ delivery.kilosEntregados }} kg</td>
-                <td><span class="badge bg-success">{{ delivery.estado }}</span></td>
+                <td class="col-mono">{{ delivery.convenio?.codigoConvenio || '—' }}</td>
+                <td><strong>{{ delivery.kilosEntregados }}</strong> kg</td>
+                <td>
+                  <span class="estado-chip" [ngClass]="getEstadoClass(delivery.estado)">{{ delivery.estado }}</span>
+                </td>
                 <td class="actions-col">
-                  <button mat-icon-button color="primary" [routerLink]="['/realized-deliveries', delivery.id]" matTooltip="Ver detalle">
-                    <mat-icon>visibility</mat-icon>
-                  </button>
+                  <p-button
+                    icon="pi pi-eye"
+                    [text]="true"
+                    severity="secondary"
+                    pTooltip="Ver detalle"
+                    [routerLink]="['/realized-deliveries', delivery.id]"
+                  />
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
         <ng-template #noDeliveries>
-          <p class="empty-text">No hay entregas registradas todavía.</p>
+          <div class="organization-empty-state">
+            <mat-icon>local_shipping</mat-icon>
+            <p>No hay entregas registradas todavía.</p>
+          </div>
         </ng-template>
       </div>
     </div>
@@ -496,35 +666,42 @@
     </app-document-section>
 
     <!-- 6. Acciones Administrativas -->
-    <div class="badi-card section-card admin-card" *ngIf="authService.canEdit()">
-      <div class="badi-card-header mb-0">
-        <mat-icon class="badi-card-icon color-warn">admin_panel_settings</mat-icon>
-        <h2>Acciones administrativas</h2>
+    <div class="organization-section-card admin-card" *ngIf="authService.canEdit()">
+      <div class="organization-section-header">
+        <div class="organization-section-title">
+          <mat-icon class="section-icon color-warn">admin_panel_settings</mat-icon>
+          <h2>Acciones administrativas</h2>
+        </div>
       </div>
       
-      <div class="admin-action-row mt-3">
-        <div class="admin-info">
-          <h3>Desactivar organización</h3>
-          <p>La organización dejará de estar disponible para la gestión operativa pero mantendrá su historial.</p>
-        </div>
-        <div class="admin-btn">
-          <button mat-stroked-button color="warn" 
-                  *ngIf="detail.organizacion.estado !== 'Inactiva'" 
-                  (click)="deactivateOrganization()"
-                  [disabled]="deactivating">
-            <mat-spinner *ngIf="deactivating" diameter="18" class="spinner-btn"></mat-spinner>
-            <mat-icon *ngIf="!deactivating">block</mat-icon>
-            <span>Desactivar organización</span>
-          </button>
-          
-          <button mat-stroked-button color="primary" 
-                  *ngIf="detail.organizacion.estado === 'Inactiva'" 
-                  (click)="activateOrganization()"
-                  [disabled]="deactivating">
-            <mat-spinner *ngIf="deactivating" diameter="18" class="spinner-btn"></mat-spinner>
-            <mat-icon *ngIf="!deactivating">restore</mat-icon>
-            <span>Reactivar organización</span>
-          </button>
+      <div class="organization-section-body">
+        <div class="admin-action-row">
+          <div class="admin-info">
+            <h3>Desactivar organización</h3>
+            <p>La organización dejará de estar disponible para la gestión operativa pero mantendrá su historial.</p>
+          </div>
+          <div class="admin-btn">
+            <p-button
+              label="Desactivar organización"
+              icon="pi pi-ban"
+              severity="danger"
+              [outlined]="true"
+              *ngIf="detail.organizacion.estado !== 'Inactiva'"
+              (onClick)="deactivateOrganization()"
+              [disabled]="deactivating"
+              [loading]="deactivating"
+            />
+            <p-button
+              label="Reactivar organización"
+              icon="pi pi-refresh"
+              [outlined]="true"
+              severity="secondary"
+              *ngIf="detail.organizacion.estado === 'Inactiva'"
+              (onClick)="activateOrganization()"
+              [disabled]="deactivating"
+              [loading]="deactivating"
+            />
+          </div>
         </div>
       </div>
     </div>

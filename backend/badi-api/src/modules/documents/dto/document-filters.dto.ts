@@ -21,6 +21,34 @@ export class DocumentFiltersDto {
   idEntidadRelacionada?: string;
 
   @IsOptional()
+  @IsString()
+  entityType?: string;
+
+  @IsOptional()
+  @IsString()
+  entityId?: string;
+
+  @IsOptional()
+  @IsString()
+  organizacionId?: string;
+
+  @IsOptional()
+  @IsString()
+  convenioId?: string;
+
+  @IsOptional()
+  @IsString()
+  entregaId?: string;
+
+  @IsOptional()
+  @IsString()
+  fechaDesde?: string;
+
+  @IsOptional()
+  @IsString()
+  fechaHasta?: string;
+
+  @IsOptional()
   @IsEnum(DocumentStatus)
   estado?: DocumentStatus;
 

@@ -23,6 +23,7 @@ import { DocumentsModule } from './modules/documents/documents.module';
 import { RealizedDeliveriesModule } from './modules/realized-deliveries/realized-deliveries.module';
 import { AuditModule } from './modules/audit/audit.module';
 import { SeedModule } from './modules/seed/seed.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { ClsModule } from 'nestjs-cls';
 
 @Module({
@@ -84,6 +85,8 @@ import { ClsModule } from 'nestjs-cls';
     AuditModule,
 
     SeedModule,
+
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [

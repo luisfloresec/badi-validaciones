@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsDateString, MaxLength } from 'class-validator';
+import { IsString, IsOptional, IsDateString, MaxLength, IsUUID } from 'class-validator';
 
 /**
  * Solo permite actualizar campos de metadata, no el archivo ni el tipo documental.
@@ -20,4 +20,8 @@ export class UpdateDocumentDto {
   @IsOptional()
   @IsDateString({}, { message: 'fechaDocumento debe tener formato YYYY-MM-DD.' })
   fechaDocumento?: string;
+
+  @IsOptional()
+  @IsUUID()
+  tipoDocumentoId?: string;
 }

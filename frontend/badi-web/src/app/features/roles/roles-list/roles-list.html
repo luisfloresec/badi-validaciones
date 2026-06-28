@@ -1,25 +1,48 @@
 <div class="page-container">
 
-  <!-- Encabezado -->
-  <div class="page-header-row">
-    <div class="page-header">
-      <h1>Roles y Permisos</h1>
-      <p>Gestión de roles y niveles de acceso del sistema</p>
+  <!-- Breadcrumb y Encabezado -->
+  <div class="header-group">
+    <div class="breadcrumb">
+      <a routerLink="/dashboard">
+        <mat-icon>home</mat-icon>
+        Inicio
+      </a>
+      <mat-icon class="separator">chevron_right</mat-icon>
+      <span class="current-page">Roles y Permisos</span>
     </div>
-    <div class="header-actions">
-      <button mat-flat-button color="primary" (click)="createRole()">
-        <mat-icon>add</mat-icon> Nuevo rol
+
+    <div class="page-header-row">
+      <div class="page-header">
+        <h1>Roles y Permisos</h1>
+        <p>Administración de roles, perfiles base de acceso y asignación de usuarios en el sistema</p>
+      </div>
+      <button mat-flat-button class="btn-primary" (click)="createRole()">
+        <mat-icon>add_moderator</mat-icon>
+        Nuevo rol
       </button>
     </div>
   </div>
 
-  <!-- Loading -->
-  <div class="state-container" *ngIf="loading">
-    <mat-spinner diameter="40"></mat-spinner>
-    <p>Cargando roles...</p>
+  <!-- Barra de búsqueda fiel a las guías -->
+  <div class="search-bar" *ngIf="!loading && !error && allRoles.length > 0">
+    <p-iconfield class="search-field">
+      <p-inputicon styleClass="pi pi-search"></p-inputicon>
+      <input pInputText type="text"
+             class="w-full"
+             placeholder="Buscar por nombre o descripción..."
+             [(ngModel)]="filters.search"
+             (ngModelChange)="applyFilters()" />
+      <p-inputicon *ngIf="filters.search" styleClass="pi pi-times" style="cursor: pointer;" (click)="filters.search=''; applyFilters()"></p-inputicon>
+    </p-iconfield>
   </div>
 
-  <!-- Error -->
+  <!-- Loading State -->
+  <div class="state-container" *ngIf="loading">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Cargando información de roles...</p>
+  </div>
+
+  <!-- Error State -->
   <div class="state-container state-error" *ngIf="!loading && error">
     <mat-icon class="state-icon">cloud_off</mat-icon>
     <p><strong>{{ error }}</strong></p>
@@ -28,54 +51,80 @@
     </button>
   </div>
 
-  <!-- Empty -->
-  <div class="state-container" *ngIf="!loading && !error && roles.length === 0">
+  <!-- Empty State -->
+  <div class="state-container" *ngIf="!loading && !error && filteredRoles.length === 0">
     <mat-icon class="state-icon">security</mat-icon>
-    <p><strong>No hay roles registrados.</strong></p>
+    <p><strong>No se encontraron roles que coincidan con la búsqueda.</strong></p>
   </div>
 
-  <!-- Tabla -->
-  <div class="badi-card table-card" *ngIf="!loading && !error && roles.length > 0">
+  <!-- Tabla de Roles -->
+  <div class="badi-card table-card" *ngIf="!loading && !error && filteredRoles.length > 0">
     <div class="table-wrapper">
       <table class="org-table">
         <thead>
           <tr>
-            <th>Nombre del Rol</th>
-            <th>Descripción</th>
-            <th>Perfil de Acceso</th>
+            <th class="text-left">Nombre del Rol</th>
+            <th class="text-left">Descripción</th>
+            <th class="text-left">Perfil Base (Acceso)</th>
+            <th class="text-center">Usuarios Asignados</th>
             <th class="text-center">Estado</th>
             <th class="text-center">Acciones</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let role of roles">
+          <tr *ngFor="let role of paginatedRoles">
             <td class="col-primary">{{ role.nombre }}</td>
             <td class="text-secondary">{{ role.descripcion || 'Sin descripción' }}</td>
-            <td class="text-secondary">{{ role.perfilAcceso }}</td>
+            <td>
+              <span class="perfil-chip" [ngClass]="getPerfilClass(role.perfilAcceso)">
+                {{ role.perfilAcceso || 'Administrador' }}
+              </span>
+            </td>
+            <td class="text-center">
+              <span class="user-count-badge">
+                <mat-icon>group</mat-icon>
+                {{ role.usuariosAsignados || 0 }}
+              </span>
+            </td>
             <td class="text-center">
               <span class="estado-chip" [ngClass]="getEstadoClass(role.estado)">
                 {{ role.estado }}
               </span>
             </td>
             <td class="text-center col-actions">
-              <button mat-icon-button color="primary" matTooltip="Editar rol" (click)="editRole(role)">
+              <button mat-icon-button matTooltip="Ver Detalle de Rol" (click)="viewRoleDetail(role)">
+                <mat-icon>visibility</mat-icon>
+              </button>
+
+              <button mat-icon-button matTooltip="Editar rol" (click)="editRole(role)">
                 <mat-icon>edit</mat-icon>
               </button>
+              
               <button mat-icon-button color="warn" matTooltip="Desactivar rol" 
                       *ngIf="role.estado === 'Activo'"
                       (click)="deactivateRole(role)">
                 <mat-icon>block</mat-icon>
               </button>
-              <button mat-icon-button class="text-success" matTooltip="Reactivar rol" 
+
+              <button mat-icon-button color="primary" matTooltip="Reactivar rol" 
                       *ngIf="role.estado === 'Inactivo'"
                       (click)="activateRole(role)">
-                <mat-icon>check_circle</mat-icon>
+                <mat-icon>restore</mat-icon>
               </button>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
+
+    <!-- Paginador Angular Material -->
+    <mat-paginator [length]="totalItems"
+                   [pageSize]="pageSize"
+                   [pageIndex]="pageIndex"
+                   [pageSizeOptions]="[5, 10, 25, 50]"
+                   (page)="onPageChange($event)"
+                   showFirstLastButtons>
+    </mat-paginator>
   </div>
 
 </div>

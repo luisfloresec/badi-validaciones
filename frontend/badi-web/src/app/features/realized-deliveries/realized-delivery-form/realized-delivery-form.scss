@@ -1,10 +1,347 @@
-.badi-card {
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+$green: #015641;
+$green-hover: #01785a;
+$green-bg: #f1faf7;
+$g9: #0f172a;
+$g7: #334155;
+$g5: #64748b;
+$g3: #cbd5e1;
+$g1: #f8fafc;
+$border: #e2e8f0;
+
+.page-container {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  max-width: 900px;
+  margin: 0 auto;
+  width: 100%;
+  padding-bottom: 40px;
+  padding-top: 24px;
 }
 
-.badi-form {
-  mat-form-field {
-    margin-bottom: 8px;
+// Breadcrumb
+.breadcrumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: $g5;
+  margin-bottom: 8px;
+  padding: 6px 14px;
+  background-color: $g1;
+  border: 1px solid $border;
+  border-radius: 12px;
+  width: fit-content;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+
+  a {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: $green;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: color 0.15s ease;
+    &:hover { color: $green-hover; }
+    mat-icon { font-size: 16px; width: 16px; height: 16px; }
+  }
+  .separator { font-size: 16px; width: 16px; height: 16px; color: $g3; }
+  .current-page { color: $g9; font-weight: 500; }
+}
+
+.page-header {
+  padding-bottom: 24px;
+  border-bottom: 1px solid $border;
+  margin-bottom: 8px;
+  h1 {
+    margin: 0 0 6px;
+    font-size: 28px;
+    font-weight: 700;
+    color: $g9;
+    letter-spacing: -0.02em;
+  }
+  p {
+    margin: 0;
+    font-size: 15px;
+    color: $g5;
+    line-height: 1.5;
+  }
+}
+
+// Cards / Sections
+.section-card {
+  padding: 0;
+  border-radius: 12px;
+  border: 1px solid $border;
+  background-color: #fff;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  overflow: hidden;
+  margin-bottom: 32px;
+}
+
+.badi-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 28px;
+  border-bottom: 1px solid $border;
+  background-color: #ffffff;
+
+  &.bg-slate-50 {
+    background-color: $g1;
+  }
+
+  h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: $g9;
+    letter-spacing: -0.01em;
+  }
+
+  .badi-card-icon {
+    color: $green;
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+  }
+}
+
+// Formularios
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px 24px;
+  padding: 24px 28px;
+
+  .col-full {
+    grid-column: 1 / -1;
+  }
+  .col-half {
+    grid-column: span 1;
+  }
+}
+
+// Botones
+.btn-primary {
+  background-color: $green !important;
+  color: #fff !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-weight: 500 !important;
+  border-radius: 10px !important;
+  padding: 0 24px !important;
+  height: 42px;
+  box-shadow: 0 1px 3px rgba(1, 86, 65, 0.2);
+  transition: all 0.2s ease;
+
+  &:hover:not([disabled]) {
+    background-color: #016b50 !important;
+    box-shadow: 0 4px 12px rgba(1, 86, 65, 0.25);
+  }
+
+  mat-icon { margin-right: 0; }
+  .spinner-btn { display: inline-block; }
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+  padding-top: 24px;
+  border-top: 1px solid $g1;
+
+  button[mat-stroked-button] {
+    border: 1px solid $g3 !important;
+    color: $g7 !important;
+    font-weight: 500 !important;
+    border-radius: 10px !important;
+    padding: 0 24px !important;
+    height: 42px;
+    background: #fff !important;
+    transition: all 0.2s ease;
+
+    &:hover:not([disabled]) {
+      background: $g1 !important;
+      border-color: #9ca3af !important;
+    }
+  }
+}
+
+// Estados
+.state-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 56px 24px;
+  text-align: center;
+  color: $g5;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid $border;
+
+  &.compact { padding: 36px 24px; }
+  p { margin: 4px 0; }
+  strong { color: $g7; }
+  .state-icon { font-size: 48px; width: 48px; height: 48px; color: $g3; margin-bottom: 12px; }
+  .state-hint { font-size: 13px; margin-bottom: 16px; }
+  &.state-error .state-icon { color: #f87171; }
+}
+
+// PrimeNG Field Container Override
+.field-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+
+  .field-hint {
+    font-size: 11.5px;
+    color: $g5;
+    margin-top: 4px;
+    margin-left: 4px;
+  }
+
+  .field-error {
+    font-size: 11px;
+    color: #dc2626;
+    font-weight: 500;
+    margin-top: 4px;
+    margin-left: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+}
+
+// Ensure PrimeNG inputs take full width
+::ng-deep {
+  p-iftalabel {
+    width: 100% !important;
+    display: block !important;
+  }
+  .p-iftalabel {
+    width: 100% !important;
+    display: block !important;
+  }
+  .p-inputtext, .p-select, .p-textarea {
+    width: 100% !important;
+  }
+}
+
+/* ── Special Fields (Destacados) ───────────────────────── */
+.special-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid $g3;
+  background: $g1;
+  border-radius: 10px;
+  padding: 8px 14px;
+  min-height: 52px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: #94a3b8;
+    background: #ffffff;
+  }
+
+  &:focus-within {
+    border-color: $green;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(1, 86, 65, 0.08);
+  }
+}
+
+.special-field-clickable {
+  cursor: pointer;
+  user-select: none;
+
+  &:hover {
+    border-color: $green;
+    background: #ffffff;
+  }
+}
+
+.special-field-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.special-field-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 2px;
+}
+
+.special-field-control {
+  width: 100%;
+  min-height: 24px;
+  display: flex;
+  align-items: center;
+}
+
+.special-field-value {
+  font-family: 'Inter', Roboto, "Helvetica Neue", sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  color: #1e293b;
+}
+
+/* Hidden mat-form-field for Datepicker */
+.hidden-mat-field {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  margin: 0 !important;
+
+  ::ng-deep {
+    .mat-mdc-form-field-subscript-wrapper {
+      display: none !important;
+    }
+  }
+}
+
+::ng-deep {
+  .special-field {
+    mat-datepicker-toggle {
+      button {
+        width: 32px !important;
+        height: 32px !important;
+        padding: 0 !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: $green !important;
+        mat-icon {
+          font-size: 20px;
+          width: 20px;
+          height: 20px;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .page-container {
+    gap: 20px;
+    padding-bottom: 24px;
+  }
+  .form-grid {
+    grid-template-columns: 1fr;
+    .col-half { grid-column: 1 / -1; }
   }
 }

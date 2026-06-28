@@ -10,6 +10,10 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { IftaLabelModule } from 'primeng/iftalabel';
+import { InputTextModule } from 'primeng/inputtext';
+import { TextareaModule } from 'primeng/textarea';
+import { ButtonModule } from 'primeng/button';
 import { ScheduleService } from '../schedule.service';
 
 @Component({
@@ -25,7 +29,11 @@ import { ScheduleService } from '../schedule.service';
     MatIconModule,
     MatDatepickerModule,
     MatNativeDateModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    IftaLabelModule,
+    InputTextModule,
+    TextareaModule,
+    ButtonModule
   ],
   templateUrl: './schedule-reschedule-dialog.html',
   styleUrls: ['./schedule-reschedule-dialog.scss']
@@ -48,18 +56,38 @@ export class ScheduleRescheduleDialogComponent {
     });
   }
 
-  private formatDateForApi(dateValue: any): string {
-    if (!dateValue) return '';
-    if (typeof dateValue === 'string') {
-      const match = dateValue.match(/^\d{4}-\d{2}-\d{2}/);
-      if (match) return match[0];
+  formatDisplayDate(date: Date | string | null): string {
+    if (!date) return 'Seleccione una fecha';
+
+    let value = date;
+    if (typeof date === 'string') {
+      const parts = date.split('T')[0].split('-');
+      value = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
     }
-    const d = new Date(dateValue);
-    if (isNaN(d.getTime())) return '';
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
+    if (isNaN((value as Date).getTime())) return 'Seleccione una fecha';
+
+    return new Intl.DateTimeFormat('es-EC', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    }).format(value as Date);
+  }
+
+  private formatLocalDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+  }
+
+  private normalizeDateForPayload(value: Date | string | null): string {
+    if (!value) return '';
+
+    if (typeof value === 'string') {
+      return value.slice(0, 10);
+    }
+
+    return this.formatLocalDate(value);
   }
 
   onSubmit(): void {
@@ -69,7 +97,7 @@ export class ScheduleRescheduleDialogComponent {
     const v = this.form.value;
 
     const payload = {
-      nuevaFecha: this.formatDateForApi(v.nuevaFecha),
+      nuevaFecha: this.normalizeDateForPayload(v.nuevaFecha),
       motivoReprogramacion: v.motivoReprogramacion.trim()
     };
 

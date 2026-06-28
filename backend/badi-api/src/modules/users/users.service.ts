@@ -64,11 +64,10 @@ export class UsersService {
   }
 
   /**
-   * Lista todos los usuarios con estado Activo, incluyendo sus roles mapeados.
+   * Lista todos los usuarios (Activos e Inactivos), incluyendo sus roles mapeados.
    */
   async findAll(): Promise<UserResponse[]> {
     const users = await this.usersRepository.find({
-      where: { estado: 'Activo' },
       relations: { usuarioRoles: { rol: true } },
     });
     return users.map((user) => this.mapUserResponse(user));
@@ -155,6 +154,27 @@ export class UsersService {
     }
 
     user.estado = 'Inactivo';
+    const saved = await this.usersRepository.save(user);
+    return this.mapUserResponse(saved);
+  }
+
+  /**
+   * Reactiva un usuario inactivo (estado -> Activo).
+   */
+  async activate(id: string): Promise<UserResponse> {
+    const user = await this.usersRepository.findOne({
+      where: { id },
+      relations: { usuarioRoles: { rol: true } },
+    });
+    if (!user) {
+      throw new NotFoundException(`Usuario con id ${id} no encontrado.`);
+    }
+
+    if (user.estado === 'Activo') {
+      throw new ConflictException('El usuario ya se encuentra activo.');
+    }
+
+    user.estado = 'Activo';
     const saved = await this.usersRepository.save(user);
     return this.mapUserResponse(saved);
   }

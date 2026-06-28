@@ -7,8 +7,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subscription } from 'rxjs';
+import { ButtonModule } from 'primeng/button';
 import { RealizedDeliveriesService, RealizedDelivery } from '../realized-deliveries.service';
 import { DocumentSectionComponent } from '../../documents/document-section/document-section';
+import { AuthService } from '../../../core/auth/auth.service';
 
 @Component({
   selector: 'app-realized-delivery-detail',
@@ -20,6 +22,7 @@ import { DocumentSectionComponent } from '../../documents/document-section/docum
     MatIconModule,
     MatButtonModule,
     MatProgressSpinnerModule,
+    ButtonModule,
     DocumentSectionComponent
   ],
   templateUrl: './realized-delivery-detail.html',
@@ -36,6 +39,7 @@ export class RealizedDeliveryDetailComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private realizedDeliveriesService: RealizedDeliveriesService,
+    public authService: AuthService,
     private cdr: ChangeDetectorRef,
     private snackBar: MatSnackBar
   ) {}
@@ -82,5 +86,17 @@ export class RealizedDeliveryDetailComponent implements OnInit, OnDestroy {
 
   goBack(): void {
     this.router.navigate(['/realized-deliveries']);
+  }
+
+  getEstadoClass(estado: string): string {
+    const map: Record<string, string> = {
+      'Registrada': 'estado-registrada',
+      'Activa': 'estado-activa',
+      'Activo': 'estado-activa',
+      'Anulada': 'estado-inactiva',
+      'Inactiva': 'estado-inactiva',
+      'Inactivo': 'estado-inactiva'
+    };
+    return map[estado] || 'estado-registrada';
   }
 }

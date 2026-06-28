@@ -1,13 +1,14 @@
 <div class="dialog-container">
   <div class="dialog-header">
-    <h2 mat-dialog-title>
-      <ng-container *ngIf="data.mode === 'create'">Agregar Dirigente Activo</ng-container>
-      <ng-container *ngIf="data.mode === 'edit'">Editar Dirigente Activo</ng-container>
-      <ng-container *ngIf="data.mode === 'replace'">Reemplazar Dirigente Activo</ng-container>
-    </h2>
-    <button mat-icon-button class="close-button" mat-dialog-close [disabled]="loading">
-      <mat-icon>close</mat-icon>
-    </button>
+    <div class="header-title">
+      <mat-icon>{{ data.mode === 'create' ? 'person_add' : (data.mode === 'edit' ? 'manage_accounts' : 'find_replace') }}</mat-icon>
+      <h2 mat-dialog-title>
+        <ng-container *ngIf="data.mode === 'create'">Agregar Dirigente Activo</ng-container>
+        <ng-container *ngIf="data.mode === 'edit'">Editar Dirigente Activo</ng-container>
+        <ng-container *ngIf="data.mode === 'replace'">Reemplazar Dirigente Activo</ng-container>
+      </h2>
+    </div>
+    <p-button icon="pi pi-times" [text]="true" severity="secondary" mat-dialog-close [disabled]="loading" />
   </div>
 
   <div class="dialog-content" mat-dialog-content>
@@ -21,74 +22,82 @@
       <span>Esta acción reemplazará al dirigente activo de este grupo. El registro anterior quedará como histórico únicamente en este grupo.</span>
     </div>
 
-    <form [formGroup]="form" class="badi-form">
+    <form [formGroup]="form" class="badi-form p-fluid">
       
       <ng-container *ngIf="data.mode !== 'edit'">
-        <mat-radio-group formControlName="leaderOption" class="leader-options">
-          <mat-radio-button value="use_active" *ngIf="data.hasActiveRepresentative">
-            Usar representante activo de la organización
-          </mat-radio-button>
-          <mat-radio-button value="new_leader">
-            Registrar dirigente nuevo
-          </mat-radio-button>
-        </mat-radio-group>
+        <div class="leader-options">
+          <div class="radio-option" *ngIf="data.hasActiveRepresentative">
+            <p-radiobutton formControlName="leaderOption" value="use_active" inputId="use_active"></p-radiobutton>
+            <label for="use_active">Usar representante activo de la organización</label>
+          </div>
+          <div class="radio-option">
+            <p-radiobutton formControlName="leaderOption" value="new_leader" inputId="new_leader"></p-radiobutton>
+            <label for="new_leader">Registrar dirigente nuevo</label>
+          </div>
+        </div>
       </ng-container>
 
       <!-- Formulario dirigente -->
       <div class="new-leader-form" *ngIf="form.getRawValue().leaderOption === 'new_leader'">
         <div class="form-row">
-          <mat-form-field appearance="outline" class="w-100">
-            <mat-label>Nombres</mat-label>
-            <input matInput formControlName="nombres" />
-            <mat-hint>Ejemplo: María Fernanda</mat-hint>
-            <mat-error *ngIf="form.get('nombres')?.hasError('required')">Requerido.</mat-error>
-          </mat-form-field>
+          <div class="field-container col-half">
+            <p-iftalabel>
+              <input pInputText formControlName="nombres" id="nombres" />
+              <label for="nombres">Nombres</label>
+            </p-iftalabel>
+            <small class="field-hint">Ejemplo: María Fernanda</small>
+            <small class="field-error" *ngIf="form.get('nombres')?.hasError('required') && form.get('nombres')?.touched">Requerido.</small>
+          </div>
 
-          <mat-form-field appearance="outline" class="w-100">
-            <mat-label>Apellidos</mat-label>
-            <input matInput formControlName="apellidos" />
-            <mat-hint>Ejemplo: Imbaquingo Flores</mat-hint>
-            <mat-error *ngIf="form.get('apellidos')?.hasError('required')">Requerido.</mat-error>
-          </mat-form-field>
+          <div class="field-container col-half">
+            <p-iftalabel>
+              <input pInputText formControlName="apellidos" id="apellidos" />
+              <label for="apellidos">Apellidos</label>
+            </p-iftalabel>
+            <small class="field-hint">Ejemplo: Imbaquingo Flores</small>
+            <small class="field-error" *ngIf="form.get('apellidos')?.hasError('required') && form.get('apellidos')?.touched">Requerido.</small>
+          </div>
         </div>
 
-        <div class="form-row">
-          <mat-form-field appearance="outline" class="w-100">
-            <mat-label>Cédula</mat-label>
-            <input matInput formControlName="cedula" />
-            <mat-hint>Ejemplo: 1000000040</mat-hint>
-            <mat-error *ngIf="form.get('cedula')?.hasError('required')">Requerido.</mat-error>
-            <mat-error *ngIf="form.get('cedula')?.hasError('pattern')">10 dígitos.</mat-error>
-          </mat-form-field>
+        <div class="form-row mt-4">
+          <div class="field-container col-half">
+            <p-iftalabel>
+              <input pInputText formControlName="cedula" id="cedula" />
+              <label for="cedula">Cédula</label>
+            </p-iftalabel>
+            <small class="field-hint">Ejemplo: 1000000040</small>
+            <small class="field-error" *ngIf="form.get('cedula')?.hasError('required') && form.get('cedula')?.touched">Requerido.</small>
+            <small class="field-error" *ngIf="form.get('cedula')?.hasError('pattern') && form.get('cedula')?.touched">10 dígitos.</small>
+          </div>
 
-          <mat-form-field appearance="outline" class="w-100">
-            <mat-label>Teléfono (Opcional)</mat-label>
-            <input matInput formControlName="telefono" />
-            <mat-hint>Ejemplo: 0987654321</mat-hint>
-          </mat-form-field>
+          <div class="field-container col-half">
+            <p-iftalabel>
+              <input pInputText formControlName="telefono" id="telefono" />
+              <label for="telefono">Teléfono (Opcional)</label>
+            </p-iftalabel>
+            <small class="field-hint">Ejemplo: 0987654321</small>
+          </div>
         </div>
 
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>Correo electrónico (Opcional)</mat-label>
-          <input matInput formControlName="email" type="email" />
-          <mat-hint>Ejemplo: dirigente@correo.com</mat-hint>
-          <mat-error *ngIf="form.get('email')?.hasError('email')">Formato inválido.</mat-error>
-        </mat-form-field>
+        <div class="form-row mt-4">
+          <div class="field-container col-full">
+            <p-iftalabel>
+              <input pInputText formControlName="email" id="email" type="email" />
+              <label for="email">Correo electrónico (Opcional)</label>
+            </p-iftalabel>
+            <small class="field-hint">Ejemplo: dirigente@correo.com</small>
+            <small class="field-error" *ngIf="form.get('email')?.hasError('email') && form.get('email')?.touched">Formato inválido.</small>
+          </div>
+        </div>
       </div>
     </form>
   </div>
 
   <div class="dialog-actions" mat-dialog-actions>
-    <button mat-stroked-button mat-dialog-close [disabled]="loading">Cancelar</button>
-    <button mat-flat-button color="primary" 
-            (click)="onSubmit()" 
-            [disabled]="form.invalid || loading"
-            class="submit-btn">
-      <mat-spinner *ngIf="loading" diameter="20" class="spinner-btn"></mat-spinner>
-      <span *ngIf="!loading">
-        <ng-container *ngIf="data.mode === 'create' || data.mode === 'edit'">Guardar dirigente</ng-container>
-        <ng-container *ngIf="data.mode === 'replace'">Reemplazar dirigente</ng-container>
-      </span>
-    </button>
+    <p-button label="Cancelar" [outlined]="true" severity="secondary" mat-dialog-close [disabled]="loading" />
+    <p-button [label]="data.mode === 'create' || data.mode === 'edit' ? 'Guardar dirigente' : 'Reemplazar dirigente'"
+              (onClick)="onSubmit()" 
+              [disabled]="form.invalid || loading"
+              [loading]="loading" />
   </div>
 </div>

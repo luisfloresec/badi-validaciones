@@ -1,56 +1,135 @@
-<h2 mat-dialog-title>{{ mode === 'create' ? 'Nuevo Usuario' : 'Editar Usuario' }}</h2>
-<mat-dialog-content>
-  <form [formGroup]="form" class="badi-form">
-    
-    <div class="form-row">
-      <mat-form-field appearance="outline" class="w-full">
-        <mat-label>Nombres</mat-label>
-        <input matInput formControlName="nombres" placeholder="Ej. Juan Carlos">
-        <mat-error *ngIf="form.get('nombres')?.hasError('required')">Los nombres son obligatorios</mat-error>
-      </mat-form-field>
+<div class="dialog-container">
+  <div class="dialog-header">
+    <div class="header-title">
+      <mat-icon>{{ mode === 'create' ? 'person_add' : 'manage_accounts' }}</mat-icon>
+      <h2 mat-dialog-title>{{ mode === 'create' ? 'Nuevo Usuario' : 'Editar Usuario' }}</h2>
     </div>
+    <p-button icon="pi pi-times" [text]="true" severity="secondary" mat-dialog-close [disabled]="loading" />
+  </div>
 
-    <div class="form-row">
-      <mat-form-field appearance="outline" class="w-full">
-        <mat-label>Apellidos</mat-label>
-        <input matInput formControlName="apellidos" placeholder="Ej. Pérez Gómez">
-        <mat-error *ngIf="form.get('apellidos')?.hasError('required')">Los apellidos son obligatorios</mat-error>
-      </mat-form-field>
-    </div>
+  <div class="dialog-content" mat-dialog-content>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="badi-form p-fluid">
+      <div class="form-grid">
+        
+        <!-- Nombres -->
+        <div class="field-container col-half">
+          <p-iftalabel>
+            <input pInputText formControlName="nombres" id="nombres" />
+            <label for="nombres">Nombres</label>
+          </p-iftalabel>
+          <small class="field-error" *ngIf="form.get('nombres')?.hasError('required') && form.get('nombres')?.touched">
+            El nombre es obligatorio.
+          </small>
+        </div>
 
-    <div class="form-row">
-      <mat-form-field appearance="outline" class="w-full">
-        <mat-label>Correo electrónico</mat-label>
-        <input matInput type="email" formControlName="email" placeholder="ejemplo@badi.org">
-        <mat-error *ngIf="form.get('email')?.hasError('required')">El correo es obligatorio</mat-error>
-        <mat-error *ngIf="form.get('email')?.hasError('email')">Formato de correo inválido</mat-error>
-      </mat-form-field>
-    </div>
+        <!-- Apellidos -->
+        <div class="field-container col-half">
+          <p-iftalabel>
+            <input pInputText formControlName="apellidos" id="apellidos" />
+            <label for="apellidos">Apellidos</label>
+          </p-iftalabel>
+          <small class="field-error" *ngIf="form.get('apellidos')?.hasError('required') && form.get('apellidos')?.touched">
+            El apellido es obligatorio.
+          </small>
+        </div>
 
-    <div class="form-row">
-      <mat-form-field appearance="outline" class="w-full">
-        <mat-label>Roles</mat-label>
-        <mat-select formControlName="roles" multiple>
-          <mat-option *ngFor="let rol of availableRoles" [value]="rol.id">{{ rol.nombre }} — Perfil: {{ rol.perfilAcceso }}</mat-option>
-        </mat-select>
-        <mat-error *ngIf="form.get('roles')?.hasError('required')">Debe seleccionar al menos un rol</mat-error>
-      </mat-form-field>
-    </div>
+        <!-- Correo Electrónico -->
+        <div class="field-container col-full">
+          <p-iftalabel>
+            <input pInputText type="email" formControlName="email" id="email" />
+            <label for="email">Correo Electrónico</label>
+          </p-iftalabel>
+          <small class="field-error" *ngIf="form.get('email')?.hasError('required') && form.get('email')?.touched">
+            El correo electrónico es obligatorio.
+          </small>
+          <small class="field-error" *ngIf="form.get('email')?.hasError('email') && form.get('email')?.touched">
+            Formato de correo electrónico inválido.
+          </small>
+        </div>
 
-    <div class="form-row">
-      <mat-form-field appearance="outline" class="w-full">
-        <mat-label>{{ mode === 'create' ? 'Contraseña' : 'Nueva contraseña (opcional)' }}</mat-label>
-        <input matInput type="password" formControlName="password" placeholder="Mínimo 6 caracteres">
-        <mat-error *ngIf="form.get('password')?.hasError('required')">La contraseña es obligatoria</mat-error>
-        <mat-error *ngIf="form.get('password')?.hasError('minlength')">Mínimo 6 caracteres</mat-error>
-      </mat-form-field>
-    </div>
+        <!-- Contraseña (solo en creación) -->
+        <div class="field-container col-full" *ngIf="mode === 'create'">
+          <p-iftalabel>
+            <input pInputText type="password" formControlName="password" id="password" />
+            <label for="password">Contraseña Temporal</label>
+          </p-iftalabel>
+          <small class="field-hint">Mínimo 8 caracteres</small>
+          <small class="field-error" *ngIf="form.get('password')?.hasError('required') && form.get('password')?.touched">
+            La contraseña temporal es obligatoria.
+          </small>
+          <small class="field-error" *ngIf="form.get('password')?.hasError('minlength') && form.get('password')?.touched">
+            Debe tener al menos 8 caracteres.
+          </small>
+        </div>
 
-  </form>
-</mat-dialog-content>
-<mat-dialog-actions align="end">
-  <button mat-button mat-dialog-close [disabled]="loading">Cancelar</button>
-  <button mat-flat-button class="btn-primary" (click)="onSubmit()" [disabled]="form.invalid || loading">
-    {{ mode === 'create' ? 'Crear usuario' : 'Guardar cambios' }}
-  </button>
-</mat-dialog-actions>
+        <!-- Roles Asignados -->
+        <div class="field-container col-full">
+          <div class="special-field">
+            <div class="special-field-content">
+              <span class="special-field-label">Roles Asignados</span>
+              <div class="special-field-control">
+                <mat-form-field appearance="outline" class="w-full special-mat-field">
+                  <mat-select formControlName="roles" multiple placeholder="Seleccione uno o más roles">
+                    <mat-option *ngFor="let rol of availableRoles" [value]="rol.id">
+                      <strong>{{ rol.nombre }}</strong> <span class="rol-profile">({{ rol.perfilAcceso }})</span>
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+            </div>
+          </div>
+          <small class="field-hint">Un usuario puede tener múltiples roles combinados.</small>
+          <small class="field-error" *ngIf="form.get('roles')?.hasError('required') && form.get('roles')?.touched">
+            Debe seleccionar al menos un rol.
+          </small>
+        </div>
+
+        <!-- Estado -->
+        <div class="field-container col-half">
+          <div class="special-field">
+            <div class="special-field-content">
+              <span class="special-field-label">Estado</span>
+              <div class="special-field-control">
+                <mat-form-field appearance="outline" class="w-full special-mat-field">
+                  <mat-select formControlName="estado">
+                    <mat-option value="Activo">Activo</mat-option>
+                    <mat-option value="Inactivo">Inactivo</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Requiere Cambio Password -->
+        <div class="field-container col-half">
+          <div class="special-field">
+            <div class="special-field-content">
+              <span class="special-field-label">Requiere Cambio de Clave</span>
+              <div class="special-field-control">
+                <mat-form-field appearance="outline" class="w-full special-mat-field">
+                  <mat-select formControlName="requiereCambioPassword">
+                    <mat-option [value]="true">Sí</mat-option>
+                    <mat-option [value]="false">No</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+            </div>
+          </div>
+          <small class="field-hint">Fuerza el cambio en el próximo inicio.</small>
+        </div>
+
+      </div>
+    </form>
+  </div>
+
+  <div class="dialog-actions" mat-dialog-actions>
+    <p-button label="Cancelar" [outlined]="true" severity="secondary" mat-dialog-close [disabled]="loading" />
+    <p-button [label]="loading ? 'Guardando...' : (mode === 'create' ? 'Crear usuario' : 'Guardar cambios')"
+              [icon]="mode === 'create' ? 'pi pi-user-plus' : 'pi pi-check'"
+              (onClick)="onSubmit()"
+              [disabled]="form.invalid || loading"
+              [loading]="loading" />
+  </div>
+
+</div>

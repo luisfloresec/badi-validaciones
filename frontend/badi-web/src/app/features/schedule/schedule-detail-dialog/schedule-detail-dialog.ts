@@ -8,6 +8,10 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { IftaLabelModule } from 'primeng/iftalabel';
+import { InputTextModule } from 'primeng/inputtext';
+import { TextareaModule } from 'primeng/textarea';
+import { ButtonModule } from 'primeng/button';
 import { ScheduleService, ScheduledDelivery } from '../schedule.service';
 import { ScheduleRescheduleDialogComponent } from '../schedule-reschedule-dialog/schedule-reschedule-dialog';
 import { ScheduleCancelDialogComponent } from '../schedule-cancel-dialog/schedule-cancel-dialog';
@@ -26,7 +30,11 @@ import { HttpClient } from '@angular/common/http';
     MatIconModule,
     MatFormFieldModule,
     MatInputModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    IftaLabelModule,
+    InputTextModule,
+    TextareaModule,
+    ButtonModule
   ],
   templateUrl: './schedule-detail-dialog.html',
   styleUrls: ['./schedule-detail-dialog.scss']
@@ -121,24 +129,29 @@ export class ScheduleDetailDialogComponent implements OnInit {
   }
 
   get isEditable(): boolean {
-    return this.delivery?.estado === 'Programado' || this.delivery?.estado === 'Reprogramado';
+    return (this.delivery?.estado === 'Programado' || this.delivery?.estado === 'Reprogramado') && !this.realizedDeliveryId;
+  }
+
+  private formatLocalDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  private todayLocalDate(): string {
+    return this.formatLocalDate(new Date());
   }
 
   get canRegisterDelivery(): boolean {
     if (!this.isEditable || !this.delivery?.fechaProgramada || this.realizedDeliveryId) return false;
-    
-    // Convert current local date to YYYY-MM-DD
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
-    const todayStr = `${year}-${month}-${day}`;
-    
+
+    const todayStr = this.todayLocalDate();
     let deliveryDateStr = this.delivery.fechaProgramada as unknown as string;
     if (typeof deliveryDateStr === 'string') {
       deliveryDateStr = deliveryDateStr.substring(0, 10);
     }
-    
+
     return todayStr >= deliveryDateStr;
   }
 

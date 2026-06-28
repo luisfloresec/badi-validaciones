@@ -6,6 +6,12 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { InputTextModule } from 'primeng/inputtext';
+import { IftaLabelModule } from 'primeng/iftalabel';
+import { TextareaModule } from 'primeng/textarea';
+import { FluidModule } from 'primeng/fluid';
+import { ButtonModule } from 'primeng/button';
 import { AgreementsService, AgreementType } from '../agreements.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
@@ -19,62 +25,86 @@ import { MatSnackBar } from '@angular/material/snack-bar';
     MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
-    MatIconModule
+    MatIconModule,
+    MatProgressSpinnerModule,
+    InputTextModule,
+    IftaLabelModule,
+    TextareaModule,
+    FluidModule,
+    ButtonModule
   ],
   template: `
   <div class="dialog-container">
     <div class="dialog-header">
       <div class="header-title">
-        <mat-icon>{{ isEdit ? 'edit' : 'add_circle' }}</mat-icon>
-        <h2>{{ isEdit ? 'Editar Tipo de Convenio' : 'Nuevo Tipo de Convenio' }}</h2>
+        <mat-icon>{{ isEdit ? 'edit' : 'category' }}</mat-icon>
+        <h2 mat-dialog-title>{{ isEdit ? 'Editar Tipo de Convenio' : 'Registrar Tipo de Convenio' }}</h2>
       </div>
-      <button mat-icon-button mat-dialog-close class="close-button">
-        <mat-icon>close</mat-icon>
-      </button>
+      <p-button icon="pi pi-times" [text]="true" severity="secondary" mat-dialog-close [disabled]="isLoading" />
     </div>
 
     <div class="dialog-content" mat-dialog-content>
-      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="badi-form">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>Nombre</mat-label>
-          <input matInput formControlName="nombre">
-          <mat-hint>Ejemplo: Convenio Mixto</mat-hint>
-          <mat-error *ngIf="form.get('nombre')?.hasError('required')">El nombre es obligatorio.</mat-error>
-          <mat-error *ngIf="form.get('nombre')?.hasError('maxlength')">Máximo 120 caracteres.</mat-error>
-        </mat-form-field>
+      <div class="section-title mb-3">
+        <h3 style="font-size: 15px; font-weight: 600; color: #374151; margin: 0 0 16px 0;">Datos del tipo de convenio</h3>
+      </div>
 
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>Descripción (Opcional)</mat-label>
-          <textarea matInput formControlName="descripcion" rows="3"></textarea>
-          <mat-hint>Ejemplo: Convenio controlado por tiempo y retiros</mat-hint>
-        </mat-form-field>
+      <form [formGroup]="form" class="badi-form p-fluid">
+        <div class="form-row">
+          <div class="field-container col-full">
+            <p-iftalabel>
+              <input pInputText formControlName="nombre" id="nombre" />
+              <label for="nombre">Nombre</label>
+            </p-iftalabel>
+            <small class="field-hint">Ejemplo: Convenio Piloto</small>
+            <small class="field-error" *ngIf="form.get('nombre')?.hasError('required') && form.get('nombre')?.touched">El nombre es obligatorio.</small>
+            <small class="field-error" *ngIf="form.get('nombre')?.hasError('maxlength') && form.get('nombre')?.touched">Máximo 120 caracteres.</small>
+          </div>
+        </div>
 
         <div class="form-row">
-          <mat-form-field appearance="outline" class="w-100">
-            <mat-label>Duración en meses (Opcional)</mat-label>
-            <input matInput type="number" formControlName="duracionMeses" min="1">
-            <mat-hint>Si está vacío, no se controlará por tiempo.</mat-hint>
-            <mat-error *ngIf="form.get('duracionMeses')?.hasError('min')">Debe ser mayor a 0.</mat-error>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="w-100">
-            <mat-label>Máximo de retiros (Opcional)</mat-label>
-            <input matInput type="number" formControlName="maxRetiros" min="1">
-            <mat-hint>Si está vacío, no se controlará por retiros.</mat-hint>
-            <mat-error *ngIf="form.get('maxRetiros')?.hasError('min')">Debe ser mayor a 0.</mat-error>
-          </mat-form-field>
+          <div class="field-container col-full">
+            <p-iftalabel>
+              <textarea pTextarea formControlName="descripcion" id="descripcion" rows="3" style="resize: vertical; width: 100%;"></textarea>
+              <label for="descripcion">Descripción (Opcional)</label>
+            </p-iftalabel>
+            <small class="field-hint">Describe brevemente la finalidad o modalidad del convenio</small>
+          </div>
         </div>
-        <p class="text-muted" style="font-size: 13px; margin-top: 8px;">
-          * Si ambos controles están vacíos, la finalización del convenio será de control manual.
-        </p>
+
+        <div class="form-row">
+          <div class="field-container col-half">
+            <p-iftalabel>
+              <input pInputText type="number" formControlName="duracionMeses" id="duracionMeses" min="1" />
+              <label for="duracionMeses">Duración en meses (Opcional)</label>
+            </p-iftalabel>
+            <small class="field-hint">Ejemplo: 12 para convenios anuales</small>
+            <small class="field-error" *ngIf="form.get('duracionMeses')?.hasError('min') && form.get('duracionMeses')?.touched">Debe ser mayor a 0.</small>
+          </div>
+
+          <div class="field-container col-half">
+            <p-iftalabel>
+              <input pInputText type="number" formControlName="maxRetiros" id="maxRetiros" min="1" />
+              <label for="maxRetiros">Máximo de retiros (Opcional)</label>
+            </p-iftalabel>
+            <small class="field-hint">Ejemplo: 4 para convenios piloto</small>
+            <small class="field-error" *ngIf="form.get('maxRetiros')?.hasError('min') && form.get('maxRetiros')?.touched">Debe ser mayor a 0.</small>
+          </div>
+        </div>
+
+        <div class="info-banner mt-2" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 16px;">
+          <p class="text-muted mb-0" style="font-size: 13px; margin: 0; color: #64748b;">
+            Puede definir una duración en meses, un máximo de retiros o ambos, según la modalidad del convenio.
+          </p>
+        </div>
       </form>
     </div>
 
     <div class="dialog-actions" mat-dialog-actions>
-      <button mat-stroked-button mat-dialog-close [disabled]="isLoading">Cancelar</button>
-      <button mat-flat-button color="primary" (click)="onSubmit()" [disabled]="form.invalid || isLoading" class="btn-primary">
-        <mat-icon>save</mat-icon> {{ isEdit ? 'Guardar Cambios' : 'Registrar Tipo' }}
-      </button>
+      <p-button label="Cancelar" [outlined]="true" severity="secondary" mat-dialog-close [disabled]="isLoading" />
+      <p-button [label]="isEdit ? 'Guardar cambios' : 'Registrar Tipo'"
+                (onClick)="onSubmit()" 
+                [disabled]="form.invalid || isLoading"
+                [loading]="isLoading" />
     </div>
   </div>
   `,

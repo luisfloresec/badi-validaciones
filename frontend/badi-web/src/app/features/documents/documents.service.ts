@@ -15,6 +15,7 @@ export interface Document {
   tamanoBytes: number;
   entidadRelacionada?: string;
   idEntidadRelacionada?: string;
+  entityName?: string;
   estado: string;
   fechaDocumento?: string;
   fechaCarga: string;
@@ -28,6 +29,12 @@ export interface DocumentFilters {
   tipoDocumentoId?: string;
   entidadRelacionada?: string;
   idEntidadRelacionada?: string;
+  entityType?: string;
+  organizacionId?: string;
+  convenioId?: string;
+  entregaId?: string;
+  fechaDesde?: string;
+  fechaHasta?: string;
   estado?: string;
   mostrarAnulados?: boolean;
   page?: number;
@@ -43,9 +50,17 @@ export interface PaginatedDocuments {
 
 export interface DocumentStats {
   total: number;
+  activos: number;
+  anulados: number;
+  tiposDocumentales: number;
+  imagenesEvidencias: number;
   byStatus: { estado: string; count: number }[];
   byType: { tipo: string; count: number }[];
+  espacioUtilizado: number;
   totalBytes: number;
+  totalDocumentos?: number;
+  tamanoTotalBytes?: number;
+  porTipo?: any[];
 }
 
 @Injectable({
@@ -78,7 +93,6 @@ export class DocumentsService {
     const formData = new FormData();
     formData.append('file', file);
     Object.entries(data).forEach(([key, value]) => {
-      // Only append non-empty, plain string values
       if (value !== undefined && value !== null && value !== '' && typeof value === 'string') {
         formData.append(key, value);
       }

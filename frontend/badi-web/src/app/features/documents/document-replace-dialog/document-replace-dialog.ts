@@ -8,6 +8,9 @@ import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { TextareaModule } from 'primeng/textarea';
+import { IftaLabelModule } from 'primeng/iftalabel';
+import { ButtonModule } from 'primeng/button';
 import { DocumentsService, Document } from '../documents.service';
 
 @Component({
@@ -21,7 +24,10 @@ import { DocumentsService, Document } from '../documents.service';
     MatFormFieldModule,
     MatInputModule,
     MatIconModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    TextareaModule,
+    IftaLabelModule,
+    ButtonModule
   ],
   templateUrl: './document-replace-dialog.html',
   styleUrls: ['./document-replace-dialog.scss']

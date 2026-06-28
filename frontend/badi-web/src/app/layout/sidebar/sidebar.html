@@ -1,10 +1,9 @@
-<div class="sidebar-container">
+<div class="sidebar">
   <div class="sidebar-header">
     <img src="assets/logo-badi.png" alt="Logo BADI" class="logo-badi" />
-    <span class="sidebar-subtitle">Sistema de Gestión Social</span>
   </div>
   
-  <div class="sidebar-menu-area">
+  <div class="sidebar-menu">
     <div class="nav-section-label">MÓDULO GESTIÓN SOCIAL</div>
     
     <mat-nav-list class="sidebar-nav">
@@ -57,14 +56,15 @@
     </mat-nav-list>
   </div>
 
-  <div class="sidebar-footer">
+  <div class="sidebar-user-footer">
     <div class="user-profile">
-      <div class="avatar relative overflow-hidden bg-blue-100 flex items-center justify-center text-blue-600 font-bold">
+      <div class="avatar">
         <span>{{ authService.getInitials() }}</span>
       </div>
       <div class="user-info">
-        <strong>{{ authService.getFullName() }}</strong>
-        <span>{{ authService.getPrimaryRole() | uppercase }}</span>
+        <strong class="user-name" [title]="authService.getFullName()">{{ authService.getFullName() }}</strong>
+        <span class="user-email" [title]="authService.getCurrentUser()?.email">{{ authService.getCurrentUser()?.email }}</span>
+        <span class="user-role">{{ authService.getPrimaryRole() | uppercase }}</span>
       </div>
       <button mat-icon-button (click)="logout()" title="Cerrar sesión" class="logout-btn">
         <mat-icon>logout</mat-icon>

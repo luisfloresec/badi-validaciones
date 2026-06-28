@@ -7,6 +7,9 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { finalize } from 'rxjs/operators';
+import { ButtonModule } from 'primeng/button';
+import { TagModule } from 'primeng/tag';
+import { TooltipModule } from 'primeng/tooltip';
 import {
   OrganizationsService,
   OrganizationFullDetail
@@ -21,6 +24,7 @@ import { AgreementFormDialogComponent } from '../../agreements/agreement-form-di
 import { AgreementsService } from '../../agreements/agreements.service';
 import { DocumentSectionComponent } from '../../documents/document-section/document-section';
 import { RealizedDeliveriesService, RealizedDelivery } from '../../realized-deliveries/realized-deliveries.service';
+import { ScheduleFormDialogComponent } from '../../schedule/schedule-form-dialog/schedule-form-dialog';
 import { AuthService } from '../../../core/auth/auth.service';
 
 @Component({
@@ -33,7 +37,10 @@ import { AuthService } from '../../../core/auth/auth.service';
     MatProgressSpinnerModule,
     MatTooltipModule,
     RouterModule,
-    DocumentSectionComponent
+    DocumentSectionComponent,
+    ButtonModule,
+    TagModule,
+    TooltipModule,
   ],
   templateUrl: './organization-detail.html',
   styleUrl: './organization-detail.scss'
@@ -240,6 +247,7 @@ export class OrganizationDetailComponent implements OnInit {
 
     const dialogRef = this.dialog.open(GroupLeaderFormDialogComponent, {
       width: '700px',
+      panelClass: 'badi-dialog-panel',
       disableClose: true,
       data: {
         organizationId: this.detail.organizacion.id,
@@ -261,6 +269,7 @@ export class OrganizationDetailComponent implements OnInit {
     
     const dialogRef = this.dialog.open(AgreementFormDialogComponent, {
       width: '600px',
+      panelClass: 'badi-dialog-panel',
       disableClose: true,
       data: {
         organizationId: this.detail.organizacion.id,
@@ -280,11 +289,34 @@ export class OrganizationDetailComponent implements OnInit {
     
     const dialogRef = this.dialog.open(AgreementFormDialogComponent, {
       width: '600px',
+      panelClass: 'badi-dialog-panel',
       disableClose: true,
       data: {
         organizationId: this.detail.organizacion.id,
         agreement: conv,
         disableOrgSelect: true
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadDetail(this.detail!.organizacion.id);
+      }
+    });
+  }
+
+  openScheduleForm(): void {
+    if (!this.detail || this.detail.organizacion.estado === 'Inactiva') return;
+
+    const activeConv = this.detail.convenios?.find(c => c.estado === 'Activo');
+
+    const dialogRef = this.dialog.open(ScheduleFormDialogComponent, {
+      width: '560px',
+      maxWidth: '95vw',
+      disableClose: true,
+      data: {
+        fecha: new Date(),
+        agreementId: activeConv ? activeConv.id : undefined
       }
     });
 

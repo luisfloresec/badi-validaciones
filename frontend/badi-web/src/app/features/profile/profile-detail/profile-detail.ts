@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
@@ -10,6 +10,13 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { Router, NavigationEnd, RouterModule } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { filter, finalize } from 'rxjs/operators';
+import { IftaLabelModule } from 'primeng/iftalabel';
+import { InputTextModule } from 'primeng/inputtext';
+import { ButtonModule } from 'primeng/button';
+import { FluidModule } from 'primeng/fluid';
 import { AuthService, UserProfile } from '../../../core/auth/auth.service';
 
 @Component({
@@ -25,22 +32,33 @@ import { AuthService, UserProfile } from '../../../core/auth/auth.service';
     MatIconModule,
     MatTabsModule,
     MatChipsModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    RouterModule,
+    IftaLabelModule,
+    InputTextModule,
+    ButtonModule,
+    FluidModule
   ],
   templateUrl: './profile-detail.html',
   styleUrl: './profile-detail.scss'
 })
-export class ProfileDetailComponent implements OnInit {
+export class ProfileDetailComponent implements OnInit, OnDestroy {
   profileForm: FormGroup;
   passwordForm: FormGroup;
+  loading = true;
   loadingProfile = false;
   loadingPassword = false;
+  error: string | null = null;
   userProfile?: UserProfile;
+
+  private routerSub?: Subscription;
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {
     this.profileForm = this.fb.group({
       nombres: ['', Validators.required],
@@ -56,11 +74,58 @@ export class ProfileDetailComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    // Usar el usuario cacheado inmediatamente para pintar rápido sin depender de datos nulos
+    const cachedUser = this.authService.getCurrentUser();
+    if (cachedUser) {
+      this.userProfile = {
+        id: cachedUser.id,
+        nombres: cachedUser.nombres,
+        apellidos: cachedUser.apellidos,
+        email: cachedUser.email,
+        cedula: null,
+        telefono: null,
+        roles: cachedUser.roles || [],
+        requiereCambioPassword: cachedUser.requiereCambioPassword,
+        estado: 'Activo'
+      };
+      this.profileForm.patchValue({
+        nombres: cachedUser.nombres,
+        apellidos: cachedUser.apellidos,
+        email: cachedUser.email
+      });
+      this.loading = false;
+      this.cdr.detectChanges();
+    }
+
     this.loadProfile();
+
+    // Suscribirse a los eventos de navegación para recargar si el usuario vuelve a entrar
+    this.routerSub = this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe((event: any) => {
+      if (event.url === '/profile' || event.urlAfterRedirects === '/profile') {
+        this.loadProfile();
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.routerSub?.unsubscribe();
   }
 
   loadProfile() {
-    this.authService.getProfile().subscribe({
+    if (!this.userProfile) {
+      this.loading = true;
+    }
+    this.error = null;
+    this.cdr.detectChanges();
+
+    this.authService.getProfile().pipe(
+      finalize(() => {
+        this.loading = false;
+        this.cdr.detectChanges();
+      })
+    ).subscribe({
       next: (profile) => {
         this.userProfile = profile;
         this.profileForm.patchValue({
@@ -68,9 +133,14 @@ export class ProfileDetailComponent implements OnInit {
           apellidos: profile.apellidos,
           email: profile.email
         });
+        this.cdr.detectChanges();
       },
       error: () => {
-        this.snackBar.open('Error al cargar perfil', 'Cerrar', { duration: 3000 });
+        if (!this.userProfile) {
+          this.error = 'No se pudo cargar la información del perfil. Verifica tu conexión al servidor.';
+        }
+        this.snackBar.open('Error al cargar la información del perfil', 'Cerrar', { duration: 3000 });
+        this.cdr.detectChanges();
       }
     });
   }
@@ -83,17 +153,20 @@ export class ProfileDetailComponent implements OnInit {
   onSaveProfile() {
     if (this.profileForm.invalid) return;
     this.loadingProfile = true;
+    this.cdr.detectChanges();
     
     this.authService.updateProfile(this.profileForm.value).subscribe({
       next: (profile) => {
         this.userProfile = profile;
         this.snackBar.open('Perfil actualizado correctamente', 'Cerrar', { duration: 3000 });
         this.loadingProfile = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         const msg = err.error?.message || 'Error al actualizar perfil';
         this.snackBar.open(msg, 'Cerrar', { duration: 4000 });
         this.loadingProfile = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -101,6 +174,7 @@ export class ProfileDetailComponent implements OnInit {
   onChangePassword() {
     if (this.passwordForm.invalid) return;
     this.loadingPassword = true;
+    this.cdr.detectChanges();
 
     const { currentPassword, newPassword } = this.passwordForm.value;
     this.authService.changePassword(currentPassword, newPassword).subscribe({
@@ -108,6 +182,7 @@ export class ProfileDetailComponent implements OnInit {
         this.snackBar.open('Contraseña actualizada correctamente', 'Cerrar', { duration: 3000 });
         this.passwordForm.reset();
         this.loadingPassword = false;
+        this.cdr.detectChanges();
         
         // Refresh profile if it had requiereCambioPassword
         if (this.userProfile?.requiereCambioPassword) {
@@ -118,6 +193,7 @@ export class ProfileDetailComponent implements OnInit {
         const msg = err.error?.message || 'Error al cambiar contraseña';
         this.snackBar.open(msg, 'Cerrar', { duration: 4000 });
         this.loadingPassword = false;
+        this.cdr.detectChanges();
       }
     });
   }

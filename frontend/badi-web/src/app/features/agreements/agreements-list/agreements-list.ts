@@ -12,6 +12,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { finalize } from 'rxjs/operators';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { RouterModule } from '@angular/router';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 
 @Component({
   selector: 'app-agreements-list',
@@ -24,6 +25,7 @@ import { RouterModule } from '@angular/router';
     MatTooltipModule,
     MatDialogModule,
     MatProgressSpinnerModule,
+    MatPaginatorModule,
     RouterModule
   ],
   templateUrl: './agreements-list.html',
@@ -31,6 +33,7 @@ import { RouterModule } from '@angular/router';
 })
 export class AgreementsListComponent implements OnInit {
   agreements: Agreement[] = [];
+  paginatedAgreements: Agreement[] = [];
   loading = true;
   error: string | null = null;
   displayedColumns: string[] = [
@@ -38,6 +41,11 @@ export class AgreementsListComponent implements OnInit {
     'fechaInicio', 'fechaActivacion', 'fechaFinEstimada',
     'retirosRealizados', 'acciones'
   ];
+
+  // Paginación
+  totalItems = 0;
+  pageSize = 10;
+  pageIndex = 0;
 
   constructor(
     private agreementsService: AgreementsService,
@@ -61,17 +69,36 @@ export class AgreementsListComponent implements OnInit {
       .subscribe({
         next: (res) => {
           this.agreements = res;
+          this.totalItems = this.agreements.length;
+          this.pageIndex = 0;
+          this.updatePagination();
         },
         error: (err) => {
           this.error = 'Error al cargar convenios';
+          this.agreements = [];
+          this.totalItems = 0;
+          this.updatePagination();
           this.snackBar.open('Error al cargar convenios', 'Cerrar', { duration: 3000 });
         }
       });
   }
 
+  onPageChange(event: PageEvent): void {
+    this.pageIndex = event.pageIndex;
+    this.pageSize = event.pageSize;
+    this.updatePagination();
+  }
+
+  updatePagination(): void {
+    const start = this.pageIndex * this.pageSize;
+    this.paginatedAgreements = this.agreements.slice(start, start + this.pageSize);
+    this.cdr.detectChanges();
+  }
+
   openAgreementForm(agreement?: Agreement) {
     const dialogRef = this.dialog.open(AgreementFormDialogComponent, {
       width: '600px',
+      panelClass: 'badi-dialog-panel',
       disableClose: true,
       data: {
         agreement: agreement,

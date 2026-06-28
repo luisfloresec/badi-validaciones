@@ -1,0 +1,112 @@
+<div class="dialog-container">
+  <div class="dialog-header">
+    <div class="header-title">
+      <mat-icon>edit_note</mat-icon>
+      <h2 mat-dialog-title>Editar Metadatos del Documento</h2>
+    </div>
+    <p-button icon="pi pi-times" [text]="true" severity="secondary" mat-dialog-close [disabled]="isSaving" />
+  </div>
+
+  <div class="dialog-content" mat-dialog-content>
+    <div class="context-box">
+      <span class="context-title">Archivo Actual:</span>
+      <span class="context-value">{{ doc.nombreOriginal || doc.nombreArchivo }}</span>
+      <p class="context-hint">Modifique la información y reglas asociadas a este documento. Los campos marcados como (Obligatorio) son requeridos por el sistema.</p>
+    </div>
+
+    <form [formGroup]="editForm" class="badi-form p-fluid">
+      <h3 class="section-subtitle">Datos Editables</h3>
+
+      <!-- Tipo de Documento -->
+      <div class="form-row">
+        <div class="field-container col-full">
+          <div class="special-field" [ngClass]="{'border-red-500': editForm.get('tipoDocumentoId')?.invalid && editForm.get('tipoDocumentoId')?.touched}">
+            <div class="special-field-content">
+              <span class="special-field-label">Tipo de Documento (Obligatorio)</span>
+              <div class="special-field-control">
+                <mat-form-field appearance="outline" class="w-full special-mat-field">
+                  <mat-select formControlName="tipoDocumentoId" placeholder="Seleccione el tipo documental (Obligatorio)">
+                    <mat-option *ngFor="let type of documentTypes" [value]="type.id">
+                      {{ type.nombre }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+            </div>
+          </div>
+          <small class="field-hint" *ngIf="selectedType">
+            Extensiones: .{{ selectedType.extensionesPermitidas.join(', .') }} | Máx: {{ selectedType.tamanoMaximoMb }} MB
+          </small>
+          <small class="field-error" *ngIf="editForm.get('tipoDocumentoId')?.invalid && editForm.get('tipoDocumentoId')?.touched">
+            El tipo documental es obligatorio. Debe seleccionar una opción.
+          </small>
+        </div>
+      </div>
+
+      <!-- Título -->
+      <div class="form-row">
+        <div class="field-container col-full">
+          <p-iftalabel>
+            <input pInputText formControlName="titulo" id="meta_titulo" [ngClass]="{'ng-invalid ng-dirty': editForm.get('titulo')?.invalid && editForm.get('titulo')?.touched}" />
+            <label for="meta_titulo">Título del Documento (Obligatorio)</label>
+          </p-iftalabel>
+          <small class="field-error" *ngIf="editForm.get('titulo')?.hasError('required') && editForm.get('titulo')?.touched">El título es obligatorio. Ingrese un nombre identificativo para el archivo.</small>
+          <small class="field-error" *ngIf="editForm.get('titulo')?.hasError('maxlength') && editForm.get('titulo')?.touched">Máximo 300 caracteres.</small>
+        </div>
+      </div>
+
+      <!-- Fecha del Documento -->
+      <div class="form-row">
+        <div class="field-container col-full">
+          <div class="special-field special-field-clickable" [ngClass]="{'border-red-500': editForm.get('fechaDocumento')?.invalid && editForm.get('fechaDocumento')?.touched}" (click)="metaFechaDocPicker.open()">
+            <div class="special-field-content">
+              <span class="special-field-label">Fecha del Documento (Físico/Emisión) (Obligatorio)</span>
+              <div class="special-field-control datepicker-control-wrapper">
+                <span class="special-field-value">{{ formatDisplayDate(editForm.get('fechaDocumento')?.value) }}</span>
+                <mat-form-field appearance="outline" class="hidden-mat-field">
+                  <input matInput [matDatepicker]="metaFechaDocPicker" formControlName="fechaDocumento" class="hidden-datepicker-input" readonly>
+                </mat-form-field>
+              </div>
+            </div>
+            <mat-datepicker-toggle matIconSuffix [for]="metaFechaDocPicker" (click)="$event.stopPropagation()"></mat-datepicker-toggle>
+            <mat-datepicker #metaFechaDocPicker></mat-datepicker>
+          </div>
+          <small class="field-hint">Fecha oficial de emisión o firma del documento original</small>
+          <small class="field-error" *ngIf="editForm.get('fechaDocumento')?.invalid && editForm.get('fechaDocumento')?.touched">La fecha del documento físico es obligatoria. Seleccione una fecha en el calendario.</small>
+        </div>
+      </div>
+
+      <!-- Descripción -->
+      <div class="form-row">
+        <div class="field-container col-full">
+          <p-iftalabel>
+            <textarea pTextarea formControlName="descripcion" id="meta_descripcion" rows="2"></textarea>
+            <label for="meta_descripcion">Descripción (Opcional)</label>
+          </p-iftalabel>
+        </div>
+      </div>
+
+      <!-- Observaciones -->
+      <div class="form-row">
+        <div class="field-container col-full">
+          <p-iftalabel>
+            <textarea pTextarea formControlName="observaciones" id="meta_observaciones" rows="2" [ngClass]="{'ng-invalid ng-dirty': editForm.get('observaciones')?.invalid && editForm.get('observaciones')?.touched}"></textarea>
+            <label for="meta_observaciones">Observaciones {{ selectedType?.observacionesObligatorias ? '(Obligatorio)' : '(Opcional)' }}</label>
+          </p-iftalabel>
+          <small class="field-error" *ngIf="editForm.get('observaciones')?.hasError('required') && editForm.get('observaciones')?.touched">
+            Las observaciones son obligatorias según la regla de este tipo documental. Explique el contexto o detalles del archivo.
+          </small>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="dialog-actions" mat-dialog-actions>
+    <p-button label="Cancelar" [outlined]="true" severity="secondary" mat-dialog-close [disabled]="isSaving" />
+    <p-button [label]="isSaving ? 'Guardando...' : 'Guardar Cambios'"
+              icon="pi pi-check"
+              (onClick)="saveMetadata()" 
+              [disabled]="isSaving"
+              [loading]="isSaving" />
+  </div>
+</div>

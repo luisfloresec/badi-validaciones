@@ -1,55 +1,66 @@
-<h2 mat-dialog-title>Reemplazar Documento</h2>
-
-<mat-dialog-content>
-  <div class="alert alert-warning mt-2 mb-4">
-    <strong>Atención:</strong> Esta acción no sobrescribe el archivo anterior. Creará una nueva versión del documento y marcará el actual como "Reemplazado".
+<div class="dialog-container">
+  <div class="dialog-header">
+    <div class="header-title">
+      <mat-icon>find_replace</mat-icon>
+      <h2 mat-dialog-title>Reemplazar Archivo del Documento</h2>
+    </div>
+    <p-button icon="pi pi-times" [text]="true" severity="secondary" mat-dialog-close [disabled]="isUploading" />
   </div>
 
-  <div class="current-doc-info mb-4 p-3 bg-light rounded border">
-    <p class="mb-1 fw-bold">{{ doc.titulo }}</p>
-    <p class="mb-0 text-muted small d-flex align-items-center">
-      <mat-icon class="icon-sm me-1">insert_drive_file</mat-icon>
-      Actual: {{ doc.nombreOriginal }}
-    </p>
-  </div>
+  <div class="dialog-content" mat-dialog-content>
+    <div class="context-box">
+      <span class="context-title">Documento Actual:</span>
+      <span class="context-value">{{ doc.titulo }} ({{ doc.nombreOriginal || doc.nombreArchivo }})</span>
+      <p class="context-hint">El archivo anterior quedará archivado con estado "Reemplazado" para auditoría.</p>
+    </div>
 
-  <form [formGroup]="replaceForm" class="badi-form">
-    <div class="mb-3">
-      <label class="form-label fw-500">Nuevo Archivo</label>
-      <div class="file-drop-area" [class.has-file]="!!selectedFile">
-        <input type="file" class="file-input" (change)="onFileSelected($event)" 
-               [accept]="'.' + doc.tipoDocumento.extensionesPermitidas.join(',.')">
-        
-        <div class="file-message text-center" *ngIf="!selectedFile">
-          <mat-icon class="upload-icon">find_replace</mat-icon>
-          <p>Haga clic o arrastre el nuevo archivo aquí</p>
-          <small class="text-muted d-block mt-1">Solo se permiten: {{ doc.tipoDocumento.extensionesPermitidas.join(', ') }}</small>
-        </div>
-        
-        <div class="file-selected text-center" *ngIf="selectedFile">
-          <mat-icon class="text-primary fs-1 mb-2">insert_drive_file</mat-icon>
-          <p class="mb-0 fw-bold">{{ selectedFile.name }}</p>
-          <small class="text-muted">{{ (selectedFile.size / 1024 / 1024) | number:'1.0-2' }} MB</small>
+    <form [formGroup]="replaceForm" class="badi-form p-fluid">
+      
+      <h3 class="section-subtitle">Nuevo Archivo y Motivo</h3>
+
+      <!-- File input -->
+      <div class="form-row">
+        <div class="field-container col-full">
+          <label class="custom-file-label">Seleccionar Nuevo Archivo</label>
+          <input type="file" #fileInput class="d-none" (change)="onFileSelected($event)" />
+          
+          <div class="custom-file-upload" (click)="fileInput.click()">
+            <mat-icon>{{ selectedFile ? 'task' : 'cloud_upload' }}</mat-icon>
+            <span class="file-name">{{ selectedFile ? selectedFile.name : 'Haz clic para seleccionar el nuevo archivo de reemplazo' }}</span>
+            <span class="file-size" *ngIf="selectedFile">({{ (selectedFile.size / 1024 / 1024).toFixed(2) }} MB)</span>
+          </div>
+          <small class="field-hint">
+            Extensiones permitidas: .{{ doc.tipoDocumento.extensionesPermitidas.join(', .') }} | Tamaño máx: {{ doc.tipoDocumento.tamanoMaximoMb }} MB
+          </small>
+          <small class="field-error" *ngIf="!selectedFile && replaceForm.touched">Debe seleccionar el nuevo archivo válido para reemplazar.</small>
         </div>
       </div>
-    </div>
 
-    <div class="mb-1">
-      <mat-form-field appearance="outline" class="w-100">
-        <mat-label>Motivo del Reemplazo</mat-label>
-        <textarea matInput formControlName="motivoReemplazo" rows="3" required placeholder="Ej: Se detectó un error en la página 2 y se sube la versión corregida."></textarea>
-        <mat-error *ngIf="replaceForm.get('motivoReemplazo')?.hasError('required')">El motivo es obligatorio.</mat-error>
-        <mat-error *ngIf="replaceForm.get('motivoReemplazo')?.hasError('minlength')">Debe ingresar al menos 5 caracteres.</mat-error>
-      </mat-form-field>
-    </div>
-  </form>
-</mat-dialog-content>
+      <!-- Motivo Reemplazo -->
+      <div class="form-row">
+        <div class="field-container col-full">
+          <p-iftalabel>
+            <textarea pTextarea formControlName="motivoReemplazo" id="motivoReemplazo" rows="3" placeholder="Explique claramente por qué se realiza este reemplazo"></textarea>
+            <label for="motivoReemplazo">Motivo de Reemplazo (Obligatorio)</label>
+          </p-iftalabel>
+          <small class="field-hint">Este motivo quedará registrado en el historial de cambios del repositorio.</small>
+          <small class="field-error" *ngIf="replaceForm.get('motivoReemplazo')?.hasError('required') && replaceForm.get('motivoReemplazo')?.touched">
+            El motivo de reemplazo es obligatorio.
+          </small>
+          <small class="field-error" *ngIf="replaceForm.get('motivoReemplazo')?.hasError('minlength') && replaceForm.get('motivoReemplazo')?.touched">
+            Ingrese al menos 5 caracteres.
+          </small>
+        </div>
+      </div>
 
-<mat-dialog-actions align="end">
-  <button mat-button mat-dialog-close [disabled]="isUploading">Cancelar</button>
-  <button mat-flat-button color="accent" (click)="onSubmit()" [disabled]="replaceForm.invalid || !selectedFile || isUploading">
-    <mat-icon *ngIf="!isUploading">find_replace</mat-icon>
-    <mat-spinner diameter="20" *ngIf="isUploading" class="me-2"></mat-spinner>
-    {{ isUploading ? 'Reemplazando...' : 'Reemplazar Versión' }}
-  </button>
-</mat-dialog-actions>
+    </form>
+  </div>
+
+  <div class="dialog-actions" mat-dialog-actions>
+    <p-button label="Cancelar" [outlined]="true" severity="secondary" mat-dialog-close [disabled]="isUploading" />
+    <p-button [label]="isUploading ? 'Reemplazando archivo...' : 'Confirmar Reemplazo'"
+              (onClick)="onSubmit()" 
+              [disabled]="replaceForm.invalid || !selectedFile || isUploading"
+              [loading]="isUploading" />
+  </div>
+</div>

@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
@@ -8,6 +8,11 @@ import { MatInputModule } from '@angular/material/input';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { InputTextModule } from 'primeng/inputtext';
+import { IftaLabelModule } from 'primeng/iftalabel';
+import { FluidModule } from 'primeng/fluid';
+import { ButtonModule } from 'primeng/button';
+import { RadioButtonModule } from 'primeng/radiobutton';
 import { OrganizationsService } from '../../organizations.service';
 
 export interface LeaderDialogData {
@@ -29,7 +34,12 @@ export interface LeaderDialogData {
     MatInputModule,
     MatRadioModule,
     MatIconModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    InputTextModule,
+    IftaLabelModule,
+    FluidModule,
+    ButtonModule,
+    RadioButtonModule
   ],
   templateUrl: './leader-form-dialog.html',
   styleUrls: ['./leader-form-dialog.scss']
@@ -43,7 +53,8 @@ export class LeaderFormDialogComponent implements OnInit {
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<LeaderFormDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: LeaderDialogData,
-    private orgService: OrganizationsService
+    private orgService: OrganizationsService,
+    private cdr: ChangeDetectorRef
   ) {
     this.form = this.fb.group({
       leaderOption: [data.hasActiveRepresentative && data.mode !== 'edit' ? 'use_active' : 'new_leader', Validators.required],
@@ -110,11 +121,13 @@ export class LeaderFormDialogComponent implements OnInit {
   onSubmit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      this.cdr.detectChanges();
       return;
     }
 
     this.loading = true;
     this.error = null;
+    this.cdr.detectChanges();
     
     const v = this.form.getRawValue(); // Usa getRawValue para incluir controles disabled
     const isNew = v.leaderOption === 'new_leader';
@@ -132,11 +145,13 @@ export class LeaderFormDialogComponent implements OnInit {
       this.orgService.updateLeader(this.data.leaderData.id, payload).subscribe({
         next: (res) => {
           this.loading = false;
+          this.cdr.detectChanges();
           this.dialogRef.close(res);
         },
         error: (err) => {
           this.loading = false;
           this.error = err?.error?.message || 'Ocurrió un error al editar el dirigente.';
+          this.cdr.detectChanges();
         }
       });
       return;
@@ -157,11 +172,13 @@ export class LeaderFormDialogComponent implements OnInit {
       this.orgService.replaceLeader(this.data.groupId, payload).subscribe({
         next: (res) => {
           this.loading = false;
+          this.cdr.detectChanges();
           this.dialogRef.close(res);
         },
         error: (err) => {
           this.loading = false;
           this.error = err?.error?.message || 'Ocurrió un error al guardar el dirigente.';
+          this.cdr.detectChanges();
         }
       });
     }

@@ -8,6 +8,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { finalize } from 'rxjs/operators';
+import { ButtonModule } from 'primeng/button';
 import { AgreementsService, Agreement } from '../agreements.service';
 import { AgreementFormDialogComponent } from '../agreement-form-dialog/agreement-form-dialog';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog';
@@ -25,6 +26,7 @@ import { DocumentSectionComponent } from '../../documents/document-section/docum
     MatProgressSpinnerModule,
     MatTooltipModule,
     RouterModule,
+    ButtonModule,
     DocumentSectionComponent
   ],
   templateUrl: './agreement-detail.html',
@@ -74,7 +76,7 @@ export class AgreementDetailComponent implements OnInit {
           this.agreement = data;
           this.loadDeliveries(id);
         },
-        error: (err) => {
+        error: () => {
           this.error = 'No se pudo cargar el detalle del convenio.';
           this.agreement = null;
         }
@@ -105,6 +107,7 @@ export class AgreementDetailComponent implements OnInit {
     
     const dialogRef = this.dialog.open(AgreementFormDialogComponent, {
       width: '600px',
+      panelClass: 'badi-dialog-panel',
       disableClose: true,
       data: {
         organizationId: this.agreement.organizacion.id,

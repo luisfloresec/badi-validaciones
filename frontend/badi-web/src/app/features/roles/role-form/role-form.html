@@ -1,40 +1,126 @@
-<h2 mat-dialog-title>{{ mode === 'create' ? 'Nuevo Rol' : 'Editar Rol' }}</h2>
-<mat-dialog-content>
-  <form [formGroup]="form" class="badi-form">
-    
-    <div class="form-row">
-      <mat-form-field appearance="outline" class="w-full">
-        <mat-label>Nombre</mat-label>
-        <input matInput formControlName="nombre" placeholder="Ej. Administrador">
-        <mat-error *ngIf="form.get('nombre')?.hasError('required')">El nombre es obligatorio</mat-error>
-      </mat-form-field>
+<div class="dialog-container">
+  <div class="dialog-header">
+    <div class="header-title">
+      <mat-icon>{{ mode === 'create' ? 'add_moderator' : (mode === 'edit' ? 'edit' : 'security') }}</mat-icon>
+      <h2 mat-dialog-title>{{ mode === 'create' ? 'Nuevo Rol' : (mode === 'edit' ? 'Editar Rol' : 'Detalle de Rol') }}</h2>
     </div>
+    <p-button icon="pi pi-times" [text]="true" severity="secondary" mat-dialog-close [disabled]="loading" />
+  </div>
 
-    <div class="form-row">
-      <mat-form-field appearance="outline" class="w-full">
-        <mat-label>Descripción</mat-label>
-        <textarea matInput formControlName="descripcion" placeholder="Ej. Acceso completo al sistema" rows="3"></textarea>
-      </mat-form-field>
+  <div class="dialog-content" mat-dialog-content>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="badi-form p-fluid" *ngIf="mode !== 'detail'">
+      <div class="form-grid">
+        
+        <!-- Nombre del Rol -->
+        <div class="field-container col-full">
+          <p-iftalabel>
+            <input pInputText formControlName="nombre" id="nombre" />
+            <label for="nombre">Nombre del Rol</label>
+          </p-iftalabel>
+          <small class="field-error" *ngIf="form.get('nombre')?.hasError('required') && form.get('nombre')?.touched">
+            El nombre del rol es obligatorio.
+          </small>
+        </div>
+
+        <!-- Descripción -->
+        <div class="field-container col-full">
+          <p-iftalabel>
+            <textarea pTextarea formControlName="descripcion" id="descripcion" rows="3"></textarea>
+            <label for="descripcion">Descripción (Opcional)</label>
+          </p-iftalabel>
+        </div>
+
+        <!-- Perfil Base de Acceso -->
+        <div class="field-container col-full">
+          <div class="special-field">
+            <div class="special-field-content">
+              <span class="special-field-label">Perfil Base (Nivel de Acceso)</span>
+              <div class="special-field-control">
+                <mat-form-field appearance="outline" class="w-full special-mat-field">
+                  <mat-select formControlName="perfilAcceso">
+                    <mat-option value="Administrador">Administrador — Acceso total al sistema</mat-option>
+                    <mat-option value="Gestión Social">Gestión Social — Operación de convenios y entregas</mat-option>
+                    <mat-option value="Auditor">Auditor — Consulta y supervisión de trazabilidad</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+            </div>
+          </div>
+          <small class="field-hint">El perfil base define el nivel general de acceso del rol dentro del sistema BADI.</small>
+        </div>
+
+      </div>
+    </form>
+
+    <!-- Vista de Detalle de Rol -->
+    <div class="role-detail-view" *ngIf="mode === 'detail' && role">
+      
+      <div class="detail-section">
+        <h3 class="section-title">Información Principal</h3>
+        <div class="detail-grid">
+          <div class="detail-item col-half">
+            <span class="label">Nombre del Rol</span>
+            <span class="value strong">{{ role.nombre }}</span>
+          </div>
+          <div class="detail-item col-half">
+            <span class="label">Estado</span>
+            <span class="estado-chip" [ngClass]="role.estado === 'Activo' ? 'estado-activa' : 'estado-inactiva'">
+              {{ role.estado }}
+            </span>
+          </div>
+          <div class="detail-item col-full">
+            <span class="label">Descripción</span>
+            <span class="value">{{ role.descripcion || 'No se proporcionó una descripción para este rol.' }}</span>
+          </div>
+          <div class="detail-item col-full">
+            <span class="label">Perfil Base (Acceso en el Sistema)</span>
+            <span class="perfil-chip" [ngClass]="getPerfilClass(role.perfilAcceso)">
+              {{ role.perfilAcceso }}
+            </span>
+            <p class="perfil-desc">El perfil base define el nivel general de acceso del rol dentro del sistema BADI.</p>
+          </div>
+          <div class="detail-item col-half">
+            <span class="label">Fecha de Creación</span>
+            <span class="value">{{ role.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+          <div class="detail-item col-half" *ngIf="role.fechaActualizacion">
+            <span class="label">Última Actualización</span>
+            <span class="value">{{ role.fechaActualizacion | date:'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-section mt-4">
+        <h3 class="section-title">Usuarios Asociados ({{ role.usuarios?.length || 0 }})</h3>
+        <div class="users-list-box" *ngIf="role.usuarios && role.usuarios.length > 0">
+          <div class="user-row" *ngFor="let u of role.usuarios">
+            <div class="user-avatar">{{ u.nombres.charAt(0) }}{{ u.apellidos.charAt(0) }}</div>
+            <div class="user-info">
+              <span class="user-name">{{ u.nombres }} {{ u.apellidos }}</span>
+              <span class="user-email">{{ u.email }}</span>
+            </div>
+            <span class="estado-chip" [ngClass]="u.estado === 'Activo' ? 'estado-activa' : 'estado-inactiva'">
+              {{ u.estado }}
+            </span>
+          </div>
+        </div>
+        <div class="no-users-box" *ngIf="!role.usuarios || role.usuarios.length === 0">
+          <mat-icon>group_off</mat-icon>
+          <p>No hay usuarios asociados a este rol actualmente.</p>
+        </div>
+      </div>
+
     </div>
+  </div>
 
-    <div class="form-row">
-      <mat-form-field appearance="outline" class="w-full">
-        <mat-label>Perfil de Acceso</mat-label>
-        <mat-select formControlName="perfilAcceso">
-          <mat-option value="Administrador">Administrador</mat-option>
-          <mat-option value="Gestión Social">Gestión Social</mat-option>
-          <mat-option value="Auditor">Auditor</mat-option>
-        </mat-select>
-        <mat-hint>El perfil de acceso define qué permisos tendrá este rol dentro del sistema.</mat-hint>
-        <mat-error *ngIf="form.get('perfilAcceso')?.hasError('required')">El perfil es obligatorio</mat-error>
-      </mat-form-field>
-    </div>
+  <div class="dialog-actions" mat-dialog-actions>
+    <p-button [label]="mode === 'detail' ? 'Cerrar' : 'Cancelar'" [outlined]="true" severity="secondary" mat-dialog-close [disabled]="loading" />
+    <p-button [label]="loading ? 'Guardando...' : (mode === 'create' ? 'Crear rol' : 'Guardar cambios')"
+              [icon]="mode === 'create' ? 'pi pi-plus' : 'pi pi-check'"
+              (onClick)="onSubmit()"
+              *ngIf="mode !== 'detail'"
+              [disabled]="form.invalid || loading"
+              [loading]="loading" />
+  </div>
 
-  </form>
-</mat-dialog-content>
-<mat-dialog-actions align="end">
-  <button mat-button mat-dialog-close [disabled]="loading">Cancelar</button>
-  <button mat-flat-button class="btn-primary" (click)="onSubmit()" [disabled]="form.invalid || loading">
-    {{ mode === 'create' ? 'Crear rol' : 'Guardar cambios' }}
-  </button>
-</mat-dialog-actions>
+</div>

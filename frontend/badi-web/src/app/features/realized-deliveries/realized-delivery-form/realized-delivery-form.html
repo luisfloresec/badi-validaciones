@@ -1,109 +1,164 @@
-<div class="container mt-4">
-  <div class="d-flex align-items-center mb-4">
-    <button mat-icon-button (click)="router.navigate(['/schedules'])" class="me-2" matTooltip="Volver">
-      <mat-icon>arrow_back</mat-icon>
+<div class="page-container">
+  
+  <!-- Encabezado y Breadcrumb -->
+  <div class="header-group">
+    <div class="breadcrumb">
+      <a [routerLink]="['/schedules']">
+        <mat-icon>calendar_month</mat-icon>
+        Cronograma
+      </a>
+      <mat-icon class="separator">chevron_right</mat-icon>
+      <span class="current-page">Registrar Entrega Realizada</span>
+    </div>
+
+    <div class="page-header">
+      <h1>Registrar Entrega Realizada</h1>
+      <p>Confirma y registra la ejecución real de una entrega programada del cronograma.</p>
+    </div>
+  </div>
+
+  <!-- Loading Context -->
+  <div class="state-container compact" *ngIf="isLoadingContext">
+    <mat-spinner diameter="30"></mat-spinner>
+    <p>Cargando información de la entrega programada...</p>
+  </div>
+
+  <!-- Error Context -->
+  <div class="state-container state-error compact" *ngIf="!isLoadingContext && error">
+    <mat-icon class="state-icon">cloud_off</mat-icon>
+    <p><strong>{{ error }}</strong></p>
+    <button mat-stroked-button (click)="loadContext()" *ngIf="scheduleId">
+      <mat-icon>refresh</mat-icon> Reintentar
     </button>
-    <h1 class="mb-0">Registrar Entrega Realizada</h1>
   </div>
 
-  <div *ngIf="isLoadingContext" class="d-flex justify-content-center p-5">
-    <mat-spinner diameter="40"></mat-spinner>
-  </div>
-
-  <div *ngIf="error && !isLoadingContext" class="alert alert-danger">
-    <mat-icon class="me-2 align-middle">error</mat-icon>
-    <span class="align-middle">{{ error }}</span>
-  </div>
-
-  <mat-card *ngIf="!isLoadingContext && !error && scheduledDelivery" class="mb-4">
-    <mat-card-header class="bg-light pb-3 border-bottom">
-      <mat-card-title class="fs-5">Contexto Programado</mat-card-title>
-    </mat-card-header>
-    <mat-card-content class="pt-3">
-      <div class="row">
-        <div class="col-md-6 mb-3">
-          <strong>Organización:</strong> {{ scheduledDelivery.convenio?.organizacion?.nombre || 'Desconocida' }}
-        </div>
-        <div class="col-md-6 mb-3">
-          <strong>Convenio:</strong> {{ scheduledDelivery.convenio?.codigoConvenio || 'Sin Código' }}
-        </div>
-        <div class="col-md-6 mb-3">
-          <strong>Fecha Programada:</strong> {{ scheduledDelivery.fechaProgramada | date:'dd/MM/yyyy' }}
-        </div>
-        <div class="col-md-6 mb-3" *ngIf="scheduledDelivery.descripcion">
-          <strong>Descripción:</strong> {{ scheduledDelivery.descripcion }}
-        </div>
+  <!-- Información de la entrega programada -->
+  <div class="badi-card section-card" *ngIf="!isLoadingContext && !error && scheduledDelivery">
+    <div class="badi-card-header bg-slate-50">
+      <mat-icon class="badi-card-icon text-muted">event_note</mat-icon>
+      <h2>Información de la entrega programada</h2>
+    </div>
+    <div class="form-grid">
+      <div class="field-container col-half">
+        <span class="d-block text-muted small fw-600">Organización:</span>
+        <span class="fw-500 text-slate-900">{{ scheduledDelivery.convenio?.organizacion?.razonSocial || scheduledDelivery.convenio?.organizacion?.nombreComercial || scheduledDelivery.convenio?.organizacion?.nombre || 'Desconocida' }}</span>
       </div>
-    </mat-card-content>
-  </mat-card>
+      <div class="field-container col-half">
+        <span class="d-block text-muted small fw-600">Convenio:</span>
+        <span class="fw-500 text-slate-900">{{ scheduledDelivery.convenio?.codigoConvenio || 'Sin Código' }}</span>
+      </div>
+      <div class="field-container col-half">
+        <span class="d-block text-muted small fw-600">Fecha Programada:</span>
+        <span class="fw-500 text-slate-900">{{ scheduledDelivery.fechaProgramada | date:'dd/MM/yyyy' }}</span>
+      </div>
+      <div class="field-container col-half">
+        <span class="d-block text-muted small fw-600">Estado Programado:</span>
+        <span class="badge bg-primary">{{ scheduledDelivery.estado }}</span>
+      </div>
+      <div class="field-container col-full" *ngIf="scheduledDelivery.descripcion">
+        <span class="d-block text-muted small fw-600">Descripción / Observaciones programadas:</span>
+        <p class="mb-0 text-slate-700 bg-white p-2 rounded border">{{ scheduledDelivery.descripcion }}</p>
+      </div>
+    </div>
+  </div>
 
-  <mat-card *ngIf="!isLoadingContext && !error" class="badi-card">
-    <mat-card-header>
-      <mat-card-title>Datos de la Entrega</mat-card-title>
-    </mat-card-header>
-    <mat-card-content class="pt-3">
-      <form [formGroup]="deliveryForm" (ngSubmit)="onSubmit()" class="badi-form">
-        <div class="row">
-          <div class="col-md-6 mb-3">
-            <mat-form-field appearance="outline" class="w-100">
-              <mat-label>Fecha de Realización</mat-label>
-              <input matInput type="date" formControlName="fechaRealizacion" required>
-              <mat-error *ngIf="deliveryForm.get('fechaRealizacion')?.hasError('required')">
-                Fecha es requerida
-              </mat-error>
-            </mat-form-field>
+  <!-- Formulario -->
+  <form [formGroup]="deliveryForm" (ngSubmit)="onSubmit()" *ngIf="!isLoadingContext && !error" class="p-fluid">
+    
+    <!-- Datos de la Entrega Realizada -->
+    <div class="badi-card section-card">
+      <div class="badi-card-header">
+        <mat-icon class="badi-card-icon">check_circle</mat-icon>
+        <h2>Datos de la Entrega Realizada</h2>
+      </div>
+      <div class="form-grid">
+        
+        <!-- Fecha de Realización (Campo Especial MatDatepicker) -->
+        <div class="field-container col-half">
+          <div class="special-field special-field-clickable" (click)="fechaPicker.open()">
+            <div class="special-field-content">
+              <span class="special-field-label">Fecha de Realización *</span>
+              <div class="special-field-control datepicker-control-wrapper">
+                <span class="special-field-value">{{ formatDisplayDate(deliveryForm.get('fechaRealizacion')?.value) }}</span>
+                <mat-form-field appearance="outline" class="hidden-mat-field">
+                  <input matInput [matDatepicker]="fechaPicker" formControlName="fechaRealizacion" class="hidden-datepicker-input" readonly>
+                </mat-form-field>
+              </div>
+            </div>
+            <mat-datepicker-toggle matIconSuffix [for]="fechaPicker" (click)="$event.stopPropagation()"></mat-datepicker-toggle>
+            <mat-datepicker #fechaPicker></mat-datepicker>
           </div>
-
-          <div class="col-md-6 mb-3">
-            <mat-form-field appearance="outline" class="w-100">
-              <mat-label>Kilos Entregados</mat-label>
-              <input matInput type="number" step="0.01" formControlName="kilosEntregados" required>
-              <span matTextSuffix>kg</span>
-              <mat-error *ngIf="deliveryForm.get('kilosEntregados')?.hasError('required')">Requerido</mat-error>
-              <mat-error *ngIf="deliveryForm.get('kilosEntregados')?.hasError('min')">Debe ser mayor a 0</mat-error>
-            </mat-form-field>
-          </div>
-
-          <div class="col-md-6 mb-3">
-            <mat-form-field appearance="outline" class="w-100">
-              <mat-label>Personas Atendidas</mat-label>
-              <input matInput type="number" formControlName="personasAtendidas" required>
-              <mat-error *ngIf="deliveryForm.get('personasAtendidas')?.hasError('required')">Requerido</mat-error>
-              <mat-error *ngIf="deliveryForm.get('personasAtendidas')?.hasError('min')">Debe ser mayor o igual a 0</mat-error>
-            </mat-form-field>
-          </div>
-
-          <div class="col-md-6 mb-3">
-            <mat-form-field appearance="outline" class="w-100">
-              <mat-label>Beneficiarios Directos (Opcional)</mat-label>
-              <input matInput type="number" formControlName="beneficiariosAtendidos">
-            </mat-form-field>
-          </div>
-
-          <div class="col-12 mb-3">
-            <mat-form-field appearance="outline" class="w-100">
-              <mat-label>Detalle de Productos Entregados</mat-label>
-              <textarea matInput formControlName="detalleProductos" rows="3" required></textarea>
-              <mat-error *ngIf="deliveryForm.get('detalleProductos')?.hasError('required')">El detalle es obligatorio</mat-error>
-            </mat-form-field>
-          </div>
-
-          <div class="col-12 mb-3">
-            <mat-form-field appearance="outline" class="w-100">
-              <mat-label>Observaciones (Opcional)</mat-label>
-              <textarea matInput formControlName="observaciones" rows="2"></textarea>
-            </mat-form-field>
-          </div>
+          <small class="field-hint">Selecciona la fecha real en que se ejecutó la entrega</small>
+          <small class="field-error" *ngIf="deliveryForm.get('fechaRealizacion')?.hasError('required') && deliveryForm.get('fechaRealizacion')?.touched">
+            La fecha de realización es obligatoria.
+          </small>
         </div>
 
-        <div class="d-flex justify-content-end gap-2 mt-4">
-          <button mat-button type="button" [routerLink]="['/schedules']">Cancelar</button>
-          <button mat-flat-button color="primary" type="submit" [disabled]="deliveryForm.invalid || isSaving">
-            <mat-icon *ngIf="isSaving">sync</mat-icon>
-            {{ isSaving ? 'Guardando...' : 'Guardar Entrega' }}
-          </button>
+        <!-- Kilos Entregados (PrimeNG) -->
+        <div class="field-container col-half">
+          <p-iftalabel>
+            <input pInputText type="number" step="0.01" formControlName="kilosEntregados" id="kilosEntregados" />
+            <label for="kilosEntregados">Kilos Entregados *</label>
+          </p-iftalabel>
+          <small class="field-hint">Peso total en kilogramos entregados</small>
+          <small class="field-error" *ngIf="deliveryForm.get('kilosEntregados')?.hasError('required') && deliveryForm.get('kilosEntregados')?.touched">El peso en kilos es requerido.</small>
+          <small class="field-error" *ngIf="deliveryForm.get('kilosEntregados')?.hasError('min') && deliveryForm.get('kilosEntregados')?.touched">Debe ser mayor a 0.</small>
         </div>
-      </form>
-    </mat-card-content>
-  </mat-card>
+
+        <!-- Personas Atendidas (PrimeNG) -->
+        <div class="field-container col-half">
+          <p-iftalabel>
+            <input pInputText type="number" formControlName="personasAtendidas" id="personasAtendidas" />
+            <label for="personasAtendidas">Personas Atendidas *</label>
+          </p-iftalabel>
+          <small class="field-hint">Número de personas atendidas en la entrega</small>
+          <small class="field-error" *ngIf="deliveryForm.get('personasAtendidas')?.hasError('required') && deliveryForm.get('personasAtendidas')?.touched">Personas atendidas es requerido.</small>
+          <small class="field-error" *ngIf="deliveryForm.get('personasAtendidas')?.hasError('min') && deliveryForm.get('personasAtendidas')?.touched">Debe ser mayor o igual a 0.</small>
+        </div>
+
+        <!-- Beneficiarios Directos (PrimeNG) -->
+        <div class="field-container col-half">
+          <p-iftalabel>
+            <input pInputText type="number" formControlName="beneficiariosAtendidos" id="beneficiariosAtendidos" />
+            <label for="beneficiariosAtendidos">Beneficiarios Directos (Opcional)</label>
+          </p-iftalabel>
+          <small class="field-hint">Beneficiarios específicos si aplica</small>
+          <small class="field-error" *ngIf="deliveryForm.get('beneficiariosAtendidos')?.hasError('min') && deliveryForm.get('beneficiariosAtendidos')?.touched">Debe ser mayor o igual a 0.</small>
+        </div>
+
+        <!-- Detalle de Productos (PrimeNG Textarea) -->
+        <div class="field-container col-full">
+          <p-iftalabel>
+            <textarea pTextarea formControlName="detalleProductos" id="detalleProductos" rows="3"></textarea>
+            <label for="detalleProductos">Detalle de Productos Entregados *</label>
+          </p-iftalabel>
+          <small class="field-hint">Especifica los productos, lotes o categorías entregadas</small>
+          <small class="field-error" *ngIf="deliveryForm.get('detalleProductos')?.hasError('required') && deliveryForm.get('detalleProductos')?.touched">El detalle de productos es obligatorio.</small>
+        </div>
+
+        <!-- Observaciones (PrimeNG Textarea) -->
+        <div class="field-container col-full">
+          <p-iftalabel>
+            <textarea pTextarea formControlName="observaciones" id="observaciones" rows="2"></textarea>
+            <label for="observaciones">Observaciones (Opcional)</label>
+          </p-iftalabel>
+          <small class="field-hint">Cualquier eventualidad o nota adicional sobre la entrega</small>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Acciones -->
+    <div class="form-actions">
+      <button mat-stroked-button type="button" (click)="router.navigate(['/schedules'])" [disabled]="isSaving">
+        Cancelar
+      </button>
+      <button mat-flat-button class="btn-primary" type="submit" [disabled]="deliveryForm.invalid || isSaving">
+        <mat-icon *ngIf="!isSaving">check_circle</mat-icon>
+        <mat-spinner *ngIf="isSaving" diameter="20" class="spinner-btn"></mat-spinner>
+        <span>{{ isSaving ? 'Registrando...' : 'Registrar Entrega' }}</span>
+      </button>
+    </div>
+
+  </form>
 </div>

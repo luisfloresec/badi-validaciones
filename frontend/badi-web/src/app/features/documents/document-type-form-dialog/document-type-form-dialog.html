@@ -1,112 +1,140 @@
-<h2 mat-dialog-title>
-  <mat-icon>{{ isEdit ? 'edit' : 'add_circle_outline' }}</mat-icon>
-  {{ isEdit ? 'Editar tipo documental' : 'Nuevo tipo documental' }}
-</h2>
-
-<mat-dialog-content>
-  <form [formGroup]="form" class="form-grid">
-
-    <!-- Nombre -->
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Nombre del tipo</mat-label>
-      <input matInput formControlName="nombre" placeholder="Ej: Convenio firmado">
-      <mat-error *ngIf="form.get('nombre')?.hasError('required')">El nombre es obligatorio</mat-error>
-      <mat-error *ngIf="form.get('nombre')?.hasError('maxlength')">Máximo 120 caracteres</mat-error>
-    </mat-form-field>
-
-    <!-- Código -->
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Código interno</mat-label>
-      <input matInput formControlName="codigo" placeholder="Ej: convenio-firmado" [disabled]="isEdit">
-      <mat-hint>Solo letras minúsculas, números y guiones. No se puede cambiar después de creado.</mat-hint>
-      <mat-error *ngIf="form.get('codigo')?.hasError('required')">El código es obligatorio</mat-error>
-      <mat-error *ngIf="form.get('codigo')?.hasError('pattern')">Solo letras minúsculas, números y guiones (a-z, 0-9, -)</mat-error>
-    </mat-form-field>
-
-    <!-- Descripción -->
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Descripción (opcional)</mat-label>
-      <textarea matInput formControlName="descripcion" rows="2"
-                placeholder="Breve descripción del uso de este tipo"></textarea>
-    </mat-form-field>
-
-    <!-- Tamaño máximo -->
-    <mat-form-field appearance="outline">
-      <mat-label>Tamaño máximo (MB)</mat-label>
-      <input matInput type="number" formControlName="tamanoMaximoMb" min="1" max="50">
-      <mat-error *ngIf="form.get('tamanoMaximoMb')?.hasError('required')">Requerido</mat-error>
-      <mat-error *ngIf="form.get('tamanoMaximoMb')?.hasError('min')">Mínimo 1 MB</mat-error>
-      <mat-error *ngIf="form.get('tamanoMaximoMb')?.hasError('max')">Máximo 50 MB</mat-error>
-    </mat-form-field>
-
-    <!-- Extensiones -->
-    <div class="field-section full-width">
-      <label class="field-label">Extensiones permitidas</label>
-      <div class="quick-select mb-2">
-        <button type="button" mat-stroked-button class="btn-xs"
-                *ngFor="let ext of EXTENSIONES_COMUNES"
-                [class.active]="extensiones.includes(ext)"
-                (click)="toggleExtension(ext)">
-          .{{ ext }}
-        </button>
-      </div>
-      <div class="chips-container">
-        <span class="chip-tag" *ngFor="let ext of extensiones">
-          .{{ ext }}
-          <button type="button" class="chip-remove" (click)="removeExtension(ext)">
-            <mat-icon style="font-size:14px;width:14px;height:14px;">close</mat-icon>
-          </button>
-        </span>
-        <span class="empty-chips" *ngIf="extensiones.length === 0">Ninguna seleccionada</span>
-      </div>
+<div class="dialog-container">
+  <div class="dialog-header">
+    <div class="header-title">
+      <mat-icon>{{ isEdit ? 'edit' : 'add_circle' }}</mat-icon>
+      <h2 mat-dialog-title>{{ isEdit ? 'Editar Tipo Documental' : 'Nuevo Tipo Documental' }}</h2>
     </div>
+    <p-button icon="pi pi-times" [text]="true" severity="secondary" mat-dialog-close [disabled]="isSaving" />
+  </div>
 
-    <!-- Entidades Permitidas -->
-    <div class="field-section full-width">
-      <label class="field-label">Entidades donde aplica</label>
-      <div class="quick-select">
-        <button type="button" mat-stroked-button class="btn-xs"
-                *ngFor="let ent of ENTIDADES"
-                [class.active]="entidades.includes(ent)"
-                (click)="toggleEntidad(ent)">
-          {{ ent }}
-        </button>
-      </div>
-    </div>
+  <div class="dialog-content" mat-dialog-content>
+    <form [formGroup]="form" class="badi-form p-fluid">
+      
+      <h3 class="section-subtitle">Información General</h3>
 
-    <!-- Toggles de reglas -->
-    <div class="toggles-section full-width">
-      <h4 class="toggles-title">Reglas de validación</h4>
-      <div class="toggle-row">
-        <mat-slide-toggle formControlName="requiereEntidadRelacionada" color="primary">
-          Requiere entidad relacionada (obligatorio al cargar)
-        </mat-slide-toggle>
+      <!-- Nombre -->
+      <div class="form-row">
+        <div class="field-container col-full">
+          <p-iftalabel>
+            <input pInputText formControlName="nombre" id="nombre" placeholder="Ej: Registro fotográfico" />
+            <label for="nombre">Nombre del Tipo Documental</label>
+          </p-iftalabel>
+          <small class="field-hint">Ingrese un nombre representativo para la categoría</small>
+          <small class="field-error" *ngIf="form.get('nombre')?.hasError('required') && form.get('nombre')?.touched">El nombre es obligatorio.</small>
+          <small class="field-error" *ngIf="form.get('nombre')?.hasError('maxlength') && form.get('nombre')?.touched">Máximo 120 caracteres.</small>
+        </div>
       </div>
-      <div class="toggle-row">
-        <mat-slide-toggle formControlName="permiteCargaGeneral" color="primary">
-          Permite carga general (sin entidad específica)
-        </mat-slide-toggle>
-      </div>
-      <div class="toggle-row">
-        <mat-slide-toggle formControlName="requiereFechaDocumento" color="primary">
-          Requiere fecha del documento
-        </mat-slide-toggle>
-      </div>
-      <div class="toggle-row">
-        <mat-slide-toggle formControlName="observacionesObligatorias" color="primary">
-          Observaciones obligatorias
-        </mat-slide-toggle>
-      </div>
-    </div>
 
-  </form>
-</mat-dialog-content>
+      <!-- Código -->
+      <div class="form-row">
+        <div class="field-container col-half">
+          <p-iftalabel>
+            <input pInputText formControlName="codigo" id="codigo" placeholder="Ej: reg-foto" />
+            <label for="codigo">Código Único</label>
+          </p-iftalabel>
+          <small class="field-hint">Debe ser único, en minúsculas, sin espacios (use guiones)</small>
+          <small class="field-error" *ngIf="form.get('codigo')?.hasError('required') && form.get('codigo')?.touched">El código es obligatorio.</small>
+          <small class="field-error" *ngIf="form.get('codigo')?.hasError('pattern') && form.get('codigo')?.touched">Formato inválido. Use letras minúsculas, números y guiones.</small>
+        </div>
 
-<mat-dialog-actions align="end">
-  <button mat-button mat-dialog-close [disabled]="isSaving">Cancelar</button>
-  <button mat-flat-button class="btn-primary" (click)="onSubmit()" [disabled]="isSaving">
-    <mat-spinner diameter="18" *ngIf="isSaving" class="spinner-inline"></mat-spinner>
-    <mat-icon *ngIf="!isSaving">save</mat-icon>
-    {{ isSaving ? 'Guardando...' : (isEdit ? 'Guardar cambios' : 'Crear tipo') }}
-  </button>
-</mat-dialog-actions>
+        <div class="field-container col-half">
+          <p-iftalabel>
+            <input pInputText type="number" formControlName="tamanoMaximoMb" id="tamanoMaximoMb" min="1" max="50" />
+            <label for="tamanoMaximoMb">Tamaño Máximo (MB)</label>
+          </p-iftalabel>
+          <small class="field-hint">Capacidad máxima permitida por archivo (1 - 50 MB)</small>
+          <small class="field-error" *ngIf="form.get('tamanoMaximoMb')?.hasError('required') && form.get('tamanoMaximoMb')?.touched">El tamaño máximo es obligatorio.</small>
+          <small class="field-error" *ngIf="(form.get('tamanoMaximoMb')?.hasError('min') || form.get('tamanoMaximoMb')?.hasError('max')) && form.get('tamanoMaximoMb')?.touched">Debe estar entre 1 y 50 MB.</small>
+        </div>
+      </div>
+
+      <!-- Descripción -->
+      <div class="form-row">
+        <div class="field-container col-full">
+          <p-iftalabel>
+            <textarea pTextarea formControlName="descripcion" id="descripcion" rows="2" placeholder="Describe brevemente el propósito y alcance de este tipo documental"></textarea>
+            <label for="descripcion">Descripción</label>
+          </p-iftalabel>
+        </div>
+      </div>
+
+      <!-- Extensiones Permitidas -->
+      <h3 class="section-subtitle mt-4">Extensiones Permitidas</h3>
+      <div class="form-row">
+        <div class="field-container col-full">
+          <div class="chips-selector">
+            <div class="chip-item" *ngFor="let ext of EXTENSIONES_COMUNES" (click)="toggleExtension(ext)" [class.selected]="extensiones.includes(ext)">
+              <mat-icon>{{ extensiones.includes(ext) ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+              <span>.{{ ext }}</span>
+            </div>
+          </div>
+          <small class="field-hint mt-2">Haga clic en las extensiones permitidas para los archivos de este tipo</small>
+          <small class="field-error" *ngIf="extensiones.length === 0 && form.touched">Debe seleccionar al menos una extensión permitida.</small>
+        </div>
+      </div>
+
+      <!-- Entidades Permitidas -->
+      <h3 class="section-subtitle mt-4">Entidades Relacionadas Permitidas</h3>
+      <div class="form-row">
+        <div class="field-container col-full">
+          <div class="chips-selector">
+            <div class="chip-item" *ngFor="let ent of ENTIDADES" (click)="toggleEntidad(ent)" [class.selected]="entidades.includes(ent)">
+              <mat-icon>{{ entidades.includes(ent) ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+              <span>{{ ent }}</span>
+            </div>
+          </div>
+          <small class="field-hint mt-2">Determina en qué partes de la aplicación (Organizaciones, Convenios, Entregas) se puede seleccionar este tipo</small>
+        </div>
+      </div>
+
+      <!-- Reglas de Carga -->
+      <h3 class="section-subtitle mt-4">Reglas de Negocio y Validación</h3>
+      <div class="form-row">
+        <div class="field-container col-full rules-wrapper">
+          
+          <div class="rule-switch-row">
+            <p-toggleswitch formControlName="permiteCargaGeneral" inputId="permiteCargaGeneral"></p-toggleswitch>
+            <div class="rule-switch-text">
+              <label for="permiteCargaGeneral" class="rule-title">Permitir carga general en Repositorio Central</label>
+              <p class="rule-desc">Habilita la subida directa sin necesidad de asociarlo a una entidad específica.</p>
+            </div>
+          </div>
+
+          <div class="rule-switch-row">
+            <p-toggleswitch formControlName="requiereEntidadRelacionada" inputId="requiereEntidadRelacionada"></p-toggleswitch>
+            <div class="rule-switch-text">
+              <label for="requiereEntidadRelacionada" class="rule-title">Requerir entidad asociada obligatoriamente</label>
+              <p class="rule-desc">Bloquea la subida si no se ha elegido una organización o convenio.</p>
+            </div>
+          </div>
+
+          <div class="rule-switch-row">
+            <p-toggleswitch formControlName="requiereFechaDocumento" inputId="requiereFechaDocumento"></p-toggleswitch>
+            <div class="rule-switch-text">
+              <label for="requiereFechaDocumento" class="rule-title">Solicitar Fecha del Documento Físico</label>
+              <p class="rule-desc">Hace obligatorio ingresar la fecha de emisión o firma original.</p>
+            </div>
+          </div>
+
+          <div class="rule-switch-row">
+            <p-toggleswitch formControlName="observacionesObligatorias" inputId="observacionesObligatorias"></p-toggleswitch>
+            <div class="rule-switch-text">
+              <label for="observacionesObligatorias" class="rule-title">Observaciones Obligatorias</label>
+              <p class="rule-desc">El usuario deberá proveer una explicación o nota al subir archivos bajo este tipo.</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </form>
+  </div>
+
+  <div class="dialog-actions" mat-dialog-actions>
+    <p-button label="Cancelar" [outlined]="true" severity="secondary" mat-dialog-close [disabled]="isSaving" />
+    <p-button [label]="isSaving ? 'Guardando...' : (isEdit ? 'Guardar Cambios' : 'Crear Tipo Documental')"
+              (onClick)="onSubmit()" 
+              [disabled]="form.invalid || extensiones.length === 0 || isSaving"
+              [loading]="isSaving" />
+  </div>
+</div>

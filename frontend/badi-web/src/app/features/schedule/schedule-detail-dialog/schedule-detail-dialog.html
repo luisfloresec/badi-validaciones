@@ -21,9 +21,7 @@
         <mat-icon>event_note</mat-icon>
         <h2>Detalle de entrega programada</h2>
       </div>
-      <button mat-icon-button class="close-button" (click)="closeDialog()">
-        <mat-icon>close</mat-icon>
-      </button>
+      <p-button icon="pi pi-times" [text]="true" severity="secondary" (onClick)="closeDialog()" />
     </div>
 
     <!-- Banner histórico (Cancelado) -->
@@ -75,26 +73,33 @@
           <h3>Editar información</h3>
         </div>
 
-        <div class="edit-form">
-          <mat-form-field appearance="outline" class="full-field">
-            <mat-label>Descripción</mat-label>
-            <input matInput [(ngModel)]="editDescripcion" maxlength="300" placeholder="Descripción de la entrega">
-            <mat-hint align="end">{{ descripcionLength }}/300</mat-hint>
-          </mat-form-field>
+        <div class="edit-form p-fluid badi-form">
+          <div class="form-row">
+            <div class="field-container col-full">
+              <p-iftalabel>
+                <input pInputText [(ngModel)]="editDescripcion" id="editDescripcion" maxlength="300" />
+                <label for="editDescripcion">Descripción</label>
+              </p-iftalabel>
+              <div class="field-hint-container flex justify-content-between">
+                <small class="field-hint">Descripción de la entrega</small>
+                <small class="field-hint">{{ descripcionLength }} / 300</small>
+              </div>
+            </div>
+          </div>
 
-          <mat-form-field appearance="outline" class="full-field">
-            <mat-label>Observaciones</mat-label>
-            <textarea matInput [(ngModel)]="editObservaciones" rows="3" placeholder="Observaciones adicionales"></textarea>
-          </mat-form-field>
+          <div class="form-row">
+            <div class="field-container col-full">
+              <p-iftalabel>
+                <textarea pTextarea [(ngModel)]="editObservaciones" id="editObservaciones" rows="3"></textarea>
+                <label for="editObservaciones">Observaciones</label>
+              </p-iftalabel>
+              <small class="field-hint">Observaciones adicionales</small>
+            </div>
+          </div>
 
           <div class="edit-actions">
-            <button mat-stroked-button (click)="cancelEditMode()" [disabled]="isSaving">
-              Cancelar edición
-            </button>
-            <button mat-flat-button class="btn-primary" (click)="saveEdit()" [disabled]="isSaving || descripcionLength > 300">
-              <mat-spinner *ngIf="isSaving" diameter="18" class="btn-spinner"></mat-spinner>
-              <span *ngIf="!isSaving">Guardar cambios</span>
-            </button>
+            <p-button label="Cancelar edición" [outlined]="true" severity="secondary" (onClick)="cancelEditMode()" [disabled]="isSaving" />
+            <p-button label="Guardar cambios" icon="pi pi-save" (onClick)="saveEdit()" [disabled]="isSaving || descripcionLength > 300" [loading]="isSaving" />
           </div>
         </div>
       </div>
@@ -184,32 +189,31 @@
 
     </div>
 
-    <div class="dialog-actions" mat-dialog-actions>
-      <!-- Acciones cuando YA existe una Entrega Realizada o el estado es Realizado -->
-      <ng-container *ngIf="realizedDeliveryId && !editMode">
-        <button mat-flat-button color="primary" class="btn-primary" (click)="viewRealizedDelivery()">
-          <mat-icon>visibility</mat-icon> Ver entrega
-        </button>
-      </ng-container>
+    <div class="dialog-actions-container" mat-dialog-actions>
+      <!-- Fila superior: Acciones principales de gestión -->
+      <div class="actions-row primary-actions-row" *ngIf="(!editMode && isEditable) || ((realizedDeliveryId || delivery.estado === 'Realizado') && !editMode)">
+        <ng-container *ngIf="(realizedDeliveryId || delivery.estado === 'Realizado') && !editMode">
+          <p-button label="Ver entrega" icon="pi pi-eye" (onClick)="viewRealizedDelivery()" />
+        </ng-container>
 
-      <!-- Acciones solo si es editable (Programado o Reprogramado) y no estamos en edit mode -->
-      <ng-container *ngIf="isEditable && !editMode">
-        <button *ngIf="canRegisterDelivery" mat-flat-button color="primary" class="btn-primary" (click)="registerRealizedDelivery()">
-          <mat-icon>check_circle</mat-icon> Registrar entrega realizada
-        </button>
-        <button mat-stroked-button class="btn-action-edit" (click)="enterEditMode()">
-          <mat-icon>edit</mat-icon> Editar
-        </button>
-        <button mat-stroked-button class="btn-action-reschedule" (click)="openReschedule()">
-          <mat-icon>event_repeat</mat-icon> Reprogramar
-        </button>
-        <button mat-stroked-button class="btn-action-cancel" (click)="openCancel()">
-          <mat-icon>event_busy</mat-icon> Cancelar entrega
-        </button>
-      </ng-container>
+        <ng-container *ngIf="isEditable && !editMode">
+          <p-button *ngIf="canRegisterDelivery" label="Registrar entrega realizada" icon="pi pi-check-circle" (onClick)="registerRealizedDelivery()" />
+          <p-button label="Editar" icon="pi pi-file-edit" severity="secondary" [outlined]="true" (onClick)="enterEditMode()" />
+          <p-button label="Reprogramar" icon="pi pi-calendar-clock" severity="secondary" [outlined]="true" (onClick)="openReschedule()" />
+        </ng-container>
+      </div>
 
-      <span class="action-spacer"></span>
-      <button mat-stroked-button (click)="closeDialog()">Cerrar</button>
+      <!-- Fila inferior: Acciones secundarias y de cierre -->
+      <div class="actions-row secondary-actions-row">
+        <div class="left-action">
+          <ng-container *ngIf="isEditable && !editMode">
+            <p-button label="Cancelar entrega" icon="pi pi-ban" severity="danger" [outlined]="true" (onClick)="openCancel()" />
+          </ng-container>
+        </div>
+        <div class="right-action">
+          <p-button label="Cerrar" severity="secondary" [outlined]="true" (onClick)="closeDialog()" />
+        </div>
+      </div>
     </div>
   </ng-container>
 </div>

@@ -176,10 +176,19 @@ body {
 /* ──────────────────────────────────────
    Angular Material — Dialog Global Override
    ────────────────────────────────────── */
-.mat-mdc-dialog-container .mdc-dialog__surface {
+.mat-mdc-dialog-container,
+.mat-mdc-dialog-container .mdc-dialog__surface,
+.badi-dialog-panel .mat-mdc-dialog-container,
+.badi-dialog-panel .mdc-dialog__surface {
   border-radius: 16px !important;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 0 4px 16px rgba(0, 0, 0, 0.06) !important;
   overflow: hidden !important;
+}
+
+/* Ensure the inner dialog scrollable content still scrolls properly */
+.mat-mdc-dialog-container .mat-mdc-dialog-content {
+  overflow-y: auto !important;
+  max-height: 70vh;
 }
 
 /* ──────────────────────────────────────
@@ -247,10 +256,51 @@ textarea.mat-mdc-input-element::placeholder {
 }
 
 /* ──────────────────────────────────────
-   Angular Material — Datepicker Overlay
+   Angular Material — Overlays & Menus
    ────────────────────────────────────── */
 .cdk-overlay-container {
-  z-index: 1200 !important;
+  z-index: 950 !important;
+}
+
+.cdk-overlay-container:has(.badi-menu-backdrop) {
+  z-index: 50000 !important;
+}
+
+/* Menú de usuario y mat-menu en general — Fondo 100% sólido y sombras definidas */
+.mat-mdc-menu-panel {
+  background-color: #ffffff !important;
+  border: 1px solid #d1d5db !important;
+  border-radius: 12px !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1) !important;
+  padding: 8px 0 !important;
+  z-index: 50000 !important;
+  opacity: 1 !important;
+}
+
+.mat-mdc-menu-item {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+  font-family: 'Inter', Roboto, sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  min-height: 42px !important;
+  transition: background-color 0.15s ease, color 0.15s ease !important;
+  opacity: 1 !important;
+
+  mat-icon {
+    color: #6b7280 !important;
+    margin-right: 12px !important;
+    transition: color 0.15s ease !important;
+  }
+
+  &:hover {
+    background-color: #f1faf7 !important;
+    color: #015641 !important;
+
+    mat-icon {
+      color: #015641 !important;
+    }
+  }
 }
 
 .mat-datepicker-content {
@@ -453,20 +503,75 @@ mat-error, .mat-mdc-form-field-error {
 /* ──────────────────────────────────────
    PrimeNG — Dropdown Select Overrides
    ────────────────────────────────────── */
-.badi-select-panel {
+.badi-dialog-panel {
+  z-index: 1000;
+}
+
+body .badi-modal-dropdown-panel,
+body .p-select-overlay,
+body .p-dropdown-panel,
+body .p-multiselect-panel,
+body .p-multiselect-overlay {
+  z-index: 20000 !important;
+}
+
+body .p-select-overlay,
+body .p-dropdown-panel,
+body .p-multiselect-panel,
+body .p-multiselect-overlay {
+  position: absolute;
+}
+
+body > div[style*="z-index"],
+body > .p-overlay,
+body > p-overlay,
+body > .p-connected-overlay,
+body > div[class*="p-overlay"],
+body > div[class*="p-select"],
+body > div[class*="p-multiselect"],
+body > div[class*="p-datepicker"],
+body > div[class*="p-connected"],
+.p-overlay,
+p-overlay,
+.p-connected-overlay {
+  z-index: 20000 !important;
+}
+
+.badi-select-panel,
+.badi-modal-dropdown-panel,
+.p-select-overlay,
+.p-dropdown-panel,
+.p-multiselect-overlay,
+.p-multiselect-panel,
+.p-datepicker-overlay,
+.p-overlaypanel {
   background-color: #ffffff !important;
   border: 1px solid #dbe3ea !important;
   border-radius: 8px !important;
-  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.1), 0 4px 6px rgba(15, 23, 42, 0.05) !important;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.15), 0 4px 6px rgba(15, 23, 42, 0.05) !important;
   padding: 6px 0 !important;
-  z-index: 1200 !important;
+  z-index: 20000 !important;
 }
 
-.badi-select-panel .p-select-list {
+body .badi-datepicker-panel,
+body .p-datepicker-panel,
+body .p-datepicker,
+body .p-calendar-panel,
+body .p-datepicker-overlay {
+  z-index: 30000 !important;
+}
+
+.badi-select-panel .p-select-list,
+.badi-select-panel .p-multiselect-list,
+.badi-modal-dropdown-panel .p-select-list,
+.badi-modal-dropdown-panel .p-multiselect-list {
   padding: 0 !important;
 }
 
-.badi-select-panel .p-select-option {
+.badi-select-panel .p-select-option,
+.badi-select-panel .p-multiselect-option,
+.badi-modal-dropdown-panel .p-select-option,
+.badi-modal-dropdown-panel .p-multiselect-option {
   color: #1f2937 !important;
   font-family: 'Inter', Roboto, "Helvetica Neue", sans-serif !important;
   font-size: 14px !important;
@@ -477,17 +582,26 @@ mat-error, .mat-mdc-form-field-error {
   transition: background-color 0.15s ease, color 0.15s ease !important;
 }
 
-.badi-select-panel .p-select-option:hover {
+.badi-select-panel .p-select-option:hover,
+.badi-select-panel .p-multiselect-option:hover,
+.badi-modal-dropdown-panel .p-select-option:hover,
+.badi-modal-dropdown-panel .p-multiselect-option:hover {
   background-color: #f1faf7 !important;
   color: #015641 !important;
 }
 
-.badi-select-panel .p-select-option.p-focus {
+.badi-select-panel .p-select-option.p-focus,
+.badi-select-panel .p-multiselect-option.p-focus,
+.badi-modal-dropdown-panel .p-select-option.p-focus,
+.badi-modal-dropdown-panel .p-multiselect-option.p-focus {
   background-color: #f1faf7 !important;
   color: #015641 !important;
 }
 
-.badi-select-panel .p-select-option.p-selected {
+.badi-select-panel .p-select-option.p-selected,
+.badi-select-panel .p-multiselect-option.p-selected,
+.badi-modal-dropdown-panel .p-select-option.p-selected,
+.badi-modal-dropdown-panel .p-multiselect-option.p-selected {
   background-color: rgba(1, 86, 65, 0.08) !important;
   color: #015641 !important;
   font-weight: 600 !important;

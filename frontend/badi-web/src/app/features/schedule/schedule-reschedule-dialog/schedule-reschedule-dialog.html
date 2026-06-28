@@ -4,9 +4,7 @@
       <mat-icon>event_repeat</mat-icon>
       <h2>Reprogramar entrega</h2>
     </div>
-    <button mat-icon-button class="close-button" mat-dialog-close>
-      <mat-icon>close</mat-icon>
-    </button>
+    <p-button icon="pi pi-times" [text]="true" severity="secondary" mat-dialog-close [disabled]="isLoading" />
   </div>
 
   <div class="dialog-info-banner">
@@ -14,30 +12,54 @@
     <span>La fecha actual programada es <strong>{{ data.fechaActual | date:'dd/MM/yyyy' }}</strong>. Selecciona una nueva fecha y proporciona el motivo de la reprogramación.</span>
   </div>
 
-  <form [formGroup]="form" (ngSubmit)="onSubmit()">
-    <div class="dialog-body" mat-dialog-content>
-      <mat-form-field appearance="outline" class="full-field">
-        <mat-label>Nueva fecha programada</mat-label>
-        <input matInput [matDatepicker]="picker" formControlName="nuevaFecha" placeholder="Seleccionar fecha">
-        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-        <mat-datepicker #picker></mat-datepicker>
-        <mat-error *ngIf="form.get('nuevaFecha')?.hasError('required')">La nueva fecha es obligatoria</mat-error>
-      </mat-form-field>
+  <div class="dialog-content" mat-dialog-content>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="badi-form p-fluid">
+      <div class="section-title-container">
+        <h3 class="form-section-title">Nueva Programación</h3>
+      </div>
 
-      <mat-form-field appearance="outline" class="full-field">
-        <mat-label>Motivo de reprogramación</mat-label>
-        <textarea matInput formControlName="motivoReprogramacion" rows="3" placeholder="Ej: Cambio en la disponibilidad del equipo de logística"></textarea>
-        <mat-error *ngIf="form.get('motivoReprogramacion')?.hasError('required')">El motivo es obligatorio</mat-error>
-        <mat-error *ngIf="form.get('motivoReprogramacion')?.hasError('minlength')">Mínimo 5 caracteres</mat-error>
-      </mat-form-field>
-    </div>
+      <!-- Nueva fecha programada -->
+      <div class="form-row">
+        <div class="field-container col-full">
+          <div class="special-field special-field-clickable" (click)="picker.open()">
+            <div class="special-field-content">
+              <span class="special-field-label">Nueva fecha programada</span>
+              <div class="special-field-control datepicker-control-wrapper">
+                <span class="special-field-value">{{ formatDisplayDate(form.get('nuevaFecha')?.value) }}</span>
+                <mat-form-field appearance="outline" class="hidden-mat-field">
+                  <input matInput [matDatepicker]="picker" formControlName="nuevaFecha" class="hidden-datepicker-input" readonly>
+                </mat-form-field>
+              </div>
+            </div>
+            <mat-datepicker-toggle matIconSuffix [for]="picker" (click)="$event.stopPropagation()"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </div>
+          <small class="field-hint">Seleccione la nueva fecha desde el calendario</small>
+          <small class="field-error" *ngIf="form.get('nuevaFecha')?.hasError('required') && form.get('nuevaFecha')?.touched">La nueva fecha es obligatoria.</small>
+        </div>
+      </div>
 
-    <div class="dialog-actions" mat-dialog-actions>
-      <button mat-stroked-button type="button" mat-dialog-close [disabled]="isLoading">Cancelar</button>
-      <button mat-flat-button type="submit" class="btn-reschedule" [disabled]="form.invalid || isLoading">
-        <mat-spinner *ngIf="isLoading" diameter="18" class="btn-spinner"></mat-spinner>
-        <span *ngIf="!isLoading">Reprogramar</span>
-      </button>
-    </div>
-  </form>
+      <!-- Motivo de reprogramación -->
+      <div class="form-row">
+        <div class="field-container col-full">
+          <p-iftalabel>
+            <textarea pTextarea formControlName="motivoReprogramacion" id="motivoReprogramacion" rows="3"></textarea>
+            <label for="motivoReprogramacion">Motivo de reprogramación</label>
+          </p-iftalabel>
+          <small class="field-hint">Ej: Cambio en la disponibilidad del equipo de logística</small>
+          <small class="field-error" *ngIf="form.get('motivoReprogramacion')?.hasError('required') && form.get('motivoReprogramacion')?.touched">El motivo es obligatorio.</small>
+          <small class="field-error" *ngIf="form.get('motivoReprogramacion')?.hasError('minlength') && form.get('motivoReprogramacion')?.touched">Mínimo 5 caracteres.</small>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="dialog-actions" mat-dialog-actions>
+    <p-button label="Cancelar" [outlined]="true" severity="secondary" mat-dialog-close [disabled]="isLoading" />
+    <p-button label="Reprogramar"
+              icon="pi pi-calendar-clock"
+              (onClick)="onSubmit()"
+              [disabled]="form.invalid || isLoading"
+              [loading]="isLoading" />
+  </div>
 </div>

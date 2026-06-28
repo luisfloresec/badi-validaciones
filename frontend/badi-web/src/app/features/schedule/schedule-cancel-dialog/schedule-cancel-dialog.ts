@@ -8,6 +8,10 @@ import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { IftaLabelModule } from 'primeng/iftalabel';
+import { InputTextModule } from 'primeng/inputtext';
+import { TextareaModule } from 'primeng/textarea';
+import { ButtonModule } from 'primeng/button';
 import { ScheduleService } from '../schedule.service';
 
 @Component({
@@ -21,7 +25,11 @@ import { ScheduleService } from '../schedule.service';
     MatFormFieldModule,
     MatInputModule,
     MatIconModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    IftaLabelModule,
+    InputTextModule,
+    TextareaModule,
+    ButtonModule
   ],
   templateUrl: './schedule-cancel-dialog.html',
   styleUrls: ['./schedule-cancel-dialog.scss']

@@ -1,123 +1,376 @@
 <div class="dashboard-container">
 
-  <!-- ── Encabezado ──────────────────── -->
-  <div class="page-header">
-    <h1>Dashboard</h1>
-    <p>Resumen operativo de Gestión Social del BADI</p>
-  </div>
-
-  <!-- ── KPIs ────────────────────────── -->
-  <div class="kpi-grid">
-    <div class="kpi-card" *ngFor="let kpi of kpis">
-      <div class="kpi-icon-wrapper">
-        <mat-icon>{{ kpi.icon }}</mat-icon>
-      </div>
-      <div class="kpi-content">
-        <span class="kpi-value">{{ kpi.value }}</span>
-        <span class="kpi-label">{{ kpi.label }}</span>
-        <span class="kpi-description">{{ kpi.description }}</span>
-      </div>
+  <!-- ── Encabezado Profesional ──────────────────── -->
+  <div class="page-header-row">
+    <div class="page-header">
+      <h1>¡Hola, {{ userFullName }}!</h1>
+      <p class="subtitle">{{ currentDateStr }} &nbsp;|&nbsp; <span class="role-badge">{{ primaryRole }}</span></p>
+    </div>
+    <div class="header-actions">
+      <button mat-stroked-button class="btn-refresh" (click)="loadSummary()" [disabled]="loading" matTooltip="Actualizar datos">
+        <mat-icon>refresh</mat-icon>
+        Actualizar
+      </button>
     </div>
   </div>
 
-  <!-- ── Resumen semanal ─────────────── -->
-  <div class="badi-card">
-    <div class="badi-card-header">
-      <mat-icon class="badi-card-icon">date_range</mat-icon>
-      <h2>Resumen semanal</h2>
-    </div>
-    <div class="resumen-grid">
-      <div class="resumen-item" *ngFor="let item of resumenSemanal">
-        <mat-icon class="resumen-icon">{{ item.icon }}</mat-icon>
-        <div class="resumen-content">
-          <span class="resumen-value">{{ item.value }}</span>
-          <span class="resumen-label">{{ item.label }}</span>
-        </div>
-      </div>
-    </div>
+  <!-- Loading State -->
+  <div class="state-container" *ngIf="loading">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Cargando información del Dashboard...</p>
   </div>
 
-  <!-- ── Sección inferior: 2 columnas ── -->
-  <div class="bottom-grid">
+  <!-- Error State -->
+  <div class="state-container state-error" *ngIf="!loading && error">
+    <mat-icon class="state-icon">cloud_off</mat-icon>
+    <p><strong>{{ error }}</strong></p>
+    <p class="state-hint">Verifica que el backend esté en ejecución y reintenta.</p>
+    <button mat-stroked-button (click)="loadSummary()">
+      <mat-icon>refresh</mat-icon> Reintentar
+    </button>
+  </div>
 
-    <!-- Próximas entregas -->
-    <div class="badi-card card-wide">
-      <div class="badi-card-header">
-        <mat-icon class="badi-card-icon">local_shipping</mat-icon>
-        <h2>Próximas entregas</h2>
+  <!-- Contenido Real -->
+  <ng-container *ngIf="!loading && !error && summary">
+
+    <!-- ── 1. Cards Principales (KPIs) ────────────────────────── -->
+    <div class="kpi-grid">
+      <div class="kpi-card" *ngIf="isGestionSocial()" (click)="navigateToPath('/organizations')" matTooltip="Ver organizaciones">
+        <div class="kpi-icon-wrapper icon-green">
+          <mat-icon>apartment</mat-icon>
+        </div>
+        <div class="kpi-content">
+          <span class="kpi-value">{{ summary.resumen.organizacionesActivas }}</span>
+          <span class="kpi-label">Organizaciones activas</span>
+          <span class="kpi-description">En gestión operativa</span>
+        </div>
       </div>
-      <div class="table-wrapper">
-        <table class="entregas-table">
-          <thead>
-            <tr>
-              <th>Razón social</th>
-              <th class="text-right">Kilos</th>
-              <th class="text-right">Usuarios</th>
-              <th class="text-right">Cuota recup.</th>
-              <th class="text-center">Hora</th>
-              <th class="text-center">Estado</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let e of proximasEntregas">
-              <td class="col-razon">{{ e.razonSocial }}</td>
-              <td class="text-right">{{ e.kilos }} kg</td>
-              <td class="text-right">{{ e.usuarios }}</td>
-              <td class="text-right">${{ e.cuotaRecuperacion.toFixed(2) }}</td>
-              <td class="text-center">{{ e.hora }}</td>
-              <td class="text-center">
-                <span class="estado-chip" [ngClass]="getEstadoClass(e.estado)">
-                  {{ e.estado }}
-                </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+
+      <div class="kpi-card" *ngIf="isGestionSocial()" (click)="navigateToPath('/agreements')" matTooltip="Ver convenios">
+        <div class="kpi-icon-wrapper icon-blue">
+          <mat-icon>handshake</mat-icon>
+        </div>
+        <div class="kpi-content">
+          <span class="kpi-value">{{ summary.resumen.conveniosActivos }}</span>
+          <span class="kpi-label">Convenios activos</span>
+          <span class="kpi-description">Vigentes actualmente</span>
+        </div>
+      </div>
+
+      <div class="kpi-card" *ngIf="isGestionSocial()" (click)="navigateToPath('/schedule')" matTooltip="Ver cronograma">
+        <div class="kpi-icon-wrapper icon-orange">
+          <mat-icon>local_shipping</mat-icon>
+        </div>
+        <div class="kpi-content">
+          <span class="kpi-value">{{ summary.resumen.entregasProgramadasMes }}</span>
+          <span class="kpi-label">Programadas del mes</span>
+          <span class="kpi-description">Entregas en curso</span>
+        </div>
+      </div>
+
+      <div class="kpi-card" *ngIf="isGestionSocial()" (click)="navigateToPath('/realized-deliveries')" matTooltip="Ver entregas realizadas">
+        <div class="kpi-icon-wrapper icon-purple">
+          <mat-icon>scale</mat-icon>
+        </div>
+        <div class="kpi-content">
+          <span class="kpi-value">{{ summary.resumen.kilosEntregadosMes }} kg</span>
+          <span class="kpi-label">Kilos entregados</span>
+          <span class="kpi-description">Total acumulado del mes</span>
+        </div>
+      </div>
+
+      <div class="kpi-card" (click)="navigateToDocs()" matTooltip="Ver repositorio global">
+        <div class="kpi-icon-wrapper icon-teal">
+          <mat-icon>folder_special</mat-icon>
+        </div>
+        <div class="kpi-content">
+          <span class="kpi-value">{{ summary.documentos.total }}</span>
+          <span class="kpi-label">Documentos registrados</span>
+          <span class="kpi-description">Archivos en repositorio</span>
+        </div>
+      </div>
+
+      <div class="kpi-card" *ngIf="isAdmin()" (click)="navigateToUsers()" matTooltip="Ver usuarios">
+        <div class="kpi-icon-wrapper icon-blue">
+          <mat-icon>admin_panel_settings</mat-icon>
+        </div>
+        <div class="kpi-content">
+          <span class="kpi-value">{{ summary.resumen.usuariosActivos }}</span>
+          <span class="kpi-label">Usuarios activos</span>
+          <span class="kpi-description">Accesos habilitados</span>
+        </div>
       </div>
     </div>
 
-    <!-- Columna derecha: alertas + actividad -->
-    <div class="side-column">
+    <!-- ── 2. Sección Central: 2 Columnas ──────────────────────── -->
+    <div class="bottom-grid">
 
-      <!-- Alertas de gestión -->
-      <div class="badi-card">
-        <div class="badi-card-header">
-          <mat-icon class="badi-card-icon icon-warning">warning_amber</mat-icon>
-          <h2>Alertas de gestión</h2>
-        </div>
-        <ul class="alert-list">
-          <li *ngFor="let alerta of alertas" [class.alert-zero]="alerta.count === 0">
-            <mat-icon class="alert-icon" [class.alert-icon-active]="alerta.count > 0">
-              {{ alerta.icon }}
-            </mat-icon>
-            <span class="alert-label">{{ alerta.label }}</span>
-            <span class="alert-count" [class.alert-count-active]="alerta.count > 0">
-              {{ alerta.count }}
-            </span>
-          </li>
-        </ul>
-      </div>
+      <!-- Columna Izquierda: Tablas Operativas -->
+      <div class="main-column">
 
-      <!-- Actividad reciente -->
-      <div class="badi-card">
-        <div class="badi-card-header">
-          <mat-icon class="badi-card-icon">update</mat-icon>
-          <h2>Actividad reciente</h2>
-        </div>
-        <ul class="activity-list">
-          <li *ngFor="let act of actividadReciente">
-            <div class="activity-icon-wrapper">
-              <mat-icon>{{ act.icon }}</mat-icon>
+        <!-- Próximas entregas -->
+        <div class="badi-card card-wide" *ngIf="isGestionSocial()">
+          <div class="badi-card-header">
+            <div class="header-title-box">
+              <mat-icon class="badi-card-icon">calendar_month</mat-icon>
+              <h2>Próximas entregas programadas</h2>
             </div>
-            <div class="activity-content">
-              <span class="activity-tipo">{{ act.tipo }}</span>
-              <span class="activity-detalle">{{ act.detalle }}</span>
+            <button mat-button color="primary" (click)="navigateToSchedule()">Ir al cronograma</button>
+          </div>
+          <div class="table-wrapper">
+            <table class="dashboard-table">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Organización</th>
+                  <th>Convenio</th>
+                  <th class="text-center">Estado</th>
+                  <th class="text-center">Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngIf="summary.cronograma.proximasEntregas.length === 0">
+                  <td colspan="5" class="text-center empty-cell">No hay próximas entregas programadas.</td>
+                </tr>
+                <tr *ngFor="let s of summary.cronograma.proximasEntregas">
+                  <td class="col-fecha font-medium">{{ formatDateOnly(s.fechaProgramada) }}</td>
+                  <td class="col-razon">{{ s.convenio?.organizacion?.razonSocial || '—' }}</td>
+                  <td>{{ s.convenio?.codigoConvenio || 'S/N' }}</td>
+                  <td class="text-center">
+                    <span class="estado-chip" [ngClass]="getEstadoClass(s.estado)">{{ s.estado }}</span>
+                  </td>
+                  <td class="text-center">
+                    <button mat-icon-button color="primary" (click)="navigateToSchedule()" matTooltip="Ver en cronograma">
+                      <mat-icon>visibility</mat-icon>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Últimas entregas realizadas -->
+        <div class="badi-card card-wide" *ngIf="isGestionSocial()">
+          <div class="badi-card-header">
+            <div class="header-title-box">
+              <mat-icon class="badi-card-icon">verified</mat-icon>
+              <h2>Últimas entregas realizadas</h2>
             </div>
-          </li>
-        </ul>
+            <button mat-button color="primary" (click)="navigateToPath('/realized-deliveries')">Ver todas</button>
+          </div>
+          <div class="table-wrapper">
+            <table class="dashboard-table">
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Organización</th>
+                  <th class="text-right">Kilos Entregados</th>
+                  <th class="text-right">Personas Atendidas</th>
+                  <th class="text-center">Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngIf="summary.entregas.ultimasEntregas.length === 0">
+                  <td colspan="5" class="text-center empty-cell">No hay entregas realizadas registradas.</td>
+                </tr>
+                <tr *ngFor="let r of summary.entregas.ultimasEntregas">
+                  <td class="col-fecha font-medium">{{ formatDateOnly(r.fechaRealizacion) }}</td>
+                  <td class="col-razon">{{ r.convenio?.organizacion?.razonSocial || '—' }}</td>
+                  <td class="text-right font-medium">{{ r.kilosEntregados }} kg</td>
+                  <td class="text-right">{{ r.personasAtendidas }}</td>
+                  <td class="text-center">
+                    <button mat-icon-button color="primary" (click)="navigateToDelivery(r.id)" matTooltip="Ver detalle">
+                      <mat-icon>visibility</mat-icon>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Documentos recientes -->
+        <div class="badi-card card-wide">
+          <div class="badi-card-header">
+            <div class="header-title-box">
+              <mat-icon class="badi-card-icon">source</mat-icon>
+              <h2>Documentos recientes</h2>
+            </div>
+            <button mat-button color="primary" (click)="navigateToDocs()">Ir a Repositorio Global</button>
+          </div>
+          <div class="table-wrapper">
+            <table class="dashboard-table">
+              <thead>
+                <tr>
+                  <th>Documento</th>
+                  <th>Tipo Documental</th>
+                  <th>Entidad Asociada</th>
+                  <th>Fecha Carga</th>
+                  <th class="text-center">Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngIf="summary.documentos.ultimosDocumentos.length === 0">
+                  <td colspan="5" class="text-center empty-cell">No hay documentos registrados en el repositorio.</td>
+                </tr>
+                <tr *ngFor="let doc of summary.documentos.ultimosDocumentos">
+                  <td class="col-doc">
+                    <div class="doc-meta">
+                      <span class="doc-title" [matTooltip]="doc.titulo">{{ doc.titulo }}</span>
+                      <span class="doc-filename">{{ doc.nombreOriginal || doc.nombreArchivo }}</span>
+                    </div>
+                  </td>
+                  <td>{{ doc.tipoDocumento?.nombre || '—' }}</td>
+                  <td>{{ doc.entityName || 'Repositorio Global' }}</td>
+                  <td class="col-fecha">{{ formatDateTime(doc.fechaCarga) }}</td>
+                  <td class="text-center">
+                    <button mat-icon-button color="primary" (click)="navigateToDocs()" matTooltip="Ver en repositorio">
+                      <mat-icon>open_in_new</mat-icon>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Auditoría Reciente (Para Administrador y Auditor) -->
+        <div class="badi-card card-wide" *ngIf="isAuditor()">
+          <div class="badi-card-header">
+            <div class="header-title-box">
+              <mat-icon class="badi-card-icon">manage_history</mat-icon>
+              <h2>Actividad Reciente del Sistema</h2>
+            </div>
+            <button mat-button color="primary" (click)="navigateToAudit()">Ver registro de auditoría</button>
+          </div>
+          <div class="table-wrapper">
+            <table class="dashboard-table">
+              <thead>
+                <tr>
+                  <th>Fecha Hora</th>
+                  <th>Usuario</th>
+                  <th>Módulo</th>
+                  <th>Acción</th>
+                  <th class="text-center">Resultado</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngIf="summary.auditoria.actividadReciente.length === 0">
+                  <td colspan="5" class="text-center empty-cell">No hay actividad reciente registrada en el sistema.</td>
+                </tr>
+                <tr *ngFor="let audit of summary.auditoria.actividadReciente">
+                  <td class="col-fecha font-medium">{{ formatDateTime(audit.fechaHora) }}</td>
+                  <td>{{ audit.user ? (audit.user.nombres + ' ' + audit.user.apellidos) : 'Sistema / Anónimo' }}</td>
+                  <td>{{ audit.modulo }}</td>
+                  <td><span class="badge-accion">{{ audit.accion }}</span></td>
+                  <td class="text-center">
+                    <span class="badge-resultado" [ngClass]="{'res-exito': audit.resultado === 'EXITO', 'res-error': audit.resultado !== 'EXITO'}">
+                      {{ audit.resultado }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Columna Derecha: Alertas, Estado de Convenios y Documentos -->
+      <div class="side-column">
+
+        <!-- Alertas de gestión -->
+        <div class="badi-card" *ngIf="!isStrictlyAuditor()">
+          <div class="badi-card-header">
+            <div class="header-title-box">
+              <mat-icon class="badi-card-icon icon-warning">warning_amber</mat-icon>
+              <h2>Alertas de gestión</h2>
+            </div>
+          </div>
+          <ul class="alert-list">
+            <li *ngFor="let alerta of summary.alertas" [class.alert-zero]="alerta.count === 0" (click)="alerta.count > 0 ? navigateToPath(alerta.link) : null" [class.cursor-pointer]="alerta.count > 0">
+              <mat-icon class="alert-icon" [class.alert-icon-active]="alerta.count > 0">
+                {{ alerta.icon }}
+              </mat-icon>
+              <span class="alert-label">{{ alerta.label }}</span>
+              <span class="alert-count" [class.alert-count-active]="alerta.count > 0">
+                {{ alerta.count }}
+              </span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Resumen de convenios por estado -->
+        <div class="badi-card" *ngIf="isGestionSocial() || isAuditor()">
+          <div class="badi-card-header">
+            <div class="header-title-box">
+              <mat-icon class="badi-card-icon">handshake</mat-icon>
+              <h2>Convenios por Estado</h2>
+            </div>
+          </div>
+          <ul class="status-summary-list">
+            <li *ngFor="let c of summary.convenios.porEstado">
+              <div class="status-indicator" [style.background-color]="c.color"></div>
+              <span class="status-label">{{ c.estado }}</span>
+              <span class="status-count">{{ c.count }}</span>
+            </li>
+          </ul>
+          <div class="card-footer-action" *ngIf="!isStrictlyAuditor()">
+            <button mat-stroked-button class="w-full btn-go" (click)="navigateToPath('/agreements')">
+              Gestionar Convenios
+            </button>
+          </div>
+        </div>
+
+        <!-- Resumen de Documentos por Tipo -->
+        <div class="badi-card">
+          <div class="badi-card-header">
+            <div class="header-title-box">
+              <mat-icon class="badi-card-icon">snippet_folder</mat-icon>
+              <h2>Documentos por Tipo</h2>
+            </div>
+          </div>
+          <ul class="type-summary-list">
+            <li *ngIf="summary.documentos.porTipo.length === 0">
+              <span class="empty-text">No hay tipos documentales asignados.</span>
+            </li>
+            <li *ngFor="let t of summary.documentos.porTipo">
+              <mat-icon class="type-icon">description</mat-icon>
+              <span class="type-label">{{ t.tipo }}</span>
+              <span class="type-count">{{ t.count }}</span>
+            </li>
+          </ul>
+          <div class="card-footer-action" *ngIf="!isStrictlyAuditor()">
+            <button mat-stroked-button class="w-full btn-go" (click)="navigateToDocs()">
+              Acceder al Repositorio
+            </button>
+          </div>
+        </div>
+
+        <!-- Convenios por Vencer -->
+        <div class="badi-card" *ngIf="summary.convenios.porVencer.length > 0 && !isStrictlyAuditor()">
+          <div class="badi-card-header">
+            <div class="header-title-box">
+              <mat-icon class="badi-card-icon icon-danger">notification_important</mat-icon>
+              <h2>Convenios Próximos a Vencer</h2>
+            </div>
+          </div>
+          <ul class="vencimiento-list">
+            <li *ngFor="let v of summary.convenios.porVencer" (click)="navigateToAgreement(v.id)" class="cursor-pointer">
+              <div class="venc-content">
+                <span class="venc-org">{{ v.organizacion?.razonSocial }}</span>
+                <span class="venc-cod">{{ v.codigoConvenio || 'S/N' }} &nbsp;|&nbsp; Fin: {{ formatDateOnly(v.fechaFinEstimada) }}</span>
+              </div>
+              <mat-icon class="arrow-icon">chevron_right</mat-icon>
+            </li>
+          </ul>
+        </div>
+
       </div>
 
     </div>
-  </div>
+
+  </ng-container>
 
 </div>

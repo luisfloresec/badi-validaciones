@@ -28,13 +28,6 @@ $border: #e5e7eb;
     color: $g9;
     letter-spacing: -0.01em;
   }
-
-  .close-button {
-    color: $g5;
-    margin-right: -8px;
-    transition: all 0.15s ease;
-    &:hover { color: $g7; background: $g1; }
-  }
 }
 
 .dialog-content {
@@ -67,17 +60,24 @@ $border: #e5e7eb;
 .leader-options {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
   margin-bottom: 24px;
-  padding: 16px;
+  padding: 20px;
   background: #fafbfc;
   border-radius: 10px;
   border: 1px solid $border;
+
+  .radio-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    label { font-size: 14px; color: $g7; font-weight: 500; cursor: pointer; margin: 0; }
+  }
 }
 
 .new-leader-form {
   background-color: #fafbfc;
-  padding: 20px;
+  padding: 24px 20px;
   border-radius: 10px;
   border: 1px solid $border;
   margin-bottom: 16px;
@@ -102,21 +102,53 @@ $border: #e5e7eb;
 .badi-form {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 24px;
+  padding-top: 12px;
 }
 
 .form-row {
   display: flex;
-  gap: 16px;
+  gap: 24px;
   align-items: flex-start;
 
   @media (max-width: 600px) {
     flex-direction: column;
-    gap: 0;
+    gap: 24px;
   }
 }
 
-.w-100 {
+.mt-4 {
+  margin-top: 24px;
+}
+
+.field-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+
+  .field-hint {
+    font-size: 11.5px;
+    color: $g5;
+    margin-top: 4px;
+    margin-left: 4px;
+  }
+
+  .field-error {
+    font-size: 11px;
+    color: #dc2626;
+    font-weight: 500;
+    margin-top: 4px;
+    margin-left: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+}
+
+.col-half {
+  flex: 1;
+}
+.col-full {
   width: 100%;
 }
 
@@ -134,32 +166,302 @@ $border: #e5e7eb;
   background-color: #fafbfc;
   margin: 0 !important;
   flex-wrap: wrap;
+}
 
-  button[mat-stroked-button] {
-    border: 1px solid $g3 !important;
-    color: $g7 !important;
-    font-weight: 500 !important;
-    border-radius: 10px !important;
-    padding: 0 20px !important;
-    background: #fff !important;
-    transition: all 0.15s ease;
-    &:hover:not([disabled]) { background: $g1 !important; border-color: #9ca3af !important; }
+::ng-deep {
+  p-iftalabel {
+    width: 100% !important;
+    display: block !important;
   }
-
-  .submit-btn {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+  .p-iftalabel {
+    width: 100% !important;
+    display: block !important;
+  }
+  .p-inputtext, .p-select, .p-multiselect, .p-textarea, .p-datepicker {
+    width: 100% !important;
+  }
+  .p-button:not(.p-button-outlined):not(.p-button-text):not(.p-button-secondary):not(.p-button-danger) {
     background: $green !important;
-    color: #fff !important;
-    font-weight: 500 !important;
-    border-radius: 10px !important;
-    padding: 0 24px !important;
-    box-shadow: 0 1px 3px rgba(1,86,65,0.2);
-    transition: all 0.2s ease;
-    &:hover:not([disabled]) { background: #016b50 !important; box-shadow: 0 4px 12px rgba(1,86,65,0.25); }
-    &[disabled] { opacity: 0.5; }
+    border-color: $green !important;
+    &:hover { background: #016b50 !important; border-color: #016b50 !important; }
+  }
+  .p-button.p-button-outlined:not(.p-button-secondary):not(.p-button-danger) {
+    color: $green !important;
+    border-color: $green !important;
+    &:hover { background: #f1faf7 !important; }
+  }
+}
+
+.badi-mat-field {
+  width: 100%;
+
+  ::ng-deep {
+    .mat-mdc-form-field-subscript-wrapper {
+      min-height: 20px;
+    }
+
+    /* Emulate PrimeNG Aura Theme Input Styling */
+    .mat-mdc-text-field-wrapper,
+    .mdc-text-field--outlined,
+    .mdc-notched-outline {
+      border-radius: 8px !important;
+    }
+
+    .mat-mdc-text-field-wrapper {
+      background-color: #ffffff !important;
+      padding: 0 14px !important;
+      border-radius: 8px !important;
+    }
+
+    .mat-mdc-form-field-flex {
+      align-items: center !important;
+    }
+
+    /* PrimeNG Aura border and rounded corners (8px) */
+    .mdc-notched-outline__leading {
+      border-radius: 8px 0 0 8px !important;
+      border-color: #cbd5e1 !important;
+      border-width: 1px !important;
+      border-left: 1px solid #cbd5e1 !important;
+    }
+    .mdc-notched-outline__trailing {
+      border-radius: 0 8px 8px 0 !important;
+      border-color: #cbd5e1 !important;
+      border-width: 1px !important;
+    }
+    .mdc-notched-outline__notch {
+      border-color: #cbd5e1 !important;
+      border-width: 1px !important;
+    }
+
+    /* Hover state matching PrimeNG Aura */
+    &:hover {
+      .mdc-notched-outline__leading {
+        border-color: #94a3b8 !important;
+        border-left: 1px solid #94a3b8 !important;
+      }
+      .mdc-notched-outline__trailing,
+      .mdc-notched-outline__notch {
+        border-color: #94a3b8 !important;
+      }
+    }
+
+    /* Focus / Active state matching PrimeNG Aura green */
+    &.mat-focused {
+      .mdc-notched-outline__leading {
+        border-color: #015641 !important;
+        border-left: 1px solid #015641 !important;
+        border-width: 1px !important;
+      }
+      .mdc-notched-outline__trailing,
+      .mdc-notched-outline__notch {
+        border-color: #015641 !important;
+        border-width: 1px !important;
+      }
+      .mat-mdc-form-field-label {
+        color: #015641 !important;
+      }
+    }
+
+    /* Text & Label styling matching PrimeNG Aura */
+    .mat-mdc-form-field-label {
+      font-family: 'Inter', Roboto, "Helvetica Neue", sans-serif !important;
+      font-size: 14px !important;
+      color: #64748b !important;
+      font-weight: 500 !important;
+    }
+
+    .mat-mdc-select-value-text {
+      font-family: 'Inter', Roboto, "Helvetica Neue", sans-serif !important;
+      font-size: 14px !important;
+      color: #334155 !important;
+      font-weight: 500 !important;
+    }
+
+    .mat-mdc-select-placeholder {
+      font-family: 'Inter', Roboto, "Helvetica Neue", sans-serif !important;
+      font-size: 14px !important;
+      color: #94a3b8 !important;
+    }
+
+    .mat-mdc-select-arrow {
+      color: #64748b !important;
+    }
+  }
+}
+
+::ng-deep .badi-mat-field .mat-mdc-text-field-wrapper {
+  border-radius: 8px !important;
+}
+
+::ng-deep .badi-mat-field .mdc-notched-outline__leading {
+  border-radius: 8px 0 0 8px !important;
+}
+
+::ng-deep .badi-mat-field .mdc-notched-outline__trailing {
+  border-radius: 0 8px 8px 0 !important;
+}
+
+.vulnerability-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.vulnerability-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid #d1d5db;
+  background: #f9fafb;
+  color: #374151;
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 11.5px;
+  font-weight: 500;
+  line-height: 1;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.vulnerability-chip:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.vulnerability-chip mat-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  line-height: 14px;
+}
+
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: $g9;
+    letter-spacing: -0.01em;
   }
 
-  .spinner-btn { margin: 0; }
+  mat-icon {
+    color: $green;
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+  }
+}
+
+/* ── Special Fields (Destacados) ───────────────────────── */
+.special-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  border-radius: 10px;
+  padding: 8px 14px;
+  min-height: 52px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: #94a3b8;
+    background: #ffffff;
+  }
+
+  &:focus-within {
+    border-color: #015641;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(1, 86, 65, 0.08);
+  }
+}
+
+.special-field-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.special-field-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 2px;
+}
+
+.special-field-control {
+  width: 100%;
+  min-height: 24px;
+  display: flex;
+  align-items: center;
+}
+
+/* Integrate Angular Material inside Special Field */
+.special-mat-field {
+  width: 100%;
+  margin: 0 !important;
+
+  ::ng-deep {
+    /* Remove default subscript wrapper to avoid extra bottom space */
+    .mat-mdc-form-field-subscript-wrapper {
+      display: none !important;
+    }
+
+    /* Transparent wrapper with zero padding */
+    .mat-mdc-text-field-wrapper {
+      background: transparent !important;
+      padding: 0 !important;
+      height: 24px !important;
+      min-height: 24px !important;
+      display: flex;
+      align-items: center;
+    }
+
+    .mat-mdc-form-field-flex {
+      padding: 0 !important;
+      align-items: center !important;
+      height: 24px !important;
+    }
+
+    .mat-mdc-form-field-infix {
+      min-height: 24px !important;
+      padding: 0 !important;
+      display: flex;
+      align-items: center;
+    }
+
+    /* Remove Material notched outline borders entirely */
+    .mdc-notched-outline {
+      display: none !important;
+    }
+
+    /* Typography matches premium styling */
+    .mat-mdc-select-value-text,
+    .mat-mdc-input-element {
+      font-family: 'Inter', Roboto, "Helvetica Neue", sans-serif !important;
+      font-size: 15px !important;
+      color: #1e293b !important;
+      font-weight: 500 !important;
+      margin: 0 !important;
+    }
+
+    .mat-mdc-select-placeholder {
+      font-family: 'Inter', Roboto, "Helvetica Neue", sans-serif !important;
+      font-size: 15px !important;
+      color: #94a3b8 !important;
+    }
+
+    .mat-mdc-select-arrow {
+      color: #015641 !important;
+    }
+  }
 }

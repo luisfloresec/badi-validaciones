@@ -1,24 +1,363 @@
-.profile-avatar-large {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background-color: var(--primary-color, #1a73e8);
-  color: white;
+$green: #015641;
+$green-hover: #01785a;
+$green-bg: #f1faf7;
+$g9: #0f172a;
+$g7: #334155;
+$g5: #64748b;
+$g3: #cbd5e1;
+$g1: #f8fafc;
+$border: #e2e8f0;
+
+.page-container {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding: 24px 32px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+// Breadcrumb (from organization-form.scss)
+.header-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.breadcrumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: $g5;
+  margin-bottom: 8px;
+  padding: 6px 14px;
+  background-color: $g1;
+  border: 1px solid $border;
+  border-radius: 12px;
+  width: fit-content;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+
+  a {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: $green;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: color 0.15s ease;
+    &:hover { color: $green-hover; }
+    mat-icon { font-size: 16px; width: 16px; height: 16px; }
+  }
+  .separator { font-size: 16px; width: 16px; height: 16px; color: $g3; }
+  .current-page { color: $g9; font-weight: 500; }
+}
+
+.page-header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-bottom: 16px;
+  border-bottom: 1px solid $border;
+}
+
+.page-header {
+  h1 {
+    margin: 0 0 6px;
+    font-size: 28px;
+    font-weight: 700;
+    color: $g9;
+    letter-spacing: -0.02em;
+  }
+  p {
+    margin: 0;
+    font-size: 15px;
+    color: $g5;
+    line-height: 1.5;
+  }
+}
+
+/* ── Alerta BADI ── */
+.badi-alert {
   display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  font-weight: 500;
-  margin-right: 16px;
-}
-
-mat-card-title {
-  font-size: 20px;
-  font-weight: 500;
-  margin-bottom: 4px;
-}
-
-mat-card-subtitle {
+  gap: 12px;
+  padding: 16px 20px;
+  border-radius: 12px;
   font-size: 14px;
-  color: #666;
+  font-weight: 500;
+  line-height: 1.5;
+
+  &.warning-alert {
+    background-color: #fff7ed;
+    border: 1px solid #ffedd5;
+    color: #9a3412;
+
+    .alert-icon {
+      color: #ea580c;
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+  }
+}
+
+/* ── Profile Grid ── */
+.profile-grid {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+
+  @media (max-width: 992px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.profile-sidebar {
+  width: 320px;
+  flex-shrink: 0;
+
+  @media (max-width: 992px) {
+    width: 100%;
+  }
+}
+
+.profile-content {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ── BADI Cards ── */
+.badi-card {
+  background: #ffffff;
+  border: 1px solid $border;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  overflow: hidden;
+}
+
+.profile-user-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+
+  .profile-cover {
+    width: 100%;
+    height: 100px;
+    background: linear-gradient(135deg, #015641 0%, #01785a 100%);
+  }
+
+  .profile-card-content {
+    padding: 0 24px 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+
+  .profile-avatar {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    border: 4px solid #ffffff;
+    background: #f1faf7;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    margin-top: -48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+
+    .avatar-text {
+      font-size: 32px;
+      font-weight: 700;
+      color: $green;
+      letter-spacing: 1px;
+    }
+  }
+
+  .profile-name {
+    margin: 0 0 4px;
+    font-size: 20px;
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  .profile-email {
+    margin: 0 0 20px;
+    font-size: 14px;
+    color: #64748b;
+  }
+
+  .profile-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+
+    .role-chip {
+      padding: 4px 12px;
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #334155;
+    }
+  }
+}
+
+.estado-chip {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  display: inline-block;
+
+  &.estado-activa { background-color: #dcfce7; color: #15803d; }
+  &.estado-inactiva { background-color: #fee2e2; color: #b91c1c; }
+}
+
+/* ── Section Card / Forms ── */
+.section-card {
+  padding: 0;
+}
+
+.tab-body {
+  padding: 32px;
+}
+
+.badi-card-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 24px;
+
+  .badi-card-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background-color: $green-bg;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    mat-icon {
+      color: $green;
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  h2 {
+    margin: 0;
+    font-size: 19px;
+    font-weight: 700;
+    color: $g9;
+    letter-spacing: -0.01em;
+  }
+}
+
+.section-desc {
+  margin: -12px 0 24px;
+  font-size: 14px;
+  color: #64748b;
+}
+
+.form-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+.field-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+
+  .field-hint {
+    font-size: 11.5px;
+    color: $g5;
+    margin-top: 4px;
+    margin-left: 4px;
+  }
+
+  .field-error {
+    font-size: 11px;
+    color: #dc2626;
+    font-weight: 500;
+    margin-top: 4px;
+    margin-left: 4px;
+  }
+}
+
+.col-half {
+  width: calc(50% - 12px);
+  @media (max-width: 768px) { width: 100%; }
+}
+.col-full { width: 100%; }
+
+.max-w-md { max-width: 480px; }
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid #f8fafc;
+}
+
+::ng-deep {
+  .badi-tab-group {
+    .mat-mdc-tab-header {
+      background: #fafbfc;
+      border-bottom: 1px solid $border;
+      padding: 0 24px;
+    }
+
+    .mat-mdc-tab {
+      font-family: 'Inter', Roboto, sans-serif !important;
+      font-size: 14px !important;
+      font-weight: 600 !important;
+      color: #64748b !important;
+      padding: 0 24px !important;
+      min-width: 120px !important;
+      letter-spacing: 0.3px !important;
+
+      &.mdc-tab--active {
+        color: $green !important;
+      }
+    }
+
+    .mdc-tab-indicator__content--underline {
+      border-color: $green !important;
+      border-top-width: 3px !important;
+      border-radius: 3px 3px 0 0 !important;
+    }
+
+    .tab-icon {
+      margin-right: 8px;
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  p-iftalabel { width: 100% !important; display: block !important; }
+  .p-iftalabel { width: 100% !important; display: block !important; }
+  .p-inputtext, .p-select, .p-multiselect, .p-textarea, .p-datepicker { width: 100% !important; }
+  .p-button:not(.p-button-outlined):not(.p-button-text):not(.p-button-secondary):not(.p-button-danger) {
+    background: $green !important; border-color: $green !important;
+    &:hover { background: #016b50 !important; border-color: #016b50 !important; }
+  }
+  .p-button.p-button-outlined:not(.p-button-secondary):not(.p-button-danger) {
+    color: $green !important; border-color: $green !important;
+    &:hover { background: #f1faf7 !important; }
+  }
 }

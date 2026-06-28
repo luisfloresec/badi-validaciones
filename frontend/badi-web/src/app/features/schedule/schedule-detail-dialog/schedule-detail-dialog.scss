@@ -6,10 +6,22 @@ $g3: #d1d5db;
 $g1: #f3f4f6;
 $border: #e5e7eb;
 
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
+  width: 100%;
+}
+
 .dialog-container {
   display: flex;
   flex-direction: column;
   height: 100%;
+  max-height: 100%;
+  overflow: hidden;
+  width: 100%;
 }
 
 .dialog-header {
@@ -19,6 +31,7 @@ $border: #e5e7eb;
   padding: 24px 28px 20px;
   border-bottom: 1px solid $g1;
   background: #fff;
+  flex-shrink: 0;
 }
 
 .header-title {
@@ -56,6 +69,7 @@ $border: #e5e7eb;
   padding: 12px 28px;
   font-size: 13px;
   font-weight: 500;
+  flex-shrink: 0;
 
   mat-icon {
     font-size: 18px;
@@ -74,11 +88,13 @@ $border: #e5e7eb;
 .dialog-content {
   padding: 24px 28px !important;
   margin: 0 !important;
-  max-height: 70vh;
+  max-height: 55vh;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 24px;
+  flex-grow: 1;
+  flex-shrink: 1;
 }
 
 /* ── Secciones ────────────────────────── */
@@ -87,6 +103,7 @@ $border: #e5e7eb;
   border: 1px solid $border;
   border-radius: 12px;
   overflow: hidden;
+  flex-shrink: 0;
 
   &.highlight-amber {
     border-color: rgba(217, 119, 6, 0.2);
@@ -223,10 +240,48 @@ $border: #e5e7eb;
   padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 24px;
+  flex-shrink: 0;
 }
 
-.full-field {
+.form-row {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  flex-shrink: 0;
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+    gap: 24px;
+  }
+}
+
+.field-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  flex-shrink: 0;
+
+  .field-hint {
+    font-size: 11.5px;
+    color: $g5;
+    margin-top: 4px;
+    margin-left: 4px;
+  }
+
+  .field-error {
+    font-size: 11px;
+    color: #dc2626;
+    font-weight: 500;
+    margin-top: 4px;
+    margin-left: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+}
+
+.col-full {
   width: 100%;
 }
 
@@ -235,6 +290,31 @@ $border: #e5e7eb;
   justify-content: flex-end;
   gap: 12px;
   padding-top: 4px;
+  flex-shrink: 0;
+}
+
+::ng-deep {
+  p-iftalabel {
+    width: 100% !important;
+    display: block !important;
+  }
+  .p-iftalabel {
+    width: 100% !important;
+    display: block !important;
+  }
+  .p-inputtext, .p-select, .p-multiselect, .p-textarea, .p-datepicker {
+    width: 100% !important;
+  }
+  .p-button:not(.p-button-outlined):not(.p-button-text):not(.p-button-secondary):not(.p-button-danger) {
+    background: $green !important;
+    border-color: $green !important;
+    &:hover { background: #016b50 !important; border-color: #016b50 !important; }
+  }
+  .p-button.p-button-outlined:not(.p-button-secondary):not(.p-button-danger) {
+    color: $green !important;
+    border-color: $green !important;
+    &:hover { background: #f1faf7 !important; }
+  }
 }
 
 .btn-spinner {
@@ -247,67 +327,72 @@ $border: #e5e7eb;
   font-size: 12px;
   color: $g5;
   padding-top: 8px;
+  flex-shrink: 0;
 }
 
 /* ── Diálogo Acciones ────────────────── */
-.dialog-actions {
+.dialog-actions-container {
   display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
+  flex-direction: column;
   padding: 16px 28px 20px;
   border-top: 1px solid $g1;
   background-color: #fafbfc;
   margin: 0 !important;
+  flex-shrink: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
 
-  .action-spacer {
-    flex: 1;
-  }
+.actions-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  flex-shrink: 0;
+}
 
-  button[mat-stroked-button] {
-    font-weight: 500 !important;
-    border-radius: 10px !important;
-    padding: 0 16px !important;
-    transition: all 0.15s ease;
-    font-size: 13px;
+.primary-actions-row {
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid $border;
 
-    mat-icon {
-      font-size: 18px;
-      width: 18px;
-      height: 18px;
-      margin-right: 4px;
-    }
-  }
-
-  /* Default stroked (Cerrar) */
-  button[mat-stroked-button]:not(.btn-action-edit):not(.btn-action-reschedule):not(.btn-action-cancel) {
-    border: 1px solid $g3 !important;
-    color: $g7 !important;
-    background: #fff !important;
-    &:hover:not([disabled]) { background: $g1 !important; border-color: #9ca3af !important; }
-  }
-
-  .btn-action-edit {
-    border: 1px solid rgba(1, 86, 65, 0.3) !important;
-    color: $green !important;
-    background: #fff !important;
-    &:hover:not([disabled]) { background: rgba(1, 86, 65, 0.04) !important; border-color: $green !important; }
-  }
-
-  .btn-action-reschedule {
-    border: 1px solid rgba(217, 119, 6, 0.3) !important;
-    color: #b45309 !important;
-    background: #fff !important;
-    &:hover:not([disabled]) { background: rgba(217, 119, 6, 0.04) !important; border-color: #d97706 !important; }
-  }
-
-  .btn-action-cancel {
-    border: 1px solid rgba(220, 38, 38, 0.25) !important;
-    color: #dc2626 !important;
-    background: #fff !important;
-    &:hover:not([disabled]) { background: rgba(220, 38, 38, 0.04) !important; border-color: #dc2626 !important; }
+  @media (max-width: 600px) {
+    justify-content: stretch;
+    flex-direction: column;
+    align-items: stretch;
   }
 }
+
+.secondary-actions-row {
+  justify-content: space-between;
+  gap: 12px;
+
+  .left-action {
+    display: flex;
+    align-items: center;
+  }
+
+  .right-action {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+  }
+
+  @media (max-width: 600px) {
+    flex-direction: column-reverse;
+    align-items: stretch;
+    .left-action, .right-action {
+      margin: 0;
+      width: 100%;
+      ::ng-deep p-button { width: 100%; }
+    }
+  }
+}
+
+  /* PrimeNG Button customization handled in ng-deep */
+
 
 /* ── States ──────────────────────────── */
 .state-container {

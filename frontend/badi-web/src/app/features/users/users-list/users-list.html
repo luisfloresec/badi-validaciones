@@ -1,24 +1,48 @@
 <div class="page-container">
 
-  <!-- Encabezado -->
-  <div class="page-header-row">
-    <div class="page-header">
-      <h1>Usuarios</h1>
-      <p>Gestión de cuentas de acceso al sistema</p>
+  <!-- Breadcrumb y Encabezado -->
+  <div class="header-group">
+    <div class="breadcrumb">
+      <a routerLink="/dashboard">
+        <mat-icon>home</mat-icon>
+        Inicio
+      </a>
+      <mat-icon class="separator">chevron_right</mat-icon>
+      <span class="current-page">Usuarios</span>
     </div>
-    <button mat-flat-button class="btn-primary" (click)="createUser()">
-      <mat-icon>person_add</mat-icon>
-      Nuevo usuario
-    </button>
+
+    <div class="page-header-row">
+      <div class="page-header">
+        <h1>Usuarios</h1>
+        <p>Administración del directorio de usuarios, roles asignados y estados de acceso al sistema</p>
+      </div>
+      <button mat-flat-button class="btn-primary" (click)="createUser()">
+        <mat-icon>person_add</mat-icon>
+        Nuevo usuario
+      </button>
+    </div>
   </div>
 
-  <!-- Loading -->
+  <!-- Barra de búsqueda fiel a las guías -->
+  <div class="search-bar" *ngIf="!loading && !error && allUsers.length > 0">
+    <p-iconfield class="search-field">
+      <p-inputicon styleClass="pi pi-search"></p-inputicon>
+      <input pInputText type="text"
+             class="w-full"
+             placeholder="Buscar por nombre o correo..."
+             [(ngModel)]="filters.search"
+             (ngModelChange)="applyFilters()" />
+      <p-inputicon *ngIf="filters.search" styleClass="pi pi-times" style="cursor: pointer;" (click)="filters.search=''; applyFilters()"></p-inputicon>
+    </p-iconfield>
+  </div>
+
+  <!-- Loading State -->
   <div class="state-container" *ngIf="loading">
     <mat-spinner diameter="40"></mat-spinner>
-    <p>Cargando usuarios...</p>
+    <p>Cargando información de usuarios...</p>
   </div>
 
-  <!-- Error -->
+  <!-- Error State -->
   <div class="state-container state-error" *ngIf="!loading && error">
     <mat-icon class="state-icon">cloud_off</mat-icon>
     <p><strong>{{ error }}</strong></p>
@@ -27,28 +51,33 @@
     </button>
   </div>
 
-  <!-- Empty -->
-  <div class="state-container" *ngIf="!loading && !error && users.length === 0">
+  <!-- Empty State -->
+  <div class="state-container" *ngIf="!loading && !error && filteredUsers.length === 0">
     <mat-icon class="state-icon">group_off</mat-icon>
-    <p><strong>No hay usuarios registrados.</strong></p>
+    <p><strong>No se encontraron usuarios que coincidan con la búsqueda.</strong></p>
   </div>
 
-  <!-- Tabla -->
-  <div class="badi-card table-card" *ngIf="!loading && !error && users.length > 0">
+  <!-- Tabla de Usuarios -->
+  <div class="badi-card table-card" *ngIf="!loading && !error && filteredUsers.length > 0">
     <div class="table-wrapper">
       <table class="org-table">
         <thead>
           <tr>
-            <th>Nombres y Apellidos</th>
-            <th>Email</th>
-            <th>Roles</th>
+            <th class="text-left">Nombres y Apellidos</th>
+            <th class="text-left">Email</th>
+            <th class="text-left">Roles</th>
             <th class="text-center">Estado</th>
+            <th class="text-center">Cambio Clave Req.</th>
+            <th class="text-center">Fecha Creación</th>
             <th class="text-center">Acciones</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let user of users">
-            <td class="col-primary">{{ user.nombres }} {{ user.apellidos }}</td>
+          <tr *ngFor="let user of paginatedUsers" [class.is-current-user]="isCurrentUser(user)">
+            <td class="col-primary">
+              {{ user.nombres }} {{ user.apellidos }}
+              <span class="me-chip" *ngIf="isCurrentUser(user)"> (Tú)</span>
+            </td>
             <td>{{ user.email }}</td>
             <td>
               <span class="chip-info" *ngFor="let rol of user.roles">{{ rol.nombre }}</span>
@@ -58,20 +87,42 @@
                 {{ user.estado }}
               </span>
             </td>
+            <td class="text-center">
+              <span class="badge-req" [class.req-yes]="user.requiereCambioPassword" [class.req-no]="!user.requiereCambioPassword">
+                {{ user.requiereCambioPassword ? 'Sí' : 'No' }}
+              </span>
+            </td>
+            <td class="text-center">{{ (user.fechaCreacion || user.fechaRegistro) ? ((user.fechaCreacion || user.fechaRegistro) | date:'dd/MM/yyyy') : '—' }}</td>
             <td class="text-center col-actions">
-              <button mat-icon-button color="primary" matTooltip="Editar usuario" (click)="editUser(user)">
+              <button mat-icon-button matTooltip="Editar usuario" (click)="editUser(user)">
                 <mat-icon>edit</mat-icon>
               </button>
+              
               <button mat-icon-button color="warn" matTooltip="Desactivar usuario" 
-                      *ngIf="user.estado === 'Activo'"
+                      *ngIf="user.estado === 'Activo' && !isCurrentUser(user)"
                       (click)="deactivateUser(user)">
                 <mat-icon>block</mat-icon>
+              </button>
+
+              <button mat-icon-button color="primary" matTooltip="Reactivar usuario" 
+                      *ngIf="user.estado === 'Inactivo'"
+                      (click)="activateUser(user)">
+                <mat-icon>restore</mat-icon>
               </button>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
+
+    <!-- Paginador Angular Material -->
+    <mat-paginator [length]="totalItems"
+                   [pageSize]="pageSize"
+                   [pageIndex]="pageIndex"
+                   [pageSizeOptions]="[5, 10, 25, 50]"
+                   (page)="onPageChange($event)"
+                   showFirstLastButtons>
+    </mat-paginator>
   </div>
 
 </div>

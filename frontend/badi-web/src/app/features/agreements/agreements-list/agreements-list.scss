@@ -9,15 +9,68 @@ $border: #e5e7eb;
 
 /* ── Breadcrumb & Navigation ───────── */
 .breadcrumb {
-  display: flex; align-items: center; gap: 6px; font-size: 13px; color: $g5; margin-bottom: 0;
-  a { color: $green; font-weight: 500; cursor: pointer; text-decoration: none; transition: color 0.15s; &:hover { text-decoration: underline; color: #016b50; } }
-  mat-icon { font-size: 16px; width: 16px; height: 16px; color: $g3; }
-  .current-page { color: $g7; font-weight: 500; }
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: $g5;
+  margin-bottom: 8px;
+  padding: 6px 14px;
+  background-color: $g1;
+  border: 1px solid $border;
+  border-radius: 12px;
+  width: fit-content;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+
+  a {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: $green;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: color 0.15s ease;
+    &:hover { color: #01785a; }
+    mat-icon { font-size: 16px; width: 16px; height: 16px; }
+  }
+  .separator { font-size: 16px; width: 16px; height: 16px; color: $g3; }
+  .current-page { color: $g9; font-weight: 500; }
 }
 
 .btn-secondary-text {
   color: $g7 !important; font-weight: 500;
   mat-icon { font-size: 18px; width: 18px; height: 18px; margin-right: 4px; }
+}
+
+.btn-secondary-outlined {
+  background-color: #ffffff !important;
+  color: $green !important;
+  border: 1px solid #cbd5e1 !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  border-radius: 10px !important;
+  padding: 0 18px !important;
+  height: 40px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03) !important;
+  transition: all 0.2s ease !important;
+
+  &:hover:not([disabled]) {
+    background-color: #f8fafc !important;
+    border-color: $green !important;
+    box-shadow: 0 2px 6px rgba(1, 86, 65, 0.08) !important;
+  }
+
+  mat-icon {
+    font-size: 20px !important;
+    width: 20px !important;
+    height: 20px !important;
+    margin: 0 !important;
+  }
 }
 
 .page-container {
@@ -53,29 +106,36 @@ $border: #e5e7eb;
 
 .header-actions {
   display: flex;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 12px;
 }
 
 .btn-primary {
   background-color: $green !important;
   color: #fff !important;
-  font-weight: 500 !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
   border-radius: 10px !important;
   padding: 0 20px !important;
-  height: 40px;
-  box-shadow: 0 1px 3px rgba(1, 86, 65, 0.2);
-  transition: all 0.2s ease;
+  height: 40px !important;
+  box-shadow: 0 1px 3px rgba(1, 86, 65, 0.2) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  transition: all 0.2s ease !important;
 
   &:hover:not([disabled]) {
     background-color: #016b50 !important;
-    box-shadow: 0 4px 12px rgba(1, 86, 65, 0.25);
+    box-shadow: 0 4px 12px rgba(1, 86, 65, 0.25) !important;
   }
 
   mat-icon {
-    font-size: 20px;
-    width: 20px;
-    height: 20px;
-    margin-right: 6px;
+    font-size: 20px !important;
+    width: 20px !important;
+    height: 20px !important;
+    margin: 0 !important;
   }
 }
 
@@ -227,5 +287,133 @@ $border: #e5e7eb;
   .page-header {
     flex-direction: column;
     align-items: stretch;
+    gap: 16px;
+  }
+  .header-actions {
+    width: 100%;
+    justify-content: flex-start;
+    button {
+      flex: 1;
+      justify-content: center;
+    }
+  }
+}
+
+/* ── Diseño Premium del Paginador (mat-paginator) ───────────────────────── */
+::ng-deep mat-paginator {
+  background: #fafbfc !important;
+  border-top: 1px solid #e5e7eb !important;
+  border-radius: 0 0 12px 12px !important;
+  padding: 8px 24px !important;
+  font-family: 'Inter', Roboto, "Helvetica Neue", sans-serif !important;
+
+  .mat-mdc-paginator-container {
+    padding: 0 !important;
+    justify-content: flex-end !important;
+    min-height: 52px !important;
+    flex-wrap: wrap !important;
+  }
+
+  .mat-mdc-paginator-page-size-label {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #64748b !important;
+    margin: 0 12px 0 0 !important;
+  }
+
+  /* Selector de ítems por página */
+  .mat-mdc-paginator-page-size-select {
+    width: 75px !important;
+    margin: 0 24px 0 0 !important;
+
+    .mat-mdc-text-field-wrapper {
+      background-color: #ffffff !important;
+      border: 1px solid #cbd5e1 !important;
+      border-radius: 8px !important;
+      padding: 0 12px !important;
+      height: 36px !important;
+      display: flex !important;
+      align-items: center !important;
+      box-shadow: 0 1px 2px 0 rgba(0,0,0,0.02) !important;
+      transition: all 0.2s ease !important;
+
+      &:hover {
+        border-color: #94a3b8 !important;
+      }
+    }
+
+    .mat-mdc-form-field-flex {
+      padding: 0 !important;
+      height: 36px !important;
+      align-items: center !important;
+    }
+
+    .mat-mdc-form-field-infix {
+      padding: 0 !important;
+      min-height: 36px !important;
+      display: flex !important;
+      align-items: center !important;
+    }
+
+    .mat-mdc-select-value-text {
+      font-size: 13px !important;
+      font-weight: 600 !important;
+      color: #334155 !important;
+    }
+
+    .mat-mdc-select-arrow {
+      color: #015641 !important;
+    }
+
+    .mdc-notched-outline {
+      display: none !important;
+    }
+  }
+
+  /* Rango de páginas (ej. 1 - 50 of 65) */
+  .mat-mdc-paginator-range-label {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #334155 !important;
+    margin: 0 24px 0 0 !important;
+  }
+
+  /* Botones de navegación */
+  .mat-mdc-paginator-navigation-previous,
+  .mat-mdc-paginator-navigation-next,
+  .mat-mdc-paginator-navigation-first,
+  .mat-mdc-paginator-navigation-last {
+    width: 36px !important;
+    height: 36px !important;
+    padding: 0 !important;
+    margin: 0 4px !important;
+    border-radius: 8px !important;
+    color: #64748b !important;
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    transition: all 0.2s ease !important;
+
+    svg {
+      fill: #64748b !important;
+    }
+
+    &:hover:not([disabled]) {
+      background: #f1faf7 !important;
+      border-color: #015641 !important;
+      color: #015641 !important;
+      svg {
+        fill: #015641 !important;
+      }
+    }
+
+    &[disabled] {
+      opacity: 0.4 !important;
+      background: #f8fafc !important;
+      border-color: #e2e8f0 !important;
+      cursor: not-allowed !important;
+      svg {
+        fill: #94a3b8 !important;
+      }
+    }
   }
 }

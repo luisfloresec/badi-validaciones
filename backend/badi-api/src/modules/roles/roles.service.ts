@@ -46,22 +46,48 @@ export class RolesService {
   }
 
   /**
-   * Lista todos los roles (Activos e Inactivos).
+   * Lista todos los roles (Activos e Inactivos), incluyendo usuarios asignados.
    */
-  async findAllAll(): Promise<Role[]> {
-    return this.rolesRepository.find();
+  async findAllAll(): Promise<any[]> {
+    const roles = await this.rolesRepository.find({
+      relations: { usuarioRoles: { usuario: true } },
+    });
+    return roles.map(role => ({
+      ...role,
+      usuariosAsignados: role.usuarioRoles?.length || 0,
+      usuarios: role.usuarioRoles?.map(ur => ({
+        id: ur.usuario?.id,
+        nombres: ur.usuario?.nombres,
+        apellidos: ur.usuario?.apellidos,
+        email: ur.usuario?.email,
+        estado: ur.usuario?.estado,
+      })) || []
+    }));
   }
 
   /**
-   * Busca un rol por su UUID.
+   * Busca un rol por su UUID con usuarios asignados.
    * Lanza NotFoundException si no existe.
    */
-  async findOne(id: string): Promise<Role> {
-    const role = await this.rolesRepository.findOne({ where: { id } });
+  async findOne(id: string): Promise<any> {
+    const role = await this.rolesRepository.findOne({
+      where: { id },
+      relations: { usuarioRoles: { usuario: true } },
+    });
     if (!role) {
       throw new NotFoundException(`Rol con id ${id} no encontrado.`);
     }
-    return role;
+    return {
+      ...role,
+      usuariosAsignados: role.usuarioRoles?.length || 0,
+      usuarios: role.usuarioRoles?.map(ur => ({
+        id: ur.usuario?.id,
+        nombres: ur.usuario?.nombres,
+        apellidos: ur.usuario?.apellidos,
+        email: ur.usuario?.email,
+        estado: ur.usuario?.estado,
+      })) || []
+    };
   }
 
   /**

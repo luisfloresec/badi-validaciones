@@ -1,174 +1,339 @@
-$green: #015641;
-$green-dark: #013d2f;
-$green-light: rgba(1, 86, 65, 0.08);
-$g9: #111827;
-$g7: #374151;
-$g5: #6b7280;
-$g3: #d1d5db;
-$g1: #f3f4f6;
+/* ────────────────────────────────────────
+   BADI Login — Split Panel + Original BADI Card
+   ──────────────────────────────────────── */
+$green:       #015641;
+$green-dark:  #013d2f;
+$green-muted: #749b8f; /* Button color from screenshot */
+$gold-light:  #f5e6b8;
+$white:       #ffffff;
+$black:       #1a1a1a;
+$g9:          #111827;
+$g7:          #374151;
+$g5:          #6b7280;
+$g3:          #e5e7eb;
+$g1:          #f8fafc; /* Right panel background */
 
-.login-wrapper {
+/* ═══════════════════════════════════════
+   LAYOUT — full-screen split
+   ═══════════════════════════════════════ */
+.login-split {
   display: flex;
-  align-items: center;
-  justify-content: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #f0fdf4 0%, #e8f5e9 30%, #f8fafc 70%, #f1f5f9 100%);
-  padding: 20px;
+  min-height: 100dvh;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
-.login-card {
-  width: 100%;
-  max-width: 420px;
-  background: #fff;
-  border-radius: 20px;
-  box-shadow:
-    0 4px 6px rgba(0, 0, 0, 0.04),
-    0 10px 40px rgba(1, 86, 65, 0.08);
-  padding: 48px 40px 36px;
-  border: 1px solid rgba(1, 86, 65, 0.06);
-}
-
-/* ── Header ────────────────────────── */
-.login-header {
-  text-align: center;
-  margin-bottom: 36px;
-
-  h1 {
-    margin: 16px 0 4px;
-    font-size: 28px;
-    font-weight: 700;
-    color: $green;
-    letter-spacing: 2px;
-  }
-}
-
-.login-logo {
-  width: 80px;
-  height: auto;
-  filter: drop-shadow(0 2px 8px rgba(1, 86, 65, 0.15));
-}
-
-.login-subtitle {
-  margin: 0;
-  font-size: 14px;
-  color: $g5;
-  font-weight: 400;
-  letter-spacing: 0.5px;
-}
-
-/* ── Error Banner ──────────────────── */
-.error-banner {
+/* ─── Panel izquierdo (Branding) ────── */
+.login-brand {
+  flex: 0 0 45%;
   display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 16px;
-  margin-bottom: 20px;
-  background: rgba(220, 38, 38, 0.06);
-  border: 1px solid rgba(220, 38, 38, 0.15);
-  border-radius: 12px;
-  color: #dc2626;
-  font-size: 13.5px;
-  font-weight: 500;
-  line-height: 1.4;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 60px 56px;
+  background: linear-gradient(145deg, $green 0%, $green-dark 100%);
+  color: $white;
+  position: relative;
+  overflow: hidden;
 
-  mat-icon {
-    font-size: 20px;
-    width: 20px;
-    height: 20px;
-    flex-shrink: 0;
+  /* Decoración */
+  &::before {
+    content: '';
+    position: absolute;
+    top: -100px;
+    right: -50px;
+    width: 400px;
+    height: 400px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: -50px;
+    right: -100px;
+    width: 400px;
+    height: 400px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
   }
 }
 
-/* ── Form ──────────────────────────── */
-.login-form {
+.brand-content {
+  position: relative;
+  z-index: 1;
+  max-width: 440px;
+}
+
+.brand-logo {
+  width: 200px;
+  height: auto;
+  margin-bottom: 36px;
+  filter: brightness(0) invert(1);
+}
+
+.brand-title {
+  font-size: 48px;
+  font-weight: 700;
+  line-height: 1.1;
+  margin: 0 0 16px;
+  letter-spacing: -1px;
+
+  span {
+    color: $white;
+    display: inline-block;
+  }
+}
+
+.brand-description {
+  font-size: 15px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+  max-width: 380px;
+  font-weight: 300;
+}
+
+.brand-footer {
+  position: relative;
+  z-index: 1;
+  margin-top: auto;
+  padding-top: 40px;
   display: flex;
   flex-direction: column;
   gap: 4px;
-}
-
-.full-width {
-  width: 100%;
-}
-
-.login-button {
-  width: 100%;
-  height: 48px;
-  margin-top: 8px;
-  background: $green !important;
-  color: #fff !important;
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  border-radius: 12px !important;
-  box-shadow: 0 2px 8px rgba(1, 86, 65, 0.2) !important;
-  transition: all 0.2s ease;
-
-  &:hover:not([disabled]) {
-    background: $green-dark !important;
-    box-shadow: 0 4px 16px rgba(1, 86, 65, 0.3) !important;
-    transform: translateY(-1px);
-  }
-
-  &[disabled] {
-    opacity: 0.55;
-    box-shadow: none !important;
-  }
-}
-
-.btn-spinner {
-  display: inline-block;
-
-  ::ng-deep circle {
-    stroke: #fff;
-  }
-}
-
-/* ── Footer ────────────────────────── */
-.login-footer {
-  text-align: center;
-  margin-top: 32px;
-  padding-top: 20px;
-  border-top: 1px solid $g1;
 
   span {
     font-size: 12px;
+    color: rgba(255, 255, 255, 0.5);
+  }
+}
+
+/* ─── Panel derecho (Formulario Estilo Original) ───── */
+.login-form-panel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  background: $g1; /* Very light gray/blue matching the image background */
+}
+
+/* ─── Tarjeta Blanca Central ────────── */
+.badi-style-card {
+  width: 100%;
+  max-width: 420px;
+  background: $white;
+  border-radius: 16px;
+  padding: 48px 40px;
+  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.08);
+}
+
+/* Encabezado de la Tarjeta */
+.badi-header {
+  text-align: center;
+  margin-bottom: 36px;
+
+  .badi-header-logo {
+    width: 160px;
+    height: auto;
+    margin: 0 auto 16px auto;
+  }
+
+  p {
+    font-size: 14px;
     color: $g5;
-    letter-spacing: 0.5px;
+    margin: 0;
+    font-weight: 500;
   }
 }
 
-/* ── Material overrides ────────────── */
-::ng-deep .login-form {
-  .mat-mdc-form-field-icon-prefix {
-    padding-right: 8px;
+/* ─── Formulario ─────────────────── */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
 
-    mat-icon {
+.badi-field {
+  position: relative;
+  width: 100%;
+
+  .field-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: $g5;
+    font-size: 16px;
+    z-index: 2;
+  }
+}
+
+::ng-deep {
+  .badi-input {
+    width: 100%;
+    height: 48px;
+    padding: 0 40px 0 44px !important; /* Espacio para icono izquierdo y derecho */
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    font-size: 14px;
+    color: $g9;
+    background: $white;
+    transition: all 0.2s ease;
+
+    &::placeholder {
+      color: #94a3b8;
+    }
+
+    &:focus {
+      border-color: $green;
+      box-shadow: 0 0 0 1px $green;
+      outline: none;
+    }
+  }
+
+  .badi-password-wrapper {
+    width: 100%;
+    
+    .p-password {
+      width: 100%;
+    }
+
+    .p-password-toggle-mask-btn,
+    .p-password-unmask-btn,
+    .p-password-mask-btn {
       color: $g5;
+      right: 12px;
+      position: absolute;
+
+      &:hover { color: $green; }
+    }
+  }
+
+  /* Botón Submit */
+  .badi-submit-btn {
+    width: 100%;
+    margin-top: 8px;
+    background: #027a5c !important;
+    background-color: #027a5c !important;
+    border: none !important;
+    border-radius: 8px !important;
+    height: 48px;
+    font-size: 15px;
+    font-weight: 600;
+    color: $white !important;
+    opacity: 1 !important;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(2, 122, 92, 0.3) !important;
+
+    &:hover:not(:disabled) {
+      background: #015641 !important;
+      background-color: #015641 !important;
+      opacity: 1 !important;
+      box-shadow: 0 6px 16px rgba(1, 86, 65, 0.4) !important;
+    }
+
+    &:disabled, &.p-disabled {
+      opacity: 0.7 !important;
+      cursor: not-allowed;
+      box-shadow: none !important;
+    }
+  }
+
+  /* Error message box */
+  .custom-error-box {
+    width: 100%;
+    margin-bottom: 24px;
+    background: #fef2f2;
+    border: 1px solid #fca5a5;
+    border-radius: 8px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.1);
+
+    .error-icon {
+      color: #dc2626;
       font-size: 20px;
-      width: 20px;
-      height: 20px;
+      flex-shrink: 0;
     }
-  }
 
-  .mat-mdc-form-field-icon-suffix {
-    button {
-      color: $g5;
+    .error-text {
+      color: #991b1b;
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 1.4;
+      margin: 0;
     }
   }
 }
 
-/* ── Responsive ────────────────────── */
-@media (max-width: 480px) {
-  .login-card {
-    padding: 36px 24px 28px;
-    border-radius: 16px;
+/* Info de recuperación */
+.badi-forgot-hint {
+  display: flex;
+  align-items: flex-start;
+  text-align: center;
+  gap: 6px;
+  margin-top: 4px;
+  line-height: 1.4;
+
+  .hint-icon {
+    font-size: 16px;
+    color: $black;
+    margin-top: 2px;
+    flex-shrink: 0;
   }
 
-  .login-header h1 {
-    font-size: 24px;
+  span {
+    font-size: 12px;
+    color: $g7;
+    text-align: left;
+
+    strong {
+      color: $black;
+    }
+  }
+}
+
+/* Footer de tarjeta */
+.badi-form-footer {
+  text-align: center;
+  margin-top: 36px;
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* ═══════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════ */
+@media (max-width: 900px) {
+  .login-split {
+    flex-direction: column;
   }
 
-  .login-logo {
-    width: 64px;
+  .login-brand {
+    flex: none;
+    padding: 40px 32px 32px;
+    text-align: center;
+    align-items: center;
   }
+
+  .brand-content { max-width: 100%; }
+  .brand-logo { margin: 0 auto 24px; }
+  .brand-title { font-size: 32px; }
+  .brand-description { margin: 0 auto; }
+  .brand-footer { align-items: center; padding-top: 24px; }
+
+  .login-form-panel { padding: 40px 20px; }
+  .badi-style-card { padding: 40px 24px; }
 }

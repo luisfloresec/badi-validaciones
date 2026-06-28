@@ -209,3 +209,123 @@ $divider: #f3f4f6;
     margin-top: 0;
   }
 }
+
+/* ── Diseño Premium del Paginador (mat-paginator) ───────────────────────── */
+::ng-deep mat-paginator {
+  background: #fafbfc !important;
+  border-top: 1px solid #e5e7eb !important;
+  border-radius: 0 0 12px 12px !important;
+  padding: 8px 24px !important;
+  font-family: 'Inter', Roboto, "Helvetica Neue", sans-serif !important;
+
+  .mat-mdc-paginator-container {
+    padding: 0 !important;
+    justify-content: flex-end !important;
+    min-height: 52px !important;
+    flex-wrap: wrap !important;
+  }
+
+  .mat-mdc-paginator-page-size-label {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #64748b !important;
+    margin: 0 12px 0 0 !important;
+  }
+
+  /* Selector de ítems por página */
+  .mat-mdc-paginator-page-size-select {
+    width: 75px !important;
+    margin: 0 24px 0 0 !important;
+
+    .mat-mdc-text-field-wrapper {
+      background-color: #ffffff !important;
+      border: 1px solid #cbd5e1 !important;
+      border-radius: 8px !important;
+      padding: 0 12px !important;
+      height: 36px !important;
+      display: flex !important;
+      align-items: center !important;
+      box-shadow: 0 1px 2px 0 rgba(0,0,0,0.02) !important;
+      transition: all 0.2s ease !important;
+
+      &:hover {
+        border-color: #94a3b8 !important;
+      }
+    }
+
+    .mat-mdc-form-field-flex {
+      padding: 0 !important;
+      height: 36px !important;
+      align-items: center !important;
+    }
+
+    .mat-mdc-form-field-infix {
+      padding: 0 !important;
+      min-height: 36px !important;
+      display: flex !important;
+      align-items: center !important;
+    }
+
+    .mat-mdc-select-value-text {
+      font-size: 13px !important;
+      font-weight: 600 !important;
+      color: #334155 !important;
+    }
+
+    .mat-mdc-select-arrow {
+      color: #015641 !important;
+    }
+
+    .mdc-notched-outline {
+      display: none !important;
+    }
+  }
+
+  /* Rango de páginas (ej. 1 - 50 of 65) */
+  .mat-mdc-paginator-range-label {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #334155 !important;
+    margin: 0 24px 0 0 !important;
+  }
+
+  /* Botones de navegación */
+  .mat-mdc-paginator-navigation-previous,
+  .mat-mdc-paginator-navigation-next,
+  .mat-mdc-paginator-navigation-first,
+  .mat-mdc-paginator-navigation-last {
+    width: 36px !important;
+    height: 36px !important;
+    padding: 0 !important;
+    margin: 0 4px !important;
+    border-radius: 8px !important;
+    color: #64748b !important;
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    transition: all 0.2s ease !important;
+
+    svg {
+      fill: #64748b !important;
+    }
+
+    &:hover:not([disabled]) {
+      background: #f1faf7 !important;
+      border-color: #015641 !important;
+      color: #015641 !important;
+      svg {
+        fill: #015641 !important;
+      }
+    }
+
+    &[disabled] {
+      opacity: 0.4 !important;
+      background: #f8fafc !important;
+      border-color: #e2e8f0 !important;
+      cursor: not-allowed !important;
+      svg {
+        fill: #94a3b8 !important;
+      }
+    }
+  }
+}
+

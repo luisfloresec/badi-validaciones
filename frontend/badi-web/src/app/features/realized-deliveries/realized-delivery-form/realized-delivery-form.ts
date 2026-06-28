@@ -5,10 +5,16 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatCardModule } from '@angular/material/card';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { IftaLabelModule } from 'primeng/iftalabel';
+import { InputTextModule } from 'primeng/inputtext';
+import { TextareaModule } from 'primeng/textarea';
+import { ButtonModule } from 'primeng/button';
 import { RealizedDeliveriesService } from '../realized-deliveries.service';
 import { HttpClient } from '@angular/common/http';
 
@@ -22,9 +28,15 @@ import { HttpClient } from '@angular/common/http';
     MatFormFieldModule,
     MatInputModule,
     MatIconModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
     MatProgressSpinnerModule,
     MatCardModule,
-    RouterModule
+    RouterModule,
+    IftaLabelModule,
+    InputTextModule,
+    TextareaModule,
+    ButtonModule
   ],
   templateUrl: './realized-delivery-form.html',
   styleUrls: ['./realized-delivery-form.scss']
@@ -57,7 +69,6 @@ export class RealizedDeliveryFormComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Suscribirse a los query params para reaccionar si cambian
     this.route.queryParamMap.subscribe(params => {
       this.scheduleId = params.get('scheduleId');
       if (!this.scheduleId) {
@@ -76,20 +87,19 @@ export class RealizedDeliveryFormComponent implements OnInit {
     this.scheduledDelivery = null;
     this.cdr.detectChanges();
 
-    // Load context: the scheduled delivery to prefill data and show context
     this.http.get<any>(`http://localhost:3000/schedules/${this.scheduleId}`).subscribe({
       next: (schedule) => {
         this.scheduledDelivery = schedule;
         
-        // Check state
         if (['Cancelado', 'Realizado'].includes(schedule.estado)) {
           this.error = `No se puede registrar entrega. Estado actual: ${schedule.estado}`;
         }
         
-        // Prefill date
         if (schedule.fechaProgramada) {
+          const parts = schedule.fechaProgramada.substring(0, 10).split('-');
+          const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
           this.deliveryForm.patchValue({
-            fechaRealizacion: schedule.fechaProgramada.substring(0, 10)
+            fechaRealizacion: d
           });
         }
         
@@ -104,6 +114,36 @@ export class RealizedDeliveryFormComponent implements OnInit {
     });
   }
 
+  private formatLocalDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  private normalizeDateForPayload(value: Date | string | null): string | null {
+    if (!value) return null;
+    if (typeof value === 'string') return value.slice(0, 10);
+    return this.formatLocalDate(value);
+  }
+
+  formatDisplayDate(val: any): string {
+    if (!val) return 'Seleccionar fecha';
+    let d: Date;
+    if (val instanceof Date) {
+      d = val;
+    } else if (typeof val === 'string') {
+      const parts = val.slice(0, 10).split('-');
+      d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+    } else {
+      return 'Seleccionar fecha';
+    }
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}/${month}/${year}`;
+  }
+
   onSubmit() {
     if (this.deliveryForm.invalid || !this.scheduleId) {
       this.deliveryForm.markAllAsTouched();
@@ -115,10 +155,10 @@ export class RealizedDeliveryFormComponent implements OnInit {
 
     const payload = {
       idEntregaProgramada: this.scheduleId,
-      fechaRealizacion: formValue.fechaRealizacion,
+      fechaRealizacion: this.normalizeDateForPayload(formValue.fechaRealizacion)!,
       kilosEntregados: Number(formValue.kilosEntregados),
       personasAtendidas: Number(formValue.personasAtendidas),
-      beneficiariosAtendidos: formValue.beneficiariosAtendidos ? Number(formValue.beneficiariosAtendidos) : undefined,
+      beneficiariosAtendidos: formValue.beneficiariosAtendidos !== null && formValue.beneficiariosAtendidos !== '' ? Number(formValue.beneficiariosAtendidos) : undefined,
       detalleProductos: formValue.detalleProductos,
       observaciones: formValue.observaciones
     };

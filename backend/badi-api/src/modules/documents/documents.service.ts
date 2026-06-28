@@ -133,7 +133,7 @@ export class DocumentsService {
   }
 
   async findAll(filters: DocumentFiltersDto): Promise<{ data: Document[]; total: number; page: number; limit: number }> {
-    const { search, tipoDocumentoId, entidadRelacionada, idEntidadRelacionada, estado, mostrarAnulados, page = 1, limit = 10 } = filters;
+    const { search, tipoDocumentoId, entidadRelacionada, idEntidadRelacionada, estado, mostrarAnulados, entityType, entityId, organizacionId, convenioId, entregaId, fechaDesde, fechaHasta, page = 1, limit = 10 } = filters;
     const query = this.documentRepo.createQueryBuilder('doc')
       .leftJoinAndSelect('doc.tipoDocumento', 'tipoDocumento')
       .orderBy('doc.fechaCarga', 'DESC')
@@ -141,30 +141,91 @@ export class DocumentsService {
       .take(limit);
 
     if (search) {
-      query.andWhere('(doc.titulo ILIKE :search OR doc.nombreOriginal ILIKE :search)', { search: `%${search}%` });
+      const orgs = await this.organizationRepo.createQueryBuilder('org')
+        .where('org.razonSocial ILIKE :search OR org.nombreComercial ILIKE :search', { search: `%${search}%` })
+        .getMany();
+      const orgIds = orgs.map(o => o.id);
+
+      const convs = await this.agreementRepo.createQueryBuilder('conv')
+        .leftJoin('conv.organizacion', 'orgConv')
+        .where('conv.codigoConvenio ILIKE :search OR orgConv.razonSocial ILIKE :search OR orgConv.nombreComercial ILIKE :search', { search: `%${search}%` })
+        .getMany();
+      const convIds = convs.map(c => c.id);
+
+      const entityIds = [...orgIds, ...convIds];
+
+      if (entityIds.length > 0) {
+        query.andWhere('(doc.titulo ILIKE :search OR doc.nombreOriginal ILIKE :search OR doc.observaciones ILIKE :search OR doc.descripcion ILIKE :search OR doc.idEntidadRelacionada IN (:...entityIds))', { search: `%${search}%`, entityIds });
+      } else {
+        query.andWhere('(doc.titulo ILIKE :search OR doc.nombreOriginal ILIKE :search OR doc.observaciones ILIKE :search OR doc.descripcion ILIKE :search)', { search: `%${search}%` });
+      }
     }
     if (tipoDocumentoId) {
       query.andWhere('tipoDocumento.id = :tipoDocumentoId', { tipoDocumentoId });
     }
-    if (entidadRelacionada) {
-      query.andWhere('doc.entidadRelacionada = :entidadRelacionada', { entidadRelacionada });
+    const effEntityType = entityType || entidadRelacionada;
+    if (effEntityType) {
+      query.andWhere('doc.entidadRelacionada = :effEntityType', { effEntityType });
     }
-    if (idEntidadRelacionada) {
-      query.andWhere('doc.idEntidadRelacionada = :idEntidadRelacionada', { idEntidadRelacionada });
+    const effEntityId = entityId || idEntidadRelacionada;
+    if (effEntityId) {
+      query.andWhere('doc.idEntidadRelacionada = :effEntityId', { effEntityId });
+    }
+    if (organizacionId) {
+      query.andWhere('doc.entidadRelacionada = :orgType AND doc.idEntidadRelacionada = :organizacionId', { orgType: EntityType.ORGANIZACION, organizacionId });
+    }
+    if (convenioId) {
+      query.andWhere('doc.entidadRelacionada = :convType AND doc.idEntidadRelacionada = :convenioId', { convType: EntityType.CONVENIO, convenioId });
+    }
+    if (entregaId) {
+      query.andWhere('doc.entidadRelacionada = :entType AND doc.idEntidadRelacionada = :entregaId', { entType: EntityType.ENTREGA_REALIZADA, entregaId });
+    }
+    if (fechaDesde) {
+      query.andWhere('doc.fechaCarga >= :fechaDesde', { fechaDesde: new Date(fechaDesde) });
+    }
+    if (fechaHasta) {
+      const hasta = new Date(fechaHasta);
+      hasta.setHours(23, 59, 59, 999);
+      query.andWhere('doc.fechaCarga <= :fechaHasta', { fechaHasta: hasta });
     }
     if (estado) {
       query.andWhere('doc.estado = :estado', { estado });
     } else if (!mostrarAnulados) {
-      // Si no se especifica estado y tampoco se pide mostrar anulados, excluimos los anulados
       query.andWhere('doc.estado != :estadoAnulado', { estadoAnulado: DocumentStatus.ANULADO });
     }
 
     const [data, total] = await query.getManyAndCount();
-    return { data, total, page, limit };
+
+    const enrichedData = await Promise.all(data.map(async (doc) => {
+      let entityName = '';
+      if (doc.entidadRelacionada === EntityType.ORGANIZACION && doc.idEntidadRelacionada) {
+        const org = await this.organizationRepo.findOne({ where: { id: doc.idEntidadRelacionada } });
+        if (org) entityName = org.razonSocial;
+      } else if (doc.entidadRelacionada === EntityType.CONVENIO && doc.idEntidadRelacionada) {
+        const conv = await this.agreementRepo.findOne({
+          where: { id: doc.idEntidadRelacionada },
+          relations: { organizacion: true },
+        });
+        if (conv) {
+          const codigo = conv.codigoConvenio || 'S/N';
+          const organizacion = conv.organizacion?.razonSocial || conv.organizacion?.nombreComercial || 'Organización no especificada';
+          entityName = `Convenio ${codigo} - ${organizacion}`;
+        }
+      } else if (doc.entidadRelacionada === EntityType.ENTREGA_REALIZADA && doc.idEntidadRelacionada) {
+        entityName = `Entrega (${doc.idEntidadRelacionada.slice(0, 8)})`;
+      } else {
+        entityName = 'Repositorio Global';
+      }
+      return { ...doc, entityName } as any;
+    }));
+
+    return { data: enrichedData, total, page, limit };
   }
 
   async getStats() {
     const total = await this.documentRepo.count();
+    const activos = await this.documentRepo.count({ where: { estado: DocumentStatus.ACTIVO } });
+    const anulados = await this.documentRepo.count({ where: { estado: DocumentStatus.ANULADO } });
     
     const byStatusRaw = await this.documentRepo.createQueryBuilder('doc')
       .select('doc.estado', 'estado')
@@ -183,10 +244,18 @@ export class DocumentsService {
       .select('SUM(doc.tamanoBytes)', 'totalBytes')
       .getRawOne();
 
+    const tiposDocumentales = await this.documentTypeRepo.count({ where: { estado: 'Activo' } });
+    const imagenesEvidencias = await this.documentRepo.count({ where: { extension: 'png' } }) + await this.documentRepo.count({ where: { extension: 'jpg' } }) + await this.documentRepo.count({ where: { extension: 'jpeg' } });
+
     return {
       total,
+      activos,
+      anulados,
+      tiposDocumentales,
+      imagenesEvidencias,
       byStatus: byStatusRaw.map(b => ({ estado: b.estado, count: parseInt(b.count, 10) })),
       byType: byTypeRaw.map(b => ({ tipo: b.tipo, count: parseInt(b.count, 10) })),
+      espacioUtilizado: parseInt(sizeRaw?.totalBytes || '0', 10),
       totalBytes: parseInt(sizeRaw?.totalBytes || '0', 10),
     };
   }
@@ -203,6 +272,10 @@ export class DocumentsService {
     if (dto.descripcion !== undefined) doc.descripcion = dto.descripcion;
     if (dto.fechaDocumento !== undefined) doc.fechaDocumento = dto.fechaDocumento ? new Date(dto.fechaDocumento) : null;
     if (dto.observaciones !== undefined) doc.observaciones = dto.observaciones;
+    if (dto.tipoDocumentoId) {
+      const tipoDoc = await this.documentTypeRepo.findOne({ where: { id: dto.tipoDocumentoId } });
+      if (tipoDoc) doc.tipoDocumento = tipoDoc;
+    }
     
     return this.documentRepo.save(doc);
   }
@@ -268,7 +341,6 @@ export class DocumentsService {
       const exists = await this.agreementRepo.findOne({ where: { id } });
       if (!exists) throw new NotFoundException(`Convenio con id ${id} no encontrado.`);
     } else if (entityType === EntityType.ENTREGA_REALIZADA) {
-      // TODO: Implementar cuando exista la entidad EntregaRealizada
       this.logger.warn('Validación de EntregaRealizada omitida (entidad no implementada aún).');
     }
   }

@@ -131,12 +131,13 @@ const SEED_DOCUMENT_TYPES: Omit<
     observacionesObligatorias: false,
     estado: 'Activo',
   },
+
   {
     nombre: 'Otro',
     codigo: 'otro',
     descripcion: 'Documento que no encaja en ninguna categoría anterior.',
     origenPermitido: 'AMBOS',
-    entidadesPermitidas: ['GENERAL'],
+    entidadesPermitidas: ['GENERAL', 'ORGANIZACION', 'CONVENIO', 'ENTREGA_REALIZADA'],
     requiereEntidadRelacionada: false,
     permiteCargaGeneral: true,
     permiteReemplazo: true,

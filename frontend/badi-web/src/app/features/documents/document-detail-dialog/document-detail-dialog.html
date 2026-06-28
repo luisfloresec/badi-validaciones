@@ -1,158 +1,209 @@
-<div class="d-flex justify-content-between align-items-center mb-0 pe-2">
-  <h2 mat-dialog-title class="mb-0">
-    Detalle del Documento
-  </h2>
-  <div class="dialog-actions-top">
-    <button mat-icon-button (click)="toggleEditMode()" matTooltip="Editar metadatos" *ngIf="doc.estado === 'Activo'">
-      <mat-icon>{{ isEditMode ? 'close' : 'edit' }}</mat-icon>
-    </button>
+<div class="dialog-container">
+  <div class="dialog-header">
+    <div class="header-title">
+      <mat-icon>description</mat-icon>
+      <h2 mat-dialog-title>Detalle del Documento</h2>
+    </div>
+    <p-button icon="pi pi-times" [text]="true" severity="secondary" mat-dialog-close [disabled]="isSaving" />
+  </div>
+
+  <div class="dialog-content" mat-dialog-content>
+    
+    <!-- Previsualización Controlada -->
+    <div class="preview-section" *ngIf="!isEditMode">
+      <!-- Si es imagen -->
+      <div class="image-preview-card" *ngIf="isImage(doc)">
+        <div class="spinner-overlay" *ngIf="isLoadingImage">
+          <mat-spinner diameter="40"></mat-spinner>
+        </div>
+        <img *ngIf="imageBlobUrl" [src]="imageBlobUrl" [alt]="doc.titulo" class="preview-img" (click)="viewInline()" />
+        <div class="click-hint" *ngIf="imageBlobUrl">Haz clic en la imagen para ver archivo completo</div>
+      </div>
+
+      <!-- Si no es imagen -->
+      <div class="file-preview-card" *ngIf="!isImage(doc)" (click)="viewInline()">
+        <mat-icon class="file-preview-icon">{{ getFileIcon(doc) }}</mat-icon>
+        <span class="file-preview-name">{{ doc.nombreOriginal || doc.nombreArchivo }}</span>
+        <span class="file-preview-hint">Haz clic para intentar abrir / visualizar en el navegador</span>
+      </div>
+    </div>
+
+    <!-- Modo Lectura -->
+    <div class="meta-grid" *ngIf="!isEditMode">
+      <div class="meta-item col-full">
+        <label>Título del Documento</label>
+        <span class="text-strong">{{ doc.titulo }}</span>
+      </div>
+
+      <div class="meta-item col-half">
+        <label>Tipo Documental</label>
+        <span>{{ doc.tipoDocumento?.nombre || '—' }}</span>
+      </div>
+
+      <div class="meta-item col-half">
+        <label>Archivo Original</label>
+        <span class="text-mono">{{ doc.nombreOriginal || doc.nombreArchivo }}</span>
+      </div>
+
+      <div class="meta-item col-half">
+        <label>Entidad Asociada</label>
+        <span>{{ getEntidadLabel(doc) }}</span>
+      </div>
+
+      <div class="meta-item col-half">
+        <label>Estado en Repositorio</label>
+        <span class="estado-chip" [ngClass]="doc.estado === 'Activo' ? 'estado-activa' : 'estado-inactiva'">
+          {{ doc.estado }}
+        </span>
+      </div>
+
+      <div class="meta-item col-half">
+        <label>Fecha de Carga</label>
+        <span>{{ doc.fechaCarga | date:'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+
+      <div class="meta-item col-half">
+        <label>Fecha del Documento (Físico)</label>
+        <span>{{ (doc.fechaDocumento | date:'dd/MM/yyyy') || 'No especificada' }}</span>
+      </div>
+
+      <div class="meta-item col-half">
+        <label>Tamaño del Archivo</label>
+        <span>{{ formatBytes(doc.tamanoBytes) }}</span>
+      </div>
+
+      <div class="meta-item col-half" *ngIf="doc.motivoReemplazo">
+        <label>Motivo de Reemplazo</label>
+        <span>{{ doc.motivoReemplazo }}</span>
+      </div>
+
+      <div class="meta-item col-full" *ngIf="doc.descripcion">
+        <label>Descripción</label>
+        <p class="desc-text">{{ doc.descripcion }}</p>
+      </div>
+
+      <div class="meta-item col-full">
+        <label>Observaciones</label>
+        <p class="desc-text">{{ doc.observaciones || 'Sin observaciones registradas' }}</p>
+      </div>
+    </div>
+
+    <!-- Modo Edición -->
+    <form [formGroup]="editForm" class="badi-form p-fluid" *ngIf="isEditMode">
+      <h3 class="section-subtitle">Editar Metadatos</h3>
+
+      <!-- Tipo de Documento -->
+      <div class="form-row">
+        <div class="field-container col-full">
+          <div class="special-field" [ngClass]="{'border-red-500': editForm.get('tipoDocumentoId')?.invalid && editForm.get('tipoDocumentoId')?.touched}">
+            <div class="special-field-content">
+              <span class="special-field-label">Tipo de Documento (Obligatorio)</span>
+              <div class="special-field-control">
+                <mat-form-field appearance="outline" class="w-full special-mat-field">
+                  <mat-select formControlName="tipoDocumentoId" placeholder="Seleccione el tipo documental (Obligatorio)">
+                    <mat-option *ngFor="let type of documentTypes" [value]="type.id">
+                      {{ type.nombre }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+            </div>
+          </div>
+          <small class="field-hint" *ngIf="selectedType">
+            Extensiones: .{{ selectedType.extensionesPermitidas.join(', .') }} | Máx: {{ selectedType.tamanoMaximoMb }} MB
+          </small>
+          <small class="field-error" *ngIf="editForm.get('tipoDocumentoId')?.invalid && editForm.get('tipoDocumentoId')?.touched">
+            El tipo documental es obligatorio. Debe seleccionar una opción.
+          </small>
+        </div>
+      </div>
+
+      <!-- Título -->
+      <div class="form-row">
+        <div class="field-container col-full">
+          <p-iftalabel>
+            <input pInputText formControlName="titulo" id="edit_titulo" [ngClass]="{'ng-invalid ng-dirty': editForm.get('titulo')?.invalid && editForm.get('titulo')?.touched}" />
+            <label for="edit_titulo">Título del Documento (Obligatorio)</label>
+          </p-iftalabel>
+          <small class="field-error" *ngIf="editForm.get('titulo')?.hasError('required') && editForm.get('titulo')?.touched">El título es obligatorio. Ingrese un nombre identificativo para el archivo.</small>
+          <small class="field-error" *ngIf="editForm.get('titulo')?.hasError('maxlength') && editForm.get('titulo')?.touched">Máximo 300 caracteres.</small>
+        </div>
+      </div>
+
+      <!-- Fecha del Documento -->
+      <div class="form-row">
+        <div class="field-container col-full">
+          <div class="special-field special-field-clickable" [ngClass]="{'border-red-500': editForm.get('fechaDocumento')?.invalid && editForm.get('fechaDocumento')?.touched}" (click)="editFechaDocPicker.open()">
+            <div class="special-field-content">
+              <span class="special-field-label">Fecha del Documento (Físico/Emisión) (Obligatorio)</span>
+              <div class="special-field-control datepicker-control-wrapper">
+                <span class="special-field-value">{{ formatDisplayDate(editForm.get('fechaDocumento')?.value) }}</span>
+                <mat-form-field appearance="outline" class="hidden-mat-field">
+                  <input matInput [matDatepicker]="editFechaDocPicker" formControlName="fechaDocumento" class="hidden-datepicker-input" readonly>
+                </mat-form-field>
+              </div>
+            </div>
+            <mat-datepicker-toggle matIconSuffix [for]="editFechaDocPicker" (click)="$event.stopPropagation()"></mat-datepicker-toggle>
+            <mat-datepicker #editFechaDocPicker></mat-datepicker>
+          </div>
+          <small class="field-hint">Fecha oficial de emisión o firma del documento original</small>
+          <small class="field-error" *ngIf="editForm.get('fechaDocumento')?.invalid && editForm.get('fechaDocumento')?.touched">La fecha del documento físico es obligatoria. Seleccione una fecha en el calendario.</small>
+        </div>
+      </div>
+
+      <!-- Descripción -->
+      <div class="form-row">
+        <div class="field-container col-full">
+          <p-iftalabel>
+            <textarea pTextarea formControlName="descripcion" id="edit_descripcion" rows="2"></textarea>
+            <label for="edit_descripcion">Descripción (Opcional)</label>
+          </p-iftalabel>
+        </div>
+      </div>
+
+      <!-- Observaciones -->
+      <div class="form-row">
+        <div class="field-container col-full">
+          <p-iftalabel>
+            <textarea pTextarea formControlName="observaciones" id="edit_observaciones" rows="2" [ngClass]="{'ng-invalid ng-dirty': editForm.get('observaciones')?.invalid && editForm.get('observaciones')?.touched}"></textarea>
+            <label for="edit_observaciones">Observaciones {{ selectedType?.observacionesObligatorias ? '(Obligatorio)' : '(Opcional)' }}</label>
+          </p-iftalabel>
+          <small class="field-error" *ngIf="editForm.get('observaciones')?.hasError('required') && editForm.get('observaciones')?.touched">
+            Las observaciones son obligatorias según la regla de este tipo documental. Explique el contexto o detalles del archivo.
+          </small>
+        </div>
+      </div>
+    </form>
+
+  </div>
+
+  <div class="dialog-actions" mat-dialog-actions>
+    <!-- Acciones en Modo Lectura -->
+    <div class="action-buttons-wrapper" *ngIf="!isEditMode">
+      <div class="action-buttons-left">
+        <p-button label="Cerrar" [outlined]="true" severity="secondary" mat-dialog-close />
+      </div>
+      <div class="action-buttons-right">
+        <p-button label="Anular Documento" icon="pi pi-trash" [outlined]="true" severity="danger" (onClick)="annul()" *ngIf="doc.estado === 'Activo'" />
+        <p-button label="Editar Metadatos" icon="pi pi-pencil" [outlined]="true" (onClick)="toggleEditMode()" *ngIf="doc.estado === 'Activo'" />
+        <p-button label="Reemplazar Documento" icon="pi pi-refresh" [outlined]="true" (onClick)="openReplaceDialog()" *ngIf="doc.estado === 'Activo'" />
+        <p-button label="Descargar Archivo" icon="pi pi-download" (onClick)="download()" />
+        <p-button label="Ver Archivo" icon="pi pi-eye" (onClick)="viewInline()" />
+      </div>
+    </div>
+
+    <!-- Acciones en Modo Edición -->
+    <div class="action-buttons-wrapper" *ngIf="isEditMode">
+      <div class="action-buttons-left">
+        <p-button label="Cancelar Edición" [outlined]="true" severity="secondary" (onClick)="toggleEditMode()" [disabled]="isSaving" />
+      </div>
+      <div class="action-buttons-right">
+        <p-button [label]="isSaving ? 'Guardando...' : 'Guardar Cambios'"
+                  icon="pi pi-check"
+                  (onClick)="saveMetadata()" 
+                  [disabled]="isSaving"
+                  [loading]="isSaving" />
+      </div>
+    </div>
   </div>
 </div>
-
-<mat-dialog-content>
-  <!-- Vista de Metadatos -->
-  <div *ngIf="!isEditMode" class="document-info mt-3">
-    
-    <div class="info-group">
-      <span class="info-label">Tipo Documental</span>
-      <span class="info-value">
-        <span class="badge badge-outline-primary">{{ doc.tipoDocumento.nombre }}</span>
-      </span>
-    </div>
-
-    <div class="info-group">
-      <span class="info-label">Título</span>
-      <span class="info-value fw-bold">{{ doc.titulo }}</span>
-    </div>
-
-    <div class="info-group" *ngIf="doc.descripcion">
-      <span class="info-label">Descripción</span>
-      <span class="info-value">{{ doc.descripcion }}</span>
-    </div>
-
-    <div class="row mt-3">
-      <div class="col-6">
-        <div class="info-group">
-          <span class="info-label">Archivo Original</span>
-          <span class="info-value d-flex align-items-center">
-            <mat-icon class="icon-sm me-1 text-muted">insert_drive_file</mat-icon>
-            {{ doc.nombreOriginal }}
-          </span>
-        </div>
-      </div>
-      <div class="col-6">
-        <div class="info-group">
-          <span class="info-label">Tamaño / Tipo</span>
-          <span class="info-value">{{ formatBytes(doc.tamanoBytes) }} ({{ doc.extension | uppercase }})</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="row mt-3">
-      <div class="col-6">
-        <div class="info-group">
-          <span class="info-label">Contexto</span>
-          <span class="info-value">
-            <span class="badge" [ngClass]="doc.entidadRelacionada ? 'badge-secondary' : 'badge-light'">
-              {{ doc.entidadRelacionada || 'General' }}
-            </span>
-          </span>
-        </div>
-      </div>
-      <div class="col-6">
-        <div class="info-group">
-          <span class="info-label">Estado</span>
-          <span class="info-value">
-            <span class="estado-chip" [ngClass]="{
-              'estado-activa': doc.estado === 'Activo',
-              'estado-inactiva': doc.estado !== 'Activo'
-            }">{{ doc.estado }}</span>
-          </span>
-        </div>
-      </div>
-    </div>
-
-    <div class="row mt-3">
-      <div class="col-6" *ngIf="doc.fechaDocumento">
-        <div class="info-group">
-          <span class="info-label">Fecha del Doc. Físico</span>
-          <span class="info-value">{{ doc.fechaDocumento | date:'dd/MM/yyyy' }}</span>
-        </div>
-      </div>
-      <div class="col-6">
-        <div class="info-group">
-          <span class="info-label">Fecha de Carga</span>
-          <span class="info-value">{{ doc.fechaCarga | date:'dd/MM/yyyy HH:mm' }}</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="info-group mt-3" *ngIf="doc.observaciones">
-      <span class="info-label">Observaciones</span>
-      <span class="info-value">{{ doc.observaciones }}</span>
-    </div>
-
-    <div class="info-group mt-3 text-danger" *ngIf="doc.estado === 'Reemplazado'">
-      <span class="info-label">Motivo de Reemplazo</span>
-      <span class="info-value">{{ doc.motivoReemplazo }}</span>
-    </div>
-
-    <div class="actions-panel mt-4 p-3 bg-light rounded d-flex gap-2 justify-content-center">
-      <button mat-flat-button color="primary" (click)="viewInline()">
-        <mat-icon>visibility</mat-icon> Ver Archivo
-      </button>
-      <button mat-stroked-button color="primary" (click)="download()">
-        <mat-icon>download</mat-icon> Descargar Original
-      </button>
-    </div>
-
-  </div>
-
-  <!-- Formulario de Edición -->
-  <form *ngIf="isEditMode" [formGroup]="editForm" class="badi-form mt-3">
-    <div class="alert alert-info">
-      Solo puede editar los metadatos. El archivo en sí no puede ser modificado por seguridad. Si necesita cambiar el archivo, use la función "Reemplazar".
-    </div>
-
-    <div class="mb-3">
-      <mat-form-field appearance="outline" class="w-100">
-        <mat-label>Título del Documento</mat-label>
-        <input matInput formControlName="titulo" required>
-      </mat-form-field>
-    </div>
-
-    <div class="mb-3" *ngIf="doc.tipoDocumento.requiereFechaDocumento">
-      <mat-form-field appearance="outline" class="w-100">
-        <mat-label>Fecha del Documento Físico</mat-label>
-        <input matInput type="date" formControlName="fechaDocumento">
-      </mat-form-field>
-    </div>
-
-    <div class="mb-3">
-      <mat-form-field appearance="outline" class="w-100">
-        <mat-label>Descripción</mat-label>
-        <textarea matInput formControlName="descripcion" rows="2"></textarea>
-      </mat-form-field>
-    </div>
-
-    <div class="mb-3">
-      <mat-form-field appearance="outline" class="w-100">
-        <mat-label>Observaciones</mat-label>
-        <textarea matInput formControlName="observaciones" rows="2"></textarea>
-      </mat-form-field>
-    </div>
-    
-    <div class="d-flex justify-content-end gap-2">
-      <button mat-button (click)="toggleEditMode()">Cancelar</button>
-      <button mat-flat-button color="primary" (click)="saveMetadata()" [disabled]="editForm.invalid || isSaving">Guardar Cambios</button>
-    </div>
-  </form>
-
-</mat-dialog-content>
-
-<mat-dialog-actions *ngIf="!isEditMode" class="d-flex justify-content-between w-100 px-3">
-  <div>
-    <button mat-button color="warn" (click)="annul()" *ngIf="doc.estado === 'Activo'">Anular documento</button>
-  </div>
-  <button mat-button mat-dialog-close>Cerrar</button>
-</mat-dialog-actions>

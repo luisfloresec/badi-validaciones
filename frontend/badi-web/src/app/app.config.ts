@@ -45,6 +45,12 @@ export const appConfig: ApplicationConfig = {
                     order: 'tailwind-base, primeng, tailwind-utilities'
                 }
             }
+        },
+        zIndex: {
+            modal: 1100,
+            overlay: 20000,
+            menu: 20000,
+            tooltip: 21000
         }
     })
   ]

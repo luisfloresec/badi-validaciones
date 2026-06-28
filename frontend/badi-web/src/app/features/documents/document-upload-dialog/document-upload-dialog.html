@@ -1,90 +1,128 @@
-<h2 mat-dialog-title>
-  Subir Documento
-  <span *ngIf="prefilledEntity" class="badge badge-secondary fs-6 ms-2 text-capitalize">
-    {{ prefilledEntity }}
-  </span>
-</h2>
+<div class="dialog-container">
+  <div class="dialog-header">
+    <div class="header-title">
+      <mat-icon>upload_file</mat-icon>
+      <h2 mat-dialog-title>Subir Documento al Repositorio</h2>
+    </div>
+    <p-button icon="pi pi-times" [text]="true" severity="secondary" mat-dialog-close [disabled]="isUploading" />
+  </div>
 
-<mat-dialog-content>
-  <form [formGroup]="uploadForm" class="badi-form mt-2">
-    
-    <div class="row">
-      <div class="col-md-12 mb-3">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>Tipo Documental</mat-label>
-          <mat-select formControlName="tipoDocumentoId" required>
-            <mat-option *ngFor="let type of documentTypes" [value]="type.id">
-              {{ type.nombre }} ({{ type.codigo }})
-            </mat-option>
-          </mat-select>
-          <mat-error *ngIf="uploadForm.get('tipoDocumentoId')?.hasError('required')">
-            El tipo de documento es obligatorio.
-          </mat-error>
-        </mat-form-field>
-        <small class="text-muted" *ngIf="selectedType">
-          Permitidos: {{ selectedType.extensionesPermitidas.join(', ') }} | Max: {{ selectedType.tamanoMaximoMb }} MB
-        </small>
-      </div>
+  <!-- Entidad / Contexto Fijo -->
+  <div class="state-info-banner" *ngIf="prefilledEntity && entityName">
+    <mat-icon>{{ prefilledEntity === 'ORGANIZACION' ? 'domain' : (prefilledEntity === 'CONVENIO' ? 'handshake' : 'info') }}</mat-icon>
+    <span><strong>Asociado a:</strong> {{ entityName }} ({{ prefilledEntity }})</span>
+  </div>
 
-      <div class="col-md-12 mb-3">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>Título del Documento</mat-label>
-          <input matInput formControlName="titulo" required placeholder="Ej. Convenio firmado GAD 2024">
-          <mat-error *ngIf="uploadForm.get('titulo')?.hasError('required')">El título es obligatorio.</mat-error>
-          <mat-error *ngIf="uploadForm.get('titulo')?.hasError('maxlength')">Máximo 300 caracteres.</mat-error>
-        </mat-form-field>
-      </div>
+  <div class="dialog-content" mat-dialog-content>
+    <form [formGroup]="uploadForm" class="badi-form p-fluid">
+      
+      <h3 class="section-subtitle">Datos del Archivo</h3>
 
-      <div class="col-md-12 mb-3">
-        <div class="file-drop-area" [class.has-file]="!!selectedFile">
-          <input type="file" class="file-input" (change)="onFileSelected($event)" 
-                 [accept]="selectedType ? '.' + selectedType.extensionesPermitidas.join(',.') : '*/*'">
-          
-          <div class="file-message text-center" *ngIf="!selectedFile">
-            <mat-icon class="upload-icon">cloud_upload</mat-icon>
-            <p>Haga clic o arrastre el archivo aquí</p>
+      <!-- Tipo de Documento -->
+      <div class="form-row">
+        <div class="field-container col-full">
+          <div class="special-field">
+            <div class="special-field-content">
+              <span class="special-field-label">Tipo de Documento</span>
+              <div class="special-field-control">
+                <mat-form-field appearance="outline" class="w-full special-mat-field">
+                  <mat-select formControlName="tipoDocumentoId" placeholder="Seleccione el tipo documental">
+                    <mat-option *ngFor="let type of documentTypes" [value]="type.id">
+                      {{ type.nombre }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+            </div>
           </div>
-          
-          <div class="file-selected text-center" *ngIf="selectedFile">
-            <mat-icon class="text-primary fs-1 mb-2">insert_drive_file</mat-icon>
-            <p class="mb-0 fw-bold">{{ selectedFile.name }}</p>
-            <small class="text-muted">{{ (selectedFile.size / 1024 / 1024) | number:'1.0-2' }} MB</small>
-          </div>
+          <small class="field-hint" *ngIf="selectedType">
+            Extensiones: .{{ selectedType.extensionesPermitidas.join(', .') }} | Máx: {{ selectedType.tamanoMaximoMb }} MB
+          </small>
+          <small class="field-error" *ngIf="uploadForm.get('tipoDocumentoId')?.hasError('required') && uploadForm.get('tipoDocumentoId')?.touched">
+            El tipo documental es obligatorio.
+          </small>
         </div>
       </div>
 
-      <div class="col-md-6 mb-3" *ngIf="selectedType?.requiereFechaDocumento">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>Fecha del Documento Físico</mat-label>
-          <input matInput type="date" formControlName="fechaDocumento" [required]="selectedType?.requiereFechaDocumento || false">
-        </mat-form-field>
+      <!-- Título -->
+      <div class="form-row">
+        <div class="field-container col-full">
+          <p-iftalabel>
+            <input pInputText formControlName="titulo" id="titulo" placeholder="Ej: Convenio firmado 2026" />
+            <label for="titulo">Título del Documento</label>
+          </p-iftalabel>
+          <small class="field-hint">Ingrese un nombre claro para identificar este documento</small>
+          <small class="field-error" *ngIf="uploadForm.get('titulo')?.hasError('required') && uploadForm.get('titulo')?.touched">El título es obligatorio.</small>
+          <small class="field-error" *ngIf="uploadForm.get('titulo')?.hasError('maxlength') && uploadForm.get('titulo')?.touched">Máximo 300 caracteres.</small>
+        </div>
       </div>
 
-      <div class="col-md-12 mb-3">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>Descripción</mat-label>
-          <textarea matInput formControlName="descripcion" rows="2" placeholder="Resumen opcional del contenido"></textarea>
-        </mat-form-field>
+      <!-- File input -->
+      <div class="form-row">
+        <div class="field-container col-full">
+          <label class="custom-file-label">Seleccionar Archivo</label>
+          <input type="file" #fileInput class="d-none" (change)="onFileSelected($event)" [disabled]="!selectedType" />
+          
+          <div class="custom-file-upload" (click)="selectedType ? fileInput.click() : null" [class.disabled]="!selectedType">
+            <mat-icon>{{ selectedFile ? 'task' : 'cloud_upload' }}</mat-icon>
+            <span class="file-name">{{ selectedFile ? selectedFile.name : (selectedType ? 'Haz clic para seleccionar o arrastra el archivo aquí' : 'Selecciona un tipo documental primero') }}</span>
+            <span class="file-size" *ngIf="selectedFile">({{ (selectedFile.size / 1024 / 1024).toFixed(2) }} MB)</span>
+          </div>
+          <small class="field-error" *ngIf="!selectedFile && uploadForm.touched">Debe seleccionar un archivo válido para subir.</small>
+        </div>
       </div>
 
-      <div class="col-md-12">
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label>Observaciones</mat-label>
-          <textarea matInput formControlName="observaciones" rows="2" [required]="selectedType?.observacionesObligatorias || false" placeholder="Notas de validación o detalles adicionales"></textarea>
-          <mat-error *ngIf="uploadForm.get('observaciones')?.hasError('required')">
-            Las observaciones son obligatorias para este tipo de documento.
-          </mat-error>
-        </mat-form-field>
+      <!-- Fecha del Documento -->
+      <div class="form-row">
+        <div class="field-container col-full">
+          <div class="special-field special-field-clickable" (click)="fechaDocPicker.open()">
+            <div class="special-field-content">
+              <span class="special-field-label">Fecha del Documento (Físico/Emisión)</span>
+              <div class="special-field-control datepicker-control-wrapper">
+                <span class="special-field-value">{{ formatDisplayDate(uploadForm.get('fechaDocumento')?.value) }}</span>
+                <mat-form-field appearance="outline" class="hidden-mat-field">
+                  <input matInput [matDatepicker]="fechaDocPicker" formControlName="fechaDocumento" class="hidden-datepicker-input" readonly>
+                </mat-form-field>
+              </div>
+            </div>
+            <mat-datepicker-toggle matIconSuffix [for]="fechaDocPicker" (click)="$event.stopPropagation()"></mat-datepicker-toggle>
+            <mat-datepicker #fechaDocPicker></mat-datepicker>
+          </div>
+          <small class="field-hint">Fecha oficial de emisión del documento original</small>
+        </div>
       </div>
-    </div>
-  </form>
-</mat-dialog-content>
 
-<mat-dialog-actions align="end">
-  <button mat-button mat-dialog-close [disabled]="isUploading">Cancelar</button>
-  <button mat-flat-button color="primary" (click)="onSubmit()" [disabled]="uploadForm.invalid || !selectedFile || isUploading">
-    <mat-icon *ngIf="!isUploading">cloud_upload</mat-icon>
-    <mat-spinner diameter="20" *ngIf="isUploading" class="me-2"></mat-spinner>
-    {{ isUploading ? 'Subiendo...' : 'Subir Documento' }}
-  </button>
-</mat-dialog-actions>
+      <!-- Descripción -->
+      <div class="form-row">
+        <div class="field-container col-full">
+          <p-iftalabel>
+            <textarea pTextarea formControlName="descripcion" id="descripcion" rows="2" placeholder="Detalles adicionales sobre el contenido del archivo"></textarea>
+            <label for="descripcion">Descripción (Opcional)</label>
+          </p-iftalabel>
+        </div>
+      </div>
+
+      <!-- Observaciones -->
+      <div class="form-row">
+        <div class="field-container col-full">
+          <p-iftalabel>
+            <textarea pTextarea formControlName="observaciones" id="observaciones" rows="2" placeholder="Notas internas u observaciones operativas"></textarea>
+            <label for="observaciones">Observaciones {{ selectedType?.observacionesObligatorias ? '(Obligatorio)' : '(Opcional)' }}</label>
+          </p-iftalabel>
+          <small class="field-error" *ngIf="uploadForm.get('observaciones')?.hasError('required') && uploadForm.get('observaciones')?.touched">
+            Las observaciones son obligatorias para este tipo documental.
+          </small>
+        </div>
+      </div>
+
+    </form>
+  </div>
+
+  <div class="dialog-actions" mat-dialog-actions>
+    <p-button label="Cancelar" [outlined]="true" severity="secondary" mat-dialog-close [disabled]="isUploading" />
+    <p-button [label]="isUploading ? 'Subiendo archivo...' : 'Subir Documento'"
+              (onClick)="onSubmit()" 
+              [disabled]="uploadForm.invalid || !selectedFile || isUploading"
+              [loading]="isUploading" />
+  </div>
+</div>

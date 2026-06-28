@@ -1,7 +1,11 @@
 <div class="page-container">
+  <!-- Breadcrumb -->
   <div class="breadcrumb">
-    <a routerLink="/agreements">Convenios</a>
-    <mat-icon>chevron_right</mat-icon>
+    <a routerLink="/agreements">
+      <mat-icon>handshake</mat-icon>
+      Convenios
+    </a>
+    <mat-icon class="separator">chevron_right</mat-icon>
     <span class="current-page">Tipos de Convenio</span>
   </div>
 
@@ -11,7 +15,7 @@
       <p class="subtitle">Gestión de reglas y modalidades para convenios</p>
     </div>
     <div class="header-actions">
-      <button mat-button class="btn-secondary-text mr-2" routerLink="/agreements">
+      <button mat-button class="btn-secondary-outlined" routerLink="/agreements">
         <mat-icon>arrow_back</mat-icon> Volver a convenios
       </button>
       <button mat-flat-button color="primary" class="btn-primary" (click)="openTypeForm()">

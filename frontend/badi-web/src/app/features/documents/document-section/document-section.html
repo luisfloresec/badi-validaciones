@@ -1,104 +1,107 @@
-<div class="badi-card section-card">
-  <div class="section-header-flex">
-    <div class="badi-card-header mb-0">
-      <mat-icon class="badi-card-icon">description</mat-icon>
-      <h2>Documentos asociados</h2>
+<div class="organization-section-card">
+  <div class="organization-section-header">
+    <div class="organization-section-title">
+      <mat-icon class="section-icon">{{ entityType === 'ENTREGA_REALIZADA' ? 'perm_media' : 'description' }}</mat-icon>
+      <h2>{{ entityType === 'ENTREGA_REALIZADA' ? 'Evidencias y Respaldos Gráficos' : 'Documentos asociados' }}</h2>
     </div>
-    <button mat-button class="btn-primary-text" (click)="openUploadDialog()" [disabled]="readonly || loading">
-      <mat-icon>attach_file</mat-icon> Asociar documento
-    </button>
+    <div class="organization-section-action" *ngIf="!readonly">
+      <button class="organization-action-button" (click)="openUploadDialog()">
+        <mat-icon>add</mat-icon>
+        <span>{{ entityType === 'ENTREGA_REALIZADA' ? 'Subir Evidencia' : 'Asociar documento' }}</span>
+      </button>
+    </div>
   </div>
-  
-  <div class="badi-card-body pt-0">
 
-    <div *ngIf="loading" class="text-center py-3">
-      <mat-spinner diameter="30" class="mx-auto"></mat-spinner>
-      <small class="text-muted mt-2 d-block">Cargando documentos...</small>
+  <div class="organization-section-body">
+    <!-- Loading -->
+    <div class="state-container compact" *ngIf="loading">
+      <mat-spinner diameter="32"></mat-spinner>
+      <p>Cargando archivos adjuntos...</p>
     </div>
 
-    <div *ngIf="!loading && error" class="text-center text-danger py-3">
-      <mat-icon>error_outline</mat-icon>
-      <p class="mb-0">{{ error }}</p>
-      <button mat-button color="primary" (click)="loadDocuments()">Reintentar</button>
+    <!-- Error -->
+    <div class="state-container state-error compact" *ngIf="!loading && error">
+      <mat-icon class="state-icon">cloud_off</mat-icon>
+      <p><strong>{{ error }}</strong></p>
+      <button mat-stroked-button (click)="loadDocuments()">
+        <mat-icon>refresh</mat-icon> Reintentar
+      </button>
     </div>
 
-    <div *ngIf="!loading && !error && documents.length === 0" class="text-center py-4 empty-state">
-      <mat-icon class="text-muted fs-1 mb-2">{{ entityType === 'ENTREGA_REALIZADA' ? 'photo_camera' : 'folder_open' }}</mat-icon>
-      <p class="empty-text mb-0">
-        {{ entityType === 'ENTREGA_REALIZADA' ? 'No hay evidencias fotográficas registradas para esta entrega.' : 'No existen documentos asociados a esta entidad.' }}
-      </p>
+    <!-- Empty State -->
+    <div class="organization-empty-state" *ngIf="!loading && !error && documents.length === 0">
+      <mat-icon class="text-muted">{{ entityType === 'ENTREGA_REALIZADA' ? 'image_not_supported' : 'find_in_page' }}</mat-icon>
+      <p class="mt-2"><strong>No hay archivos adjuntos registrados.</strong></p>
+      <p class="state-hint" *ngIf="!readonly">Usa el botón superior para asociar el primer documento.</p>
     </div>
 
-    <!-- MODO GALERÍA (Para Entregas Realizadas) -->
-    <div class="gallery-mode" *ngIf="!loading && !error && documents.length > 0 && entityType === 'ENTREGA_REALIZADA'">
-      <div class="row">
-        <div class="col-md-4 col-sm-6 mb-4" *ngFor="let doc of documents">
-          <div class="gallery-card" *ngIf="isImage(doc); else nonImageCard">
-            <div class="img-wrapper" (click)="viewInline(doc)">
-              <img [src]="getImageUrl(doc)" [alt]="doc.titulo">
-              <div class="img-overlay">
-                <mat-icon>visibility</mat-icon>
-              </div>
-            </div>
-            <div class="gallery-info d-flex justify-content-between align-items-center p-2">
-              <div class="text-truncate fw-500" [title]="doc.titulo">{{ doc.titulo }}</div>
-              <button mat-icon-button class="text-success" matTooltip="Descargar" (click)="download(doc)">
-                <mat-icon>download</mat-icon>
-              </button>
-            </div>
+    <!-- Galería Gráfica (Para Entregas Realizadas / Imágenes) -->
+    <div class="evidencia-gallery" *ngIf="!loading && !error && documents.length > 0 && entityType === 'ENTREGA_REALIZADA'">
+      <div class="evidencia-card" *ngFor="let doc of documents">
+        <div class="evidencia-thumb" (click)="viewInline(doc)">
+          <div class="image-spinner" *ngIf="isImageLoading(doc)">
+            <mat-spinner diameter="24"></mat-spinner>
           </div>
-          
-          <ng-template #nonImageCard>
-            <div class="doc-card h-100 mb-0 border bg-light">
-              <div class="doc-icon">
-                <mat-icon class="text-primary">insert_drive_file</mat-icon>
-              </div>
-              <div class="doc-details">
-                <h4 class="doc-title text-truncate" [title]="doc.titulo">{{ doc.titulo }}</h4>
-                <p class="doc-meta text-muted mb-0">
-                  <span class="badge badge-outline-primary badge-sm me-2">{{ doc.tipoDocumento.nombre }}</span>
-                  <span>{{ formatBytes(doc.tamanoBytes) }}</span>
-                </p>
-              </div>
-              <div class="doc-actions d-flex flex-column gap-1">
-                <button mat-icon-button color="primary" matTooltip="Visualizar" (click)="viewInline(doc)">
-                  <mat-icon>visibility</mat-icon>
-                </button>
-                <button mat-icon-button class="text-success" matTooltip="Descargar" (click)="download(doc)">
-                  <mat-icon>download</mat-icon>
-                </button>
-              </div>
-            </div>
-          </ng-template>
+          <img *ngIf="isImage(doc) && getImageBlobUrl(doc)" [src]="getImageBlobUrl(doc)" [alt]="doc.titulo" class="thumb-img" />
+          <div class="evidencia-file-icon" *ngIf="!isImage(doc) || (!isImageLoading(doc) && !getImageBlobUrl(doc))">
+            <mat-icon [style.color]="getDocIconColor(doc)">{{ getDocIcon(doc) }}</mat-icon>
+            <span class="file-ext">.{{ doc.extension }}</span>
+          </div>
+          <div class="evidencia-overlay">
+            <mat-icon>zoom_in</mat-icon>
+          </div>
+        </div>
+        <div class="evidencia-info">
+          <span class="evidencia-title" [matTooltip]="doc.titulo">{{ doc.titulo }}</span>
+          <span class="evidencia-date">{{ doc.fechaCarga | date:'dd/MM/yyyy HH:mm' }}</span>
+          <span class="evidencia-size">{{ formatBytes(doc.tamanoBytes) }}</span>
+          <div class="evidencia-actions">
+            <button mat-icon-button color="primary" matTooltip="Ver archivo" (click)="viewInline(doc)">
+              <mat-icon>visibility</mat-icon>
+            </button>
+            <button mat-icon-button color="primary" matTooltip="Descargar archivo" (click)="download(doc)">
+              <mat-icon>download</mat-icon>
+            </button>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- MODO LISTA NORMAL (Otras entidades) -->
-    <div class="documents-grid" *ngIf="!loading && !error && documents.length > 0 && entityType !== 'ENTREGA_REALIZADA'">
-      <div class="doc-card" *ngFor="let doc of documents">
-        <div class="doc-icon">
-          <mat-icon class="text-primary">insert_drive_file</mat-icon>
+    <!-- Matriz de Cajitas Pequeñas (Para Organizaciones y Convenios) -->
+    <div class="matrix-gallery" *ngIf="!loading && !error && documents.length > 0 && entityType !== 'ENTREGA_REALIZADA'">
+      <div class="matrix-card" *ngFor="let doc of documents">
+        
+        <div class="matrix-card-header">
+          <div class="matrix-icon" [style.background-color]="getDocBgColor(doc)">
+            <mat-icon [style.color]="getDocIconColor(doc)">{{ getDocIcon(doc) }}</mat-icon>
+          </div>
+          <div class="matrix-title-area">
+            <span class="matrix-title" [matTooltip]="doc.titulo">{{ doc.titulo }}</span>
+            <span class="matrix-subtitle" [matTooltip]="doc.nombreOriginal || doc.nombreArchivo">{{ doc.nombreOriginal || doc.nombreArchivo }}</span>
+          </div>
         </div>
-        <div class="doc-details">
-          <h4 class="doc-title text-truncate" [title]="doc.titulo">{{ doc.titulo }}</h4>
-          <p class="doc-meta text-muted mb-0">
-            <span class="badge badge-outline-primary badge-sm me-2">{{ doc.tipoDocumento.nombre }}</span>
-            <span class="me-2">{{ doc.extension | uppercase }}</span>
-            <span class="me-2">&middot;</span>
-            <span class="me-2">{{ formatBytes(doc.tamanoBytes) }}</span>
-            <span class="me-2">&middot;</span>
-            <span>{{ doc.fechaCarga | date:'dd/MM/yyyy' }}</span>
-          </p>
+
+        <div class="matrix-card-meta">
+          <div class="meta-row-1">
+            <span class="matrix-chip">{{ doc.tipoDocumento?.nombre || 'General' }}</span>
+            <span class="matrix-ext">{{ doc.extension?.toUpperCase() }}</span>
+          </div>
+          <div class="meta-row-2">
+            <span class="matrix-size">{{ formatBytes(doc.tamanoBytes) }}</span>
+            <span class="meta-dot">·</span>
+            <span class="matrix-date">{{ doc.fechaCarga | date:'dd/MM/yyyy' }}</span>
+          </div>
         </div>
-        <div class="doc-actions">
-          <button mat-icon-button color="primary" matTooltip="Visualizar" (click)="viewInline(doc)">
-            <mat-icon>visibility</mat-icon>
+
+        <div class="matrix-card-actions">
+          <button mat-icon-button class="matrix-btn" matTooltip="Ver archivo en nueva pestaña" (click)="viewInline(doc)">
+            <mat-icon>open_in_new</mat-icon>
           </button>
-          <button mat-icon-button class="text-success" matTooltip="Descargar" (click)="download(doc)">
+          <button mat-icon-button class="matrix-btn" matTooltip="Descargar archivo" (click)="download(doc)">
             <mat-icon>download</mat-icon>
           </button>
         </div>
+
       </div>
     </div>
 

@@ -8,6 +8,8 @@ export interface Role {
   descripcion?: string;
   perfilAcceso: string;
   estado: string;
+  usuariosAsignados?: number;
+  usuarios?: { id: string; nombres: string; apellidos: string; email: string; estado: string; }[];
   fechaCreacion: string;
   fechaActualizacion?: string;
 }

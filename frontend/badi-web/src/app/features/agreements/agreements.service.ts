@@ -22,6 +22,7 @@ export interface Agreement {
   fechaFinalizacion?: string;
   retirosRealizados?: number;
   fechaCreacion: string;
+  fechaActualizacion?: string;
   observaciones?: string;
   estado: string;
   convenioOrigenId?: string | null;
