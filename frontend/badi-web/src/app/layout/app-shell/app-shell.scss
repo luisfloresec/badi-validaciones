@@ -29,4 +29,29 @@
   padding: 24px;
   overflow-y: auto;
   overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.app-footer {
+  margin-top: auto;
+  padding: 24px 24px 4px 24px;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+  background: transparent;
+
+  .footer-content {
+    border-top: 1px solid #e5e7eb;
+    padding-top: 16px;
+    color: #64748b;
+    font-size: 12px;
+    width: 100%;
+
+    span {
+      display: inline-block;
+      line-height: 1.5;
+    }
+  }
 }

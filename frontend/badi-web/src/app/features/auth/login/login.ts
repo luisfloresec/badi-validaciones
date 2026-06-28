@@ -7,6 +7,7 @@ import { PasswordModule } from 'primeng/password';
 import { ButtonModule } from 'primeng/button';
 import { MessageModule } from 'primeng/message';
 import { AuthService } from '../../../core/auth/auth.service';
+import { NotificationService } from '../../../shared/services/notification.service';
 
 @Component({
   selector: 'app-login',
@@ -32,6 +33,7 @@ export class LoginComponent {
     private authService: AuthService,
     private router: Router,
     private cdr: ChangeDetectorRef,
+    private notificationService: NotificationService,
   ) {
     if (this.authService.isAuthenticated()) {
       const user = this.authService.getCurrentUser();
@@ -46,6 +48,7 @@ export class LoginComponent {
   onSubmit(): void {
     if (!this.email || !this.password) {
       this.errorMessage = 'Por favor, ingrese su correo y contraseña.';
+      this.notificationService.error(this.errorMessage);
       return;
     }
 
@@ -68,9 +71,11 @@ export class LoginComponent {
           : Array.isArray(msg)
             ? msg.join('. ')
             : 'Credenciales inválidas. Por favor, verifica tu correo y contraseña.';
+        this.notificationService.error(this.errorMessage);
         this.cdr.markForCheck();
         this.cdr.detectChanges();
       },
     });
   }
 }
+

@@ -6,7 +6,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -18,6 +17,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { FluidModule } from 'primeng/fluid';
 import { AuthService, UserProfile } from '../../../core/auth/auth.service';
+import { NotificationService } from '../../../shared/services/notification.service';
 
 @Component({
   selector: 'app-profile-detail',
@@ -56,7 +56,7 @@ export class ProfileDetailComponent implements OnInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private snackBar: MatSnackBar,
+    private notificationService: NotificationService,
     private router: Router,
     private cdr: ChangeDetectorRef
   ) {
@@ -139,7 +139,7 @@ export class ProfileDetailComponent implements OnInit, OnDestroy {
         if (!this.userProfile) {
           this.error = 'No se pudo cargar la información del perfil. Verifica tu conexión al servidor.';
         }
-        this.snackBar.open('Error al cargar la información del perfil', 'Cerrar', { duration: 3000 });
+        this.notificationService.error('Error al cargar la información del perfil');
         this.cdr.detectChanges();
       }
     });
@@ -158,13 +158,13 @@ export class ProfileDetailComponent implements OnInit, OnDestroy {
     this.authService.updateProfile(this.profileForm.value).subscribe({
       next: (profile) => {
         this.userProfile = profile;
-        this.snackBar.open('Perfil actualizado correctamente', 'Cerrar', { duration: 3000 });
+        this.notificationService.success('Perfil actualizado correctamente');
         this.loadingProfile = false;
         this.cdr.detectChanges();
       },
       error: (err) => {
         const msg = err.error?.message || 'Error al actualizar perfil';
-        this.snackBar.open(msg, 'Cerrar', { duration: 4000 });
+        this.notificationService.error(msg);
         this.loadingProfile = false;
         this.cdr.detectChanges();
       }
@@ -179,7 +179,7 @@ export class ProfileDetailComponent implements OnInit, OnDestroy {
     const { currentPassword, newPassword } = this.passwordForm.value;
     this.authService.changePassword(currentPassword, newPassword).subscribe({
       next: () => {
-        this.snackBar.open('Contraseña actualizada correctamente', 'Cerrar', { duration: 3000 });
+        this.notificationService.success('Contraseña actualizada correctamente');
         this.passwordForm.reset();
         this.loadingPassword = false;
         this.cdr.detectChanges();
@@ -191,10 +191,11 @@ export class ProfileDetailComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         const msg = err.error?.message || 'Error al cambiar contraseña';
-        this.snackBar.open(msg, 'Cerrar', { duration: 4000 });
+        this.notificationService.error(msg);
         this.loadingPassword = false;
         this.cdr.detectChanges();
       }
     });
   }
 }
+

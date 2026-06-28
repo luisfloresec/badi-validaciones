@@ -608,76 +608,76 @@ body .p-datepicker-overlay {
 }
 
 /* ──────────────────────────────────────
-   BADI Snackbar Custom Styles
+   BADI Snackbar Custom & Global Styles
    ────────────────────────────────────── */
-.badi-snackbar {
-  /* Hacemos transparente el container base para evitar bloques negros */
-  --mdc-snackbar-container-color: transparent !important;
+
+.mat-mdc-snack-bar-container {
+  --mdc-snackbar-container-shape: 12px;
+  --mdc-snackbar-supporting-text-size: 14px;
+  --mdc-snackbar-supporting-text-weight: 500;
+  --mdc-snackbar-container-color: #ffffff;
   --mat-mdc-snack-bar-button-color: #015641;
-  
-  .mdc-snackbar__surface {
-    background-color: #ffffff !important;
-    border-radius: 12px !important;
-    border: 1px solid #e5e7eb !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
-    padding: 0 !important;
-    display: flex !important;
-    align-items: center !important;
+}
+
+.mat-mdc-snack-bar-container .mdc-snackbar__surface {
+  background-color: #ffffff !important;
+  border-radius: 12px !important;
+  border: 1px solid #e5e7eb !important;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.18) !important;
+  padding: 0 4px !important;
+  min-height: 42px !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.mat-mdc-snack-bar-container .mat-mdc-snack-bar-label {
+  font-family: 'Inter', Roboto, sans-serif !important;
+  font-size: 13.5px !important;
+  font-weight: 500 !important;
+  line-height: 1.4 !important;
+  color: #111827 !important;
+  padding: 10px 16px !important;
+}
+
+.mat-mdc-snack-bar-container .mat-mdc-button,
+.mat-mdc-snack-bar-container .mat-mdc-snack-bar-action {
+  font-weight: 700 !important;
+  border-radius: 8px !important;
+  color: var(--mat-mdc-snack-bar-button-color, #015641) !important;
+  background-color: transparent !important;
+  letter-spacing: 0.02em !important;
+  transition: background-color 0.2s ease !important;
+
+  .mat-mdc-button-persistent-ripple,
+  .mat-mdc-button-ripple,
+  .mat-mdc-button-touch-target {
+    display: none !important;
   }
 
-  .mat-mdc-snack-bar-label {
-    padding: 14px 16px !important;
-    font-family: 'Inter', Roboto, sans-serif !important;
-    font-size: 14px !important;
-    font-weight: 500 !important;
-    color: #111827 !important;
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.05) !important;
   }
-
-  .mat-mdc-snack-bar-actions {
-    padding-right: 8px !important;
-  }
-
-  .mat-mdc-snack-bar-action {
-    color: var(--mat-mdc-snack-bar-button-color) !important;
-    background-color: transparent !important;
-    font-weight: 600 !important;
-    letter-spacing: 0.02em !important;
-    border-radius: 6px !important;
-    transition: background-color 0.2s ease !important;
-
-    /* Desactivar ripples nativos de MDC que causan el bloque sólido oscuro al hacer hover */
-    .mat-mdc-button-persistent-ripple,
-    .mat-mdc-button-ripple,
-    .mat-mdc-button-touch-target {
-      display: none !important;
-    }
-
-    /* Hover manual limpio */
-    &:hover {
-      background-color: rgba(0, 0, 0, 0.05) !important;
-    }
-
-    &:active {
-      background-color: rgba(0, 0, 0, 0.1) !important;
-    }
+  &:active {
+    background-color: rgba(0, 0, 0, 0.1) !important;
   }
 }
 
-.badi-snackbar-warning {
+/* Tipos de Snackbar (Nuevos y Heredados) */
+.success-snackbar, .badi-snackbar-success {
   .mdc-snackbar__surface {
-    background-color: #fffbeb !important;
-    border-color: #fcd34d !important;
+    background: #ecfdf5 !important;
+    border: 1px solid #a7f3d0 !important;
   }
   .mat-mdc-snack-bar-label {
-    color: #92400e !important;
+    color: #065f46 !important;
   }
-  --mat-mdc-snack-bar-button-color: #92400e;
+  --mat-mdc-snack-bar-button-color: #065f46;
 }
 
-.badi-snackbar-error {
+.error-snackbar, .badi-snackbar-error {
   .mdc-snackbar__surface {
-    background-color: #fef2f2 !important;
-    border-color: #fecaca !important;
+    background: #fef2f2 !important;
+    border: 1px solid #fecaca !important;
   }
   .mat-mdc-snack-bar-label {
     color: #991b1b !important;
@@ -685,13 +685,24 @@ body .p-datepicker-overlay {
   --mat-mdc-snack-bar-button-color: #991b1b;
 }
 
-.badi-snackbar-success {
+.warning-snackbar, .badi-snackbar-warning {
   .mdc-snackbar__surface {
-    background-color: #f0fdf4 !important;
-    border-color: #bbf7d0 !important;
+    background: #fffbeb !important;
+    border: 1px solid #fde68a !important;
   }
   .mat-mdc-snack-bar-label {
-    color: #166534 !important;
+    color: #92400e !important;
   }
-  --mat-mdc-snack-bar-button-color: #166534;
+  --mat-mdc-snack-bar-button-color: #92400e;
+}
+
+.info-snackbar {
+  .mdc-snackbar__surface {
+    background: #eff6ff !important;
+    border: 1px solid #bfdbfe !important;
+  }
+  .mat-mdc-snack-bar-label {
+    color: #1e40af !important;
+  }
+  --mat-mdc-snack-bar-button-color: #1e40af;
 }
