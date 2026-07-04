@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface CreateRealizedDelivery {
@@ -52,5 +52,22 @@ export class RealizedDeliveriesService {
 
   findByOrganization(organizationId: string): Observable<RealizedDelivery[]> {
     return this.http.get<RealizedDelivery[]>(`${this.apiUrl}/by-organization/${organizationId}`);
+  }
+
+  downloadReport(id: string): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/${id}/report`, {
+      responseType: 'blob'
+    });
+  }
+
+  exportExcel(searchTerm: string, estado: string): Observable<Blob> {
+    let params = new HttpParams();
+    if (searchTerm) params = params.set('searchTerm', searchTerm);
+    if (estado && estado !== 'TODOS') params = params.set('estado', estado);
+
+    return this.http.get(`${this.apiUrl}/export`, {
+      params,
+      responseType: 'blob'
+    });
   }
 }

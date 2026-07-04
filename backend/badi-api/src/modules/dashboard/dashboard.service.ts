@@ -10,6 +10,7 @@ import { User } from '../users/entities/user.entity';
 import { AuditLog } from '../audit/entities/audit-log.entity';
 import { EntityType } from '../documents/enums/entity-type.enum';
 import { DocumentStatus } from '../documents/enums/document-status.enum';
+import { PdfGeneratorService } from '../reports/services/pdf-generator.service';
 
 @Injectable()
 export class DashboardService {
@@ -30,6 +31,7 @@ export class DashboardService {
     private readonly userRepo: Repository<User>,
     @InjectRepository(AuditLog)
     private readonly auditLogRepo: Repository<AuditLog>,
+    private readonly pdfGeneratorService: PdfGeneratorService,
   ) {}
 
   async getSummary() {
@@ -261,5 +263,71 @@ export class DashboardService {
       },
       alertas,
     };
+  }
+
+  async generateDashboardReport(): Promise<PDFKit.PDFDocument> {
+    const summary = await this.getSummary();
+
+    const doc = this.pdfGeneratorService.createDocument({
+      title: 'Reporte Gerencial - Dashboard BADI',
+    });
+
+    this.pdfGeneratorService.drawHeader(doc, {
+      title: 'Reporte Gerencial - Dashboard BADI',
+    });
+
+    this.pdfGeneratorService.drawReportInfo(doc, {
+      numeroReporte: `DB-${new Date().getFullYear()}${(new Date().getMonth()+1).toString().padStart(2, '0')}`,
+      fechaEjecucion: new Date().toLocaleDateString('es-EC'),
+      fechaGeneracion: new Date().toLocaleDateString('es-EC'),
+      usuario: 'Sistema BADI'
+    });
+
+    // 1. Resumen Ejecutivo (Indicadores Actuales)
+    this.pdfGeneratorService.drawSectionTitle(doc, 'Resumen Ejecutivo');
+    this.pdfGeneratorService.drawInstitutionalCard(doc, [
+      { label: 'Organizaciones Activas', value: summary.resumen.organizacionesActivas.toString() },
+      { label: 'Convenios Activos', value: summary.resumen.conveniosActivos.toString() },
+      { label: 'Entregas en el Mes', value: summary.resumen.entregasRealizadasMes.toString() },
+      { label: 'Kilos Entregados en el Mes', value: `${summary.resumen.kilosEntregadosMes.toFixed(2)} kg` },
+      { label: 'Documentos Activos', value: summary.resumen.documentosActivos.toString() },
+      { label: 'Usuarios Activos', value: summary.resumen.usuariosActivos.toString() }
+    ]);
+
+    // 2. Gráfico: Convenios por Estado
+    this.pdfGeneratorService.drawSectionTitle(doc, 'Convenios por Estado');
+    const conveniosHeaders = ['Estado', 'Cantidad'];
+    const conveniosRows = summary.convenios.porEstado.map(c => [
+      c.estado,
+      c.count.toString()
+    ]);
+    this.pdfGeneratorService.drawTable(doc, conveniosHeaders, conveniosRows, [200, 100]);
+
+    // 3. Gráfico: Documentos por Tipo
+    this.pdfGeneratorService.drawSectionTitle(doc, 'Documentos por Tipo');
+    const documentosHeaders = ['Tipo', 'Cantidad'];
+    const documentosRows = summary.documentos.porTipo.map(d => [
+      d.tipo,
+      d.count.toString()
+    ]);
+    this.pdfGeneratorService.drawTable(doc, documentosHeaders, documentosRows, [200, 100]);
+
+    // 4. Últimas Entregas
+    this.pdfGeneratorService.drawSectionTitle(doc, 'Últimas Entregas Registradas');
+    if (summary.entregas.ultimasEntregas.length > 0) {
+      const entregasHeaders = ['Fecha', 'Organización', 'Kilos', 'Estado'];
+      const entregasRows = summary.entregas.ultimasEntregas.map(e => [
+        e.fechaRealizacion ? new Date(e.fechaRealizacion).toLocaleDateString('es-EC') : 'S/F',
+        e.convenio?.organizacion?.razonSocial || e.convenio?.organizacion?.nombreComercial || 'Desconocida',
+        `${e.kilosEntregados} kg`,
+        e.estado
+      ]);
+      this.pdfGeneratorService.drawTable(doc, entregasHeaders, entregasRows, [80, 200, 80, 100]);
+    } else {
+      this.pdfGeneratorService.drawLongText(doc, 'No existen entregas recientes.');
+    }
+
+    this.pdfGeneratorService.finalizeDocument(doc);
+    return doc;
   }
 }

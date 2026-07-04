@@ -107,4 +107,16 @@ export class AgreementsService {
   deactivate(id: string): Observable<any> {
     return this.http.patch(`${this.apiUrl}/${id}/deactivate`, {});
   }
+
+  downloadReport(id: string): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/${id}/report`, {
+      responseType: 'blob'
+    });
+  }
+
+  exportExcel(): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/export`, {
+      responseType: 'blob'
+    });
+  }
 }

@@ -14,6 +14,12 @@ import { UpdateAgreementDto } from './dto/update-agreement.dto';
 import { CreateAgreementTypeDto } from './dto/create-agreement-type.dto';
 import { UpdateAgreementTypeDto } from './dto/update-agreement-type.dto';
 import { Not } from 'typeorm';
+import { PdfGeneratorService } from '../reports/services/pdf-generator.service';
+import { ExcelGeneratorService } from '../reports/services/excel-generator.service';
+import { DocumentsService } from '../documents/documents.service';
+import { EntityType } from '../documents/enums/entity-type.enum';
+import { DocumentStatus } from '../documents/enums/document-status.enum';
+import * as ExcelJS from 'exceljs';
 
 @Injectable()
 export class AgreementsService implements OnModuleInit {
@@ -24,6 +30,9 @@ export class AgreementsService implements OnModuleInit {
     private readonly agreementTypesRepository: Repository<AgreementType>,
     @InjectRepository(Organization)
     private readonly organizationsRepository: Repository<Organization>,
+    private readonly pdfGeneratorService: PdfGeneratorService,
+    private readonly excelGeneratorService: ExcelGeneratorService,
+    private readonly documentsService: DocumentsService,
   ) {}
 
   async onModuleInit() {
@@ -171,6 +180,81 @@ export class AgreementsService implements OnModuleInit {
       throw new NotFoundException('Convenio no encontrado');
     }
     return agreement;
+  }
+
+  async generateReport(id: string): Promise<PDFKit.PDFDocument> {
+    const agreement = await this.findOne(id);
+    const organizacion = agreement.organizacion;
+
+    // Inicializar PDF
+    const doc = this.pdfGeneratorService.createDocument({
+      title: 'Reporte de Convenio',
+    });
+
+    this.pdfGeneratorService.drawHeader(doc, {
+      title: 'Reporte de Convenio',
+    });
+
+    // --- Información del Reporte ---
+    this.pdfGeneratorService.drawReportInfo(doc, {
+      numeroReporte: agreement.codigoConvenio || 'S/N',
+      fechaEjecucion: agreement.fechaInicio ? agreement.fechaInicio.toString() : 'No iniciada',
+      fechaGeneracion: new Date().toLocaleDateString('es-EC'),
+      usuario: 'Sistema BADI'
+    });
+
+    // --- Datos Generales ---
+    this.pdfGeneratorService.drawSectionTitle(doc, 'Datos Generales');
+    this.pdfGeneratorService.drawInstitutionalCard(doc, [
+      { label: 'Organización', value: organizacion?.razonSocial || organizacion?.nombreComercial || 'Desconocida' },
+      { label: 'Estado', value: agreement.estado },
+      { label: 'Tipo de Convenio', value: agreement.tipoConvenio?.nombre || 'N/A' },
+      { label: 'Fecha de Inicio', value: agreement.fechaInicio ? agreement.fechaInicio.toString() : 'N/A' },
+      { label: 'Fecha Fin Estimada', value: agreement.fechaFinEstimada ? agreement.fechaFinEstimada.toString() : 'N/A' },
+      { label: 'Retiros Realizados', value: agreement.retirosRealizados !== null ? agreement.retirosRealizados.toString() : '0' }
+    ]);
+
+
+
+    // --- Observaciones ---
+    if (agreement.observaciones) {
+      this.pdfGeneratorService.drawSectionTitle(doc, 'Observaciones');
+      this.pdfGeneratorService.drawLongText(doc, agreement.observaciones);
+    }
+
+    this.pdfGeneratorService.finalizeDocument(doc);
+    return doc;
+  }
+
+  async exportToExcel(): Promise<ExcelJS.Workbook> {
+    const agreements = await this.findAll();
+
+    const data = agreements.map(agr => ({
+      codigo: agr.codigoConvenio || 'S/N',
+      organizacion: agr.organizacion?.razonSocial || '—',
+      tipo: agr.tipoConvenio?.nombre || '—',
+      estado: agr.estado,
+      fechaInicio: agr.fechaInicio ? new Date(agr.fechaInicio) : null,
+      fechaActivacion: agr.fechaActivacion ? new Date(agr.fechaActivacion) : null,
+      fechaFinEstimada: agr.fechaFinEstimada ? new Date(agr.fechaFinEstimada) : null,
+      retiros: (agr.retirosRealizados || 0) + (agr.tipoConvenio?.maxRetiros ? ` / ${agr.tipoConvenio.maxRetiros}` : '')
+    }));
+
+    return this.excelGeneratorService.generateExcel({
+      title: 'Listado de Convenios',
+      sheetName: 'Convenios',
+      columns: [
+        { header: 'Código', key: 'codigo', width: 20 },
+        { header: 'Organización', key: 'organizacion', width: 45 },
+        { header: 'Tipo de Convenio', key: 'tipo', width: 25 },
+        { header: 'Estado', key: 'estado', width: 15 },
+        { header: 'Fecha Inicio', key: 'fechaInicio', width: 15 },
+        { header: 'Fecha Activación', key: 'fechaActivacion', width: 15 },
+        { header: 'Fecha Fin Estimada', key: 'fechaFinEstimada', width: 15 },
+        { header: 'Retiros', key: 'retiros', width: 15 }
+      ],
+      data
+    });
   }
 
   private async checkUniqueCode(code: string, excludeId?: string) {

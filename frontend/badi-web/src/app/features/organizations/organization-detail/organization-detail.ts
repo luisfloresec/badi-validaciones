@@ -592,4 +592,61 @@ export class OrganizationDetailComponent implements OnInit {
       };
     });
   }
+
+  // ── Reportes ───────────────────────────
+
+  reportLoading = false;
+  historyLoading = false;
+
+  downloadReport(): void {
+    if (!this.detail) return;
+    this.reportLoading = true;
+    
+    this.orgService.downloadReport(this.detail.organizacion.id)
+      .pipe(finalize(() => {
+        this.reportLoading = false;
+        this.cdr.detectChanges();
+      }))
+      .subscribe({
+        next: (blob) => {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `Ficha-Organizacion-${this.detail!.organizacion.ruc || 'Generado'}.pdf`;
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+        },
+        error: () => {
+          this.snackBar.open('Error al descargar la ficha de organización', 'Cerrar', { duration: 3000 });
+        }
+      });
+  }
+
+  downloadHistoryReport(): void {
+    if (!this.detail) return;
+    this.historyLoading = true;
+    
+    this.orgService.downloadHistoryReport(this.detail.organizacion.id)
+      .pipe(finalize(() => {
+        this.historyLoading = false;
+        this.cdr.detectChanges();
+      }))
+      .subscribe({
+        next: (blob) => {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `Historial-Organizacion-${this.detail!.organizacion.ruc || 'Generado'}.pdf`;
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+        },
+        error: () => {
+          this.snackBar.open('Error al descargar el historial de organización', 'Cerrar', { duration: 3000 });
+        }
+      });
+  }
 }

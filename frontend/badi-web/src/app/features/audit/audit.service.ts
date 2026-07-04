@@ -48,4 +48,19 @@ export class AuditService {
     }
     return this.http.get<AuditResponse>(this.apiUrl, { params: httpParams });
   }
+
+  exportExcel(params?: any): Observable<Blob> {
+    let httpParams = new HttpParams();
+    if (params) {
+      Object.keys(params).forEach(key => {
+        if (params[key]) {
+          httpParams = httpParams.set(key, params[key]);
+        }
+      });
+    }
+    return this.http.get(`${this.apiUrl}/export`, {
+      params: httpParams,
+      responseType: 'blob'
+    });
+  }
 }

@@ -99,4 +99,27 @@ export class RealizedDeliveryDetailComponent implements OnInit, OnDestroy {
     };
     return map[estado] || 'estado-registrada';
   }
+
+  downloadReport(): void {
+    if (!this.delivery) return;
+    
+    this.snackBar.open('Generando reporte PDF, por favor espera...', 'Cerrar', { duration: 3000 });
+    
+    this.realizedDeliveriesService.downloadReport(this.delivery.id).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Reporte_Entrega_${this.delivery!.id.substring(0, 8)}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      },
+      error: (err) => {
+        console.error('Error al descargar el reporte', err);
+        this.snackBar.open('Error al generar el reporte PDF', 'Cerrar', { duration: 4000 });
+      }
+    });
+  }
 }

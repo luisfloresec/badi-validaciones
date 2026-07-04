@@ -19,6 +19,12 @@ import { UpdateOrganizationDto } from './dto/update-organization.dto';
 import { ReplaceRepresentativeDto } from './dto/replace-representative.dto';
 import { CreateAttendedGroupWithLeaderDto } from './dto/create-group-with-leader.dto';
 import { LocationsService } from '../locations/locations.service';
+import { PdfGeneratorService, PdfImage } from '../reports/services/pdf-generator.service';
+import { ExcelGeneratorService } from '../reports/services/excel-generator.service';
+import * as ExcelJS from 'exceljs';
+import { RealizedDelivery } from '../realized-deliveries/entities/realized-delivery.entity';
+import { DocumentsService } from '../documents/documents.service';
+import { DocumentStatus } from '../documents/enums/document-status.enum';
 
 @Injectable()
 export class OrganizationsService {
@@ -44,6 +50,12 @@ export class OrganizationsService {
     private readonly dataSource: DataSource,
 
     private readonly locationsService: LocationsService,
+
+    private readonly pdfGeneratorService: PdfGeneratorService,
+
+    private readonly excelGeneratorService: ExcelGeneratorService,
+
+    private readonly documentsService: DocumentsService,
   ) {}
 
   /**
@@ -658,5 +670,187 @@ export class OrganizationsService {
     } finally {
       await queryRunner.release();
     }
+  }
+
+  async generateReport(id: string): Promise<PDFKit.PDFDocument> {
+    const orgData = await this.getFullDetail(id);
+    const org = orgData.organizacion;
+
+    // Calcular indicadores usando repositorios
+    const agreementsRepo = this.dataSource.getRepository(Agreement);
+    const deliveriesRepo = this.dataSource.getRepository(RealizedDelivery);
+
+    const cantidadConvenios = await agreementsRepo.count({
+      where: { organizacion: { id } }
+    });
+
+    const cantidadEntregas = await deliveriesRepo.count({
+      where: { convenio: { organizacion: { id } } }
+    });
+
+    const ultimaEntrega = await deliveriesRepo.findOne({
+      where: { convenio: { organizacion: { id } } },
+      order: { fechaRealizacion: 'DESC' }
+    });
+
+    // Inicializar PDF
+    const doc = this.pdfGeneratorService.createDocument({
+      title: 'Ficha Institucional de Organización',
+    });
+
+    this.pdfGeneratorService.drawHeader(doc, {
+      title: 'Ficha Institucional de Organización',
+    });
+
+    // --- Información del Reporte ---
+    this.pdfGeneratorService.drawReportInfo(doc, {
+      numeroReporte: org.ruc || 'S/N',
+      fechaEjecucion: org.fechaRegistro ? new Date(org.fechaRegistro).toLocaleDateString('es-EC') : 'No iniciada',
+      fechaGeneracion: new Date().toLocaleDateString('es-EC'),
+      usuario: 'Sistema BADI'
+    });
+
+    // --- Datos de la Organización ---
+    this.pdfGeneratorService.drawSectionTitle(doc, 'Datos de la Organización');
+    this.pdfGeneratorService.drawInstitutionalCard(doc, [
+      { label: 'Razón Social', value: org.razonSocial || 'No especificada' },
+      { label: 'RUC', value: org.ruc || 'No especificado' },
+      { label: 'Estado', value: org.estado },
+      { label: 'Email', value: org.email || 'No especificado' },
+      { label: 'Dirección', value: org.direccion || 'No especificada' },
+      { label: 'Ciudad / Provincia', value: `${org.ciudad || 'S/C'} / ${org.provincia?.nombre || 'S/P'}` },
+      { label: 'Personas Atendidas (Base)', value: org.totalPersonasAtendidas ? org.totalPersonasAtendidas.toString() : '0' }
+    ]);
+
+    // --- Indicadores ---
+    this.pdfGeneratorService.drawSectionTitle(doc, 'Indicadores Calculados');
+    this.pdfGeneratorService.drawInstitutionalCard(doc, [
+      { label: 'Cantidad de Convenios', value: cantidadConvenios.toString() },
+      { label: 'Cantidad de Entregas Realizadas', value: cantidadEntregas.toString() },
+      { label: 'Última Entrega Registrada', value: ultimaEntrega ? new Date(ultimaEntrega.fechaRealizacion).toLocaleDateString('es-EC') : 'Ninguna' }
+    ]);
+
+    // --- Observaciones ---
+    if (org.observaciones) {
+      this.pdfGeneratorService.drawSectionTitle(doc, 'Observaciones');
+      this.pdfGeneratorService.drawLongText(doc, org.observaciones);
+    }
+
+    this.pdfGeneratorService.finalizeDocument(doc);
+    return doc;
+  }
+
+  async generateHistoryReport(id: string): Promise<PDFKit.PDFDocument> {
+    const orgData = await this.getFullDetail(id);
+    const org = orgData.organizacion;
+
+    const doc = this.pdfGeneratorService.createDocument({
+      title: 'Historial de Organización',
+    });
+
+    this.pdfGeneratorService.drawHeader(doc, {
+      title: 'Historial de Organización',
+    });
+
+    this.pdfGeneratorService.drawReportInfo(doc, {
+      numeroReporte: org.ruc || 'S/N',
+      fechaEjecucion: org.fechaRegistro ? new Date(org.fechaRegistro).toLocaleDateString('es-EC') : 'No iniciada',
+      fechaGeneracion: new Date().toLocaleDateString('es-EC'),
+      usuario: 'Sistema BADI'
+    });
+
+    // 1. Datos Generales
+    this.pdfGeneratorService.drawSectionTitle(doc, 'Datos Generales');
+    this.pdfGeneratorService.drawInstitutionalCard(doc, [
+      { label: 'Razón Social', value: org.razonSocial || 'No especificada' },
+      { label: 'RUC', value: org.ruc || 'No especificado' },
+      { label: 'Estado', value: org.estado },
+      { label: 'Email', value: org.email || 'No especificado' },
+      { label: 'Personas Atendidas', value: org.totalPersonasAtendidas ? org.totalPersonasAtendidas.toString() : '0' }
+    ]);
+
+    // 2. Convenios Registrados
+    this.pdfGeneratorService.drawSectionTitle(doc, 'Convenios Registrados');
+    if (orgData.convenios && orgData.convenios.length > 0) {
+      const headers = ['Código', 'Tipo', 'Estado', 'Activación', 'Fin Estimado', 'Retiros'];
+      const rows = orgData.convenios.map(c => [
+        c.codigoConvenio || 'S/N',
+        c.tipoConvenio?.nombre || 'N/A',
+        c.estado,
+        c.fechaActivacion ? new Date(c.fechaActivacion).toLocaleDateString('es-EC') : '—',
+        c.fechaFinEstimada ? new Date(c.fechaFinEstimada).toLocaleDateString('es-EC') : '—',
+        c.tipoConvenio?.maxRetiros ? `${c.retirosRealizados ?? 0} / ${c.tipoConvenio.maxRetiros}` : `${c.retirosRealizados ?? 0}`
+      ]);
+      const colWidths = [80, 110, 70, 75, 80, 80];
+      this.pdfGeneratorService.drawTable(doc, headers, rows, colWidths);
+    } else {
+      this.pdfGeneratorService.drawLongText(doc, 'No existen convenios registrados.');
+    }
+
+    // 3. Entregas Realizadas
+    const deliveriesRepo = this.dataSource.getRepository(RealizedDelivery);
+    const entregas = await deliveriesRepo.find({
+      where: { convenio: { organizacion: { id } } },
+      relations: { convenio: true },
+      order: { fechaRealizacion: 'DESC' }
+    });
+
+    this.pdfGeneratorService.drawSectionTitle(doc, 'Entregas Realizadas');
+    if (entregas.length > 0) {
+      const headers = ['Fecha', 'Convenio', 'Kilos', 'Estado'];
+      const rows = entregas.map(e => [
+        e.fechaRealizacion ? new Date(e.fechaRealizacion).toLocaleDateString('es-EC') : '—',
+        e.convenio?.codigoConvenio || 'S/N',
+        `${e.kilosEntregados} kg`,
+        e.estado
+      ]);
+      const colWidths = [90, 130, 90, 185];
+      this.pdfGeneratorService.drawTable(doc, headers, rows, colWidths);
+    } else {
+      this.pdfGeneratorService.drawLongText(doc, 'No existen entregas registradas.');
+    }
+
+    this.pdfGeneratorService.finalizeDocument(doc);
+    return doc;
+  }
+
+  async exportToExcel(includeInactive: boolean, searchTerm?: string): Promise<ExcelJS.Workbook> {
+    let orgs = await this.findAll(includeInactive);
+
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase().trim();
+      orgs = orgs.filter(org => 
+        (org.razonSocial && org.razonSocial.toLowerCase().includes(term)) ||
+        (org.ruc && org.ruc.toLowerCase().includes(term)) ||
+        (org.ciudad && org.ciudad.toLowerCase().includes(term))
+      );
+    }
+
+    const data = orgs.map(org => ({
+      ruc: org.ruc,
+      razonSocial: org.razonSocial,
+      tipo: org.tipoOrganizacion?.nombre || '—',
+      estado: org.estado,
+      provincia: org.provincia?.nombre || '—',
+      ciudad: org.ciudad || '—',
+      personas: org.totalPersonasAtendidas || 0,
+      registro: org.fechaRegistro ? new Date(org.fechaRegistro) : null
+    }));
+
+    return this.excelGeneratorService.generateExcel({
+      title: 'Listado de Organizaciones',
+      sheetName: 'Organizaciones',
+      columns: [
+        { header: 'RUC', key: 'ruc', width: 15 },
+        { header: 'Razón Social', key: 'razonSocial', width: 40 },
+        { header: 'Tipo', key: 'tipo', width: 20 },
+        { header: 'Estado', key: 'estado', width: 15 },
+        { header: 'Provincia', key: 'provincia', width: 20 },
+        { header: 'Ciudad', key: 'ciudad', width: 20 },
+        { header: 'Personas Atendidas', key: 'personas', width: 20 },
+        { header: 'Fecha Registro', key: 'registro', width: 20 }
+      ],
+      data
+    });
   }
 }

@@ -6,6 +6,13 @@
       <h1>Entregas Realizadas</h1>
       <p>Registro histórico de las entregas ejecutadas y confirmadas en el sistema BADI</p>
     </div>
+    <div class="header-actions">
+      <button mat-stroked-button class="btn-refresh" (click)="exportExcel()" [disabled]="isLoading || exportLoading" matTooltip="Exportar vista actual a Excel">
+        <mat-icon *ngIf="!exportLoading">table_view</mat-icon>
+        <mat-spinner *ngIf="exportLoading" diameter="20" class="inline-spinner"></mat-spinner>
+        Exportar Excel
+      </button>
+    </div>
   </div>
 
   <!-- Tarjetas de Resumen / Indicadores -->

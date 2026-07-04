@@ -268,4 +268,34 @@ export class AgreementDetailComponent implements OnInit {
     };
     return map[estado] || '';
   }
+
+  // ── Reportes ───────────────────────────
+  
+  reportLoading = false;
+
+  downloadReport(): void {
+    if (!this.agreement) return;
+    this.reportLoading = true;
+    
+    this.agreementsService.downloadReport(this.agreement.id)
+      .pipe(finalize(() => {
+        this.reportLoading = false;
+        this.cdr.detectChanges();
+      }))
+      .subscribe({
+        next: (blob) => {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `Reporte-Convenio-${this.agreement!.codigoConvenio || 'Generado'}.pdf`;
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+        },
+        error: () => {
+          this.snackBar.open('Error al descargar el reporte', 'Cerrar', { duration: 3000 });
+        }
+      });
+  }
 }

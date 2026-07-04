@@ -12,6 +12,8 @@ import { AttendedGroupVulnerability } from '../attended-groups/entities/attended
 import { Province } from '../locations/entities/province.entity';
 import { City } from '../locations/entities/city.entity';
 import { LocationsModule } from '../locations/locations.module';
+import { ReportsModule } from '../reports/reports.module';
+import { DocumentsModule } from '../documents/documents.module';
 
 @Module({
   imports: [
@@ -21,6 +23,8 @@ import { LocationsModule } from '../locations/locations.module';
       Province, City,
     ]),
     LocationsModule,
+    ReportsModule,
+    DocumentsModule,
   ],
   controllers: [OrganizationsController],
   providers: [OrganizationsService],

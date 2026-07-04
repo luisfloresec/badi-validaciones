@@ -220,4 +220,32 @@ export class OrganizationsPlaceholderComponent implements OnInit {
     };
     return map[estado] || '';
   }
+
+  exportLoading = false;
+
+  exportExcel(): void {
+    this.exportLoading = true;
+    this.cdr.detectChanges();
+
+    this.orgService.exportExcel(this.showInactive, this.searchTerm).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Organizaciones_BADI_${new Date().getTime()}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        this.exportLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error exporting excel:', err);
+        this.error = 'No se pudo exportar el listado a Excel.';
+        this.exportLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
 }

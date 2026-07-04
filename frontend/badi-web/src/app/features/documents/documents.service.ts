@@ -126,4 +126,22 @@ export class DocumentsService {
   getViewUrl(id: string): string {
     return `${this.apiUrl}/${id}/view`;
   }
+
+  exportExcel(filters: DocumentFilters): Observable<Blob> {
+    let params = new HttpParams();
+    if (filters.search) params = params.set('search', filters.search);
+    if (filters.tipoDocumentoId) params = params.set('tipoDocumentoId', filters.tipoDocumentoId);
+    if (filters.entityType) params = params.set('entityType', filters.entityType);
+    if (filters.organizacionId) params = params.set('organizacionId', filters.organizacionId);
+    if (filters.convenioId) params = params.set('convenioId', filters.convenioId);
+    if (filters.fechaDesde) params = params.set('fechaDesde', filters.fechaDesde);
+    if (filters.fechaHasta) params = params.set('fechaHasta', filters.fechaHasta);
+    if (filters.estado) params = params.set('estado', filters.estado);
+    if (filters.mostrarAnulados) params = params.set('mostrarAnulados', 'true');
+
+    return this.http.get(`${this.apiUrl}/export`, {
+      params,
+      responseType: 'blob'
+    });
+  }
 }

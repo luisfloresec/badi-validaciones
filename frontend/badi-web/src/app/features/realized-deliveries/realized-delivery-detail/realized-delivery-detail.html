@@ -40,6 +40,12 @@
           severity="secondary"
           (onClick)="goBack()"
         />
+        <p-button
+          label="Reporte PDF"
+          icon="pi pi-file-pdf"
+          severity="danger"
+          (onClick)="downloadReport()"
+        />
         <div class="action-buttons" *ngIf="authService.canEdit()">
           <p-button
             label="Asociar evidencia"

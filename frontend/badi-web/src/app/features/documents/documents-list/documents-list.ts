@@ -474,4 +474,47 @@ export class DocumentsListComponent implements OnInit, OnDestroy {
     }
     return 'Repositorio Global (General)';
   }
+
+  exportLoading = false;
+
+  exportExcel(): void {
+    this.exportLoading = true;
+    this.cdr.detectChanges();
+
+    // Reconstruir filtros de fecha al igual que en loadDocuments
+    const currentFilters: DocumentFilters = { ...this.filters };
+    if (this.fechaDesdeObj) {
+      const y = this.fechaDesdeObj.getFullYear();
+      const m = String(this.fechaDesdeObj.getMonth() + 1).padStart(2, '0');
+      const d = String(this.fechaDesdeObj.getDate()).padStart(2, '0');
+      currentFilters.fechaDesde = `${y}-${m}-${d}`;
+    }
+    if (this.fechaHastaObj) {
+      const y = this.fechaHastaObj.getFullYear();
+      const m = String(this.fechaHastaObj.getMonth() + 1).padStart(2, '0');
+      const d = String(this.fechaHastaObj.getDate()).padStart(2, '0');
+      currentFilters.fechaHasta = `${y}-${m}-${d}`;
+    }
+
+    this.documentsService.exportExcel(currentFilters).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Documentos_BADI_${new Date().getTime()}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        this.exportLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error exporting excel:', err);
+        this.snackBar.open('Error al exportar el listado a Excel', 'Cerrar', { duration: 3000 });
+        this.exportLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
 }

@@ -2,12 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AuditLog } from './entities/audit-log.entity';
+import { ExcelGeneratorService } from '../reports/services/excel-generator.service';
+import * as ExcelJS from 'exceljs';
 
 @Injectable()
 export class AuditService {
   constructor(
     @InjectRepository(AuditLog)
     private readonly auditRepository: Repository<AuditLog>,
+    private readonly excelGeneratorService: ExcelGeneratorService,
   ) {}
 
   async findAll(query: any) {
@@ -64,5 +67,33 @@ export class AuditService {
     });
 
     return { items: sanitizedItems, total };
+  }
+
+  async exportToExcel(query: any): Promise<ExcelJS.Workbook> {
+    const fetchQuery = { ...query, limit: 1000000, offset: 0 };
+    const { items } = await this.findAll(fetchQuery);
+
+    const excelData = items.map(log => ({
+      fecha: log.fechaHora ? new Date(log.fechaHora) : null,
+      usuario: log.user ? `${log.user.nombres} ${log.user.apellidos}` : 'Sistema',
+      modulo: log.modulo || '—',
+      accion: log.accion || '—',
+      entidad: log.entidad || '—',
+      resultado: log.resultado || '—'
+    }));
+
+    return this.excelGeneratorService.generateExcel({
+      title: 'Reporte de Auditoría',
+      sheetName: 'Auditoría',
+      columns: [
+        { header: 'Fecha y Hora', key: 'fecha', width: 25 },
+        { header: 'Usuario', key: 'usuario', width: 35 },
+        { header: 'Módulo', key: 'modulo', width: 25 },
+        { header: 'Acción', key: 'accion', width: 20 },
+        { header: 'Entidad Afectada', key: 'entidad', width: 30 },
+        { header: 'Resultado', key: 'resultado', width: 15 }
+      ],
+      data: excelData
+    });
   }
 }

@@ -131,6 +131,29 @@ $divider: #f3f4f6;
   mat-icon { margin-right: 6px; }
 }
 
+.btn-refresh {
+  border: 1px solid $g3 !important;
+  color: $g7 !important;
+  font-weight: 500 !important;
+  border-radius: 10px !important;
+  padding: 0 20px !important;
+  height: 40px;
+  background: #fff !important;
+  transition: all 0.2s ease;
+
+  &:hover:not([disabled]) {
+    background: $g1 !important;
+    border-color: #9ca3af !important;
+  }
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    margin-right: 6px;
+  }
+}
+
 // States
 .state-container {
   display: flex;

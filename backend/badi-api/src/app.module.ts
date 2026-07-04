@@ -24,6 +24,7 @@ import { RealizedDeliveriesModule } from './modules/realized-deliveries/realized
 import { AuditModule } from './modules/audit/audit.module';
 import { SeedModule } from './modules/seed/seed.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
+import { ReportsModule } from './modules/reports/reports.module';
 import { ClsModule } from 'nestjs-cls';
 
 @Module({
@@ -87,6 +88,8 @@ import { ClsModule } from 'nestjs-cls';
     SeedModule,
 
     DashboardModule,
+
+    ReportsModule,
   ],
   controllers: [AppController],
   providers: [

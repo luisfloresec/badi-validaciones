@@ -5,6 +5,12 @@ import { RealizedDelivery } from './entities/realized-delivery.entity';
 import { CreateRealizedDeliveryDto } from './dto/create-realized-delivery.dto';
 import { ScheduledDelivery } from '../schedules/entities/scheduled-delivery.entity';
 import { Agreement } from '../agreements/entities/agreement.entity';
+import { PdfGeneratorService, PdfImage } from '../reports/services/pdf-generator.service';
+import { ExcelGeneratorService } from '../reports/services/excel-generator.service';
+import { DocumentsService } from '../documents/documents.service';
+import { EntityType } from '../documents/enums/entity-type.enum';
+import { DocumentStatus } from '../documents/enums/document-status.enum';
+import * as ExcelJS from 'exceljs';
 
 @Injectable()
 export class RealizedDeliveriesService {
@@ -12,6 +18,9 @@ export class RealizedDeliveriesService {
     @InjectRepository(RealizedDelivery)
     private realizedDeliveryRepository: Repository<RealizedDelivery>,
     private dataSource: DataSource,
+    private pdfGeneratorService: PdfGeneratorService,
+    private excelGeneratorService: ExcelGeneratorService,
+    private documentsService: DocumentsService,
   ) {}
 
   async create(createDto: CreateRealizedDeliveryDto): Promise<RealizedDelivery> {
@@ -137,5 +146,150 @@ export class RealizedDeliveriesService {
       throw new NotFoundException(`No se encontró entrega realizada para el cronograma ${scheduleId}`);
     }
     return delivery;
+  }
+
+  async generateReport(id: string): Promise<PDFKit.PDFDocument> {
+    const delivery = await this.findOne(id);
+    const { convenio } = delivery;
+    const organizacion = convenio.organizacion;
+
+    // Buscar evidencias
+    const docs = await this.documentsService.findAll({
+      entregaId: id,
+      estado: DocumentStatus.ACTIVO,
+      limit: 100
+    } as any);
+    
+    // Filtrar solo imágenes
+    const evidencias = docs.data.filter(d => ['png', 'jpg', 'jpeg'].includes(d.extension));
+
+    // 1. Crear documento
+    const doc = this.pdfGeneratorService.createDocument({
+      title: 'Reporte de Entrega',
+    });
+
+    // 2. Encabezado institucional
+    this.pdfGeneratorService.drawHeader(doc, {
+      title: 'Reporte de Entrega'
+    });
+
+    // 3. Info del reporte (caja superior)
+    const splitId = delivery.id.split('-');
+    const reportNum = splitId[0].toUpperCase() + '-' + (splitId[1] || '0000');
+    
+    this.pdfGeneratorService.drawReportInfo(doc, {
+      numeroReporte: reportNum,
+      fechaEjecucion: delivery.fechaRealizacion?.toString(),
+      fechaGeneracion: new Date().toLocaleDateString('es-EC'),
+      usuario: 'Sistema BADI'
+    });
+
+    // 4. Información General
+    this.pdfGeneratorService.drawSectionTitle(doc, 'Información General');
+    
+    this.pdfGeneratorService.drawInstitutionalCard(doc, [
+      { label: 'Organización', value: organizacion?.razonSocial || organizacion?.nombreComercial || 'Desconocida' },
+      { label: 'Responsable', value: 'No registrado' },
+      { label: 'Estado', value: delivery.estado },
+      { label: 'Convenio Asociado', value: convenio.codigoConvenio || 'S/N' },
+      { label: 'Beneficiarios Directos', value: delivery.beneficiariosAtendidos !== null && delivery.beneficiariosAtendidos !== undefined ? delivery.beneficiariosAtendidos.toString() : 'No especificado' }
+    ]);
+
+    // 5. Productos Entregados (Tabla)
+    this.pdfGeneratorService.drawSectionTitle(doc, 'Productos Entregados');
+    
+    const headers = ['Producto', 'Cantidad', 'Unidad', 'Observaciones'];
+    // Aquí mapeamos el string detalleProductos a una fila única porque no está normalizado.
+    // En un futuro, si es JSON o relación, se generarán múltiples filas.
+    const rows = [
+      ['Variados', `${delivery.kilosEntregados}`, 'kg', delivery.detalleProductos || 'Sin detalle'],
+      ['Total de personas atendidas', `${delivery.personasAtendidas}`, 'personas', '']
+    ];
+    
+    const colWidths = [120, 80, 80, 215]; // Suman 495 (aprox ancho página - márgenes)
+    this.pdfGeneratorService.drawTable(doc, headers, rows, colWidths);
+
+    // 6. Observaciones
+    if (delivery.observaciones) {
+      this.pdfGeneratorService.drawSectionTitle(doc, 'Observaciones');
+      this.pdfGeneratorService.drawLongText(doc, delivery.observaciones);
+    }
+
+    // 7. Evidencias Fotográficas
+    this.pdfGeneratorService.drawSectionTitle(doc, 'Evidencias Fotográficas');
+    
+    const imageList: PdfImage[] = [];
+    let imgCounter = 1;
+
+    for (const evidencia of evidencias) {
+      try {
+        const streamData = await this.documentsService.getDownloadStream(evidencia.id);
+        const chunks: Buffer[] = [];
+        for await (const chunk of streamData.stream) {
+          chunks.push(Buffer.from(chunk));
+        }
+        imageList.push({
+          buffer: Buffer.concat(chunks),
+          caption: `Evidencia ${imgCounter}`
+        });
+        imgCounter++;
+      } catch (error) {
+        console.error(`Error procesando imagen ${evidencia.id}:`, error);
+      }
+    }
+
+    this.pdfGeneratorService.drawGallery(doc, imageList);
+
+    // 8. Finalizar Documento
+    this.pdfGeneratorService.finalizeDocument(doc);
+    return doc;
+  }
+
+  async exportToExcel(searchTerm?: string, estado?: string): Promise<ExcelJS.Workbook> {
+    let deliveries = await this.findAll();
+
+    if (estado && estado !== 'TODOS') {
+      deliveries = deliveries.filter(d => d.estado === estado);
+    }
+
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase().trim();
+      deliveries = deliveries.filter(d => {
+        const orgName = d.convenio?.organizacion?.razonSocial?.toLowerCase() || '';
+        const orgComercial = d.convenio?.organizacion?.nombreComercial?.toLowerCase() || '';
+        const convCode = d.convenio?.codigoConvenio?.toLowerCase() || '';
+        return orgName.includes(term) || orgComercial.includes(term) || convCode.includes(term);
+      });
+    }
+
+    const data = deliveries.map(d => ({
+      id: d.id.split('-')[0].toUpperCase(),
+      fecha: d.fechaRealizacion ? new Date(d.fechaRealizacion) : null,
+      convenio: d.convenio?.codigoConvenio || 'S/N',
+      organizacion: d.convenio?.organizacion?.razonSocial || '—',
+      estado: d.estado,
+      kilos: Number(d.kilosEntregados) || 0,
+      personas: Number(d.personasAtendidas) || 0
+    }));
+
+    return this.excelGeneratorService.generateExcel({
+      title: 'Listado de Entregas Realizadas',
+      sheetName: 'Entregas',
+      columns: [
+        { header: 'ID Entrega', key: 'id', width: 15 },
+        { header: 'Fecha Realización', key: 'fecha', width: 20 },
+        { header: 'Convenio', key: 'convenio', width: 20 },
+        { header: 'Organización', key: 'organizacion', width: 45 },
+        { header: 'Estado', key: 'estado', width: 15 },
+        { header: 'Kilos Entregados', key: 'kilos', width: 20 },
+        { header: 'Personas Atendidas', key: 'personas', width: 20 }
+      ],
+      data,
+      summaryRow: {
+        id: 'TOTALES',
+        kilos: data.reduce((acc, curr) => acc + curr.kilos, 0),
+        personas: data.reduce((acc, curr) => acc + curr.personas, 0)
+      }
+    });
   }
 }

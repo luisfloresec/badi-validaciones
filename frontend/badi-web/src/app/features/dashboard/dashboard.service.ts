@@ -58,4 +58,10 @@ export class DashboardService {
   getSummary(): Observable<DashboardSummary> {
     return this.http.get<DashboardSummary>(`${this.apiUrl}/summary`);
   }
+
+  downloadReport(): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/report`, {
+      responseType: 'blob'
+    });
+  }
 }

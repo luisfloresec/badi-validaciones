@@ -225,4 +225,40 @@ export class AuditListComponent implements OnInit {
     if (acc.includes('DESCARGAR')) return `Descarga en ${ent}`;
     return `Operación ${log.accion} en ${ent}`;
   }
+
+  exportLoading = false;
+
+  exportExcel(): void {
+    this.exportLoading = true;
+    this.cdr.detectChanges();
+
+    const params: any = {};
+    if (this.filters.search) params.search = this.filters.search;
+    if (this.filters.userId) params.userId = this.filters.userId;
+    if (this.filters.modulo) params.modulo = this.filters.modulo;
+    if (this.filters.accion) params.accion = this.filters.accion;
+    if (this.filters.fechaDesde) params.fechaDesde = this.filters.fechaDesde.toISOString();
+    if (this.filters.fechaHasta) params.fechaHasta = this.filters.fechaHasta.toISOString();
+
+    this.auditService.exportExcel(params).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Auditoria_BADI_${new Date().getTime()}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        this.exportLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error exporting excel:', err);
+        this.error = 'No se pudo exportar el listado a Excel.';
+        this.exportLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
 }

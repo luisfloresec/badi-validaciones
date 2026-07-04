@@ -7,7 +7,14 @@
       <p class="subtitle">{{ currentDateStr }} &nbsp;|&nbsp; <span class="role-badge">{{ primaryRole }}</span></p>
     </div>
     <div class="header-actions">
-      <button mat-stroked-button class="btn-refresh" (click)="loadSummary()" [disabled]="loading" matTooltip="Actualizar datos">
+      <button mat-stroked-button class="btn-refresh" (click)="exportPdf()" [disabled]="loading || exportLoading"
+        matTooltip="Exportar Reporte PDF del Dashboard">
+        <mat-icon *ngIf="!exportLoading">picture_as_pdf</mat-icon>
+        <mat-spinner *ngIf="exportLoading" diameter="20" class="inline-spinner"></mat-spinner>
+        Exportar PDF
+      </button>
+      <button mat-stroked-button class="btn-refresh" (click)="loadSummary()" [disabled]="loading"
+        matTooltip="Actualizar datos">
         <mat-icon>refresh</mat-icon>
         Actualizar
       </button>
@@ -35,7 +42,8 @@
 
     <!-- ── 1. Cards Principales (KPIs) ────────────────────────── -->
     <div class="kpi-grid">
-      <div class="kpi-card" *ngIf="isGestionSocial()" (click)="navigateToPath('/organizations')" matTooltip="Ver organizaciones">
+      <div class="kpi-card" *ngIf="isGestionSocial()" (click)="navigateToPath('/organizations')"
+        matTooltip="Ver organizaciones">
         <div class="kpi-icon-wrapper icon-green">
           <mat-icon>apartment</mat-icon>
         </div>
@@ -46,7 +54,8 @@
         </div>
       </div>
 
-      <div class="kpi-card" *ngIf="isGestionSocial()" (click)="navigateToPath('/agreements')" matTooltip="Ver convenios">
+      <div class="kpi-card" *ngIf="isGestionSocial()" (click)="navigateToPath('/agreements')"
+        matTooltip="Ver convenios">
         <div class="kpi-icon-wrapper icon-blue">
           <mat-icon>handshake</mat-icon>
         </div>
@@ -68,7 +77,8 @@
         </div>
       </div>
 
-      <div class="kpi-card" *ngIf="isGestionSocial()" (click)="navigateToPath('/realized-deliveries')" matTooltip="Ver entregas realizadas">
+      <div class="kpi-card" *ngIf="isGestionSocial()" (click)="navigateToPath('/realized-deliveries')"
+        matTooltip="Ver entregas realizadas">
         <div class="kpi-icon-wrapper icon-purple">
           <mat-icon>scale</mat-icon>
         </div>
@@ -140,7 +150,8 @@
                     <span class="estado-chip" [ngClass]="getEstadoClass(s.estado)">{{ s.estado }}</span>
                   </td>
                   <td class="text-center">
-                    <button mat-icon-button color="primary" (click)="navigateToSchedule()" matTooltip="Ver en cronograma">
+                    <button mat-icon-button color="primary" (click)="navigateToSchedule()"
+                      matTooltip="Ver en cronograma">
                       <mat-icon>visibility</mat-icon>
                     </button>
                   </td>
@@ -257,7 +268,8 @@
               </thead>
               <tbody>
                 <tr *ngIf="summary.auditoria.actividadReciente.length === 0">
-                  <td colspan="5" class="text-center empty-cell">No hay actividad reciente registrada en el sistema.</td>
+                  <td colspan="5" class="text-center empty-cell">No hay actividad reciente registrada en el sistema.
+                  </td>
                 </tr>
                 <tr *ngFor="let audit of summary.auditoria.actividadReciente">
                   <td class="col-fecha font-medium">{{ formatDateTime(audit.fechaHora) }}</td>
@@ -265,7 +277,8 @@
                   <td>{{ audit.modulo }}</td>
                   <td><span class="badge-accion">{{ audit.accion }}</span></td>
                   <td class="text-center">
-                    <span class="badge-resultado" [ngClass]="{'res-exito': audit.resultado === 'EXITO', 'res-error': audit.resultado !== 'EXITO'}">
+                    <span class="badge-resultado"
+                      [ngClass]="{'res-exito': audit.resultado === 'EXITO', 'res-error': audit.resultado !== 'EXITO'}">
                       {{ audit.resultado }}
                     </span>
                   </td>
@@ -289,7 +302,8 @@
             </div>
           </div>
           <ul class="alert-list">
-            <li *ngFor="let alerta of summary.alertas" [class.alert-zero]="alerta.count === 0" (click)="alerta.count > 0 ? navigateToPath(alerta.link) : null" [class.cursor-pointer]="alerta.count > 0">
+            <li *ngFor="let alerta of summary.alertas" [class.alert-zero]="alerta.count === 0"
+              (click)="alerta.count > 0 ? navigateToPath(alerta.link) : null" [class.cursor-pointer]="alerta.count > 0">
               <mat-icon class="alert-icon" [class.alert-icon-active]="alerta.count > 0">
                 {{ alerta.icon }}
               </mat-icon>
@@ -357,10 +371,12 @@
             </div>
           </div>
           <ul class="vencimiento-list">
-            <li *ngFor="let v of summary.convenios.porVencer" (click)="navigateToAgreement(v.id)" class="cursor-pointer">
+            <li *ngFor="let v of summary.convenios.porVencer" (click)="navigateToAgreement(v.id)"
+              class="cursor-pointer">
               <div class="venc-content">
                 <span class="venc-org">{{ v.organizacion?.razonSocial }}</span>
-                <span class="venc-cod">{{ v.codigoConvenio || 'S/N' }} &nbsp;|&nbsp; Fin: {{ formatDateOnly(v.fechaFinEstimada) }}</span>
+                <span class="venc-cod">{{ v.codigoConvenio || 'S/N' }} &nbsp;|&nbsp; Fin: {{
+                  formatDateOnly(v.fechaFinEstimada) }}</span>
               </div>
               <mat-icon class="arrow-icon">chevron_right</mat-icon>
             </li>

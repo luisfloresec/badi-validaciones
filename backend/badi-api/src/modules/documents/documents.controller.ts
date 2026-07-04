@@ -87,6 +87,18 @@ export class DocumentsController {
     return this.documentsService.findAll(filters);
   }
 
+  /** GET /documents/export — Exportar documentos a Excel */
+  @Get('export')
+  async exportExcel(@Query() filters: DocumentFiltersDto, @Res() res: Response) {
+    const workbook = await this.documentsService.exportToExcel(filters);
+    
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename="documentos.xlsx"');
+    
+    await workbook.xlsx.write(res);
+    res.end();
+  }
+
   @Get('stats')
   async getStats() {
     return this.documentsService.getStats();

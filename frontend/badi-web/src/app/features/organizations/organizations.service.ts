@@ -221,4 +221,27 @@ export class OrganizationsService {
   replaceLeader(groupId: string, payload: any): Observable<any> {
     return this.http.post(`http://localhost:3000/attended-groups/${groupId}/leaders/replace`, payload);
   }
+
+  downloadReport(id: string): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/${id}/report`, {
+      responseType: 'blob'
+    });
+  }
+
+  downloadHistoryReport(id: string): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/${id}/history`, {
+      responseType: 'blob'
+    });
+  }
+
+  exportExcel(includeInactive: boolean, searchTerm: string): Observable<Blob> {
+    let params = new HttpParams();
+    if (includeInactive) params = params.set('includeInactive', 'true');
+    if (searchTerm) params = params.set('searchTerm', searchTerm);
+
+    return this.http.get(`${this.apiUrl}/export`, {
+      params,
+      responseType: 'blob'
+    });
+  }
 }

@@ -19,6 +19,9 @@ import { DocumentFiltersDto } from './dto/document-filters.dto';
 import { EntityType } from './enums/entity-type.enum';
 import { DocumentStatus } from './enums/document-status.enum';
 import { Organization } from '../organizations/entities/organization.entity';
+import { RealizedDelivery } from '../realized-deliveries/entities/realized-delivery.entity';
+import { ExcelGeneratorService } from '../reports/services/excel-generator.service';
+import * as ExcelJS from 'exceljs';
 import { Agreement } from '../agreements/entities/agreement.entity';
 import { Readable } from 'stream';
 
@@ -36,6 +39,7 @@ export class DocumentsService {
     @InjectRepository(Agreement)
     private readonly agreementRepo: Repository<Agreement>,
     private readonly r2Storage: R2StorageService,
+    private readonly excelGeneratorService: ExcelGeneratorService,
   ) {}
 
   async upload(dto: CreateDocumentDto, file: Express.Multer.File): Promise<Document> {
@@ -120,6 +124,45 @@ export class DocumentsService {
     });
 
     return this.documentRepo.save(document);
+  }
+
+  async exportToExcel(filters: DocumentFiltersDto): Promise<ExcelJS.Workbook> {
+    const fetchFilters = { ...filters, page: 1, limit: 1000000 };
+    const { data } = await this.findAll(fetchFilters);
+
+    const excelData = data.map(doc => ({
+      titulo: doc.titulo,
+      tipo: doc.tipoDocumento?.nombre || '—',
+      entidad: (doc as any).entityName || '—',
+      fechaCarga: doc.fechaCarga ? new Date(doc.fechaCarga) : null,
+      fechaDoc: doc.fechaDocumento ? new Date(doc.fechaDocumento) : null,
+      tamano: this.formatBytes(doc.tamanoBytes),
+      estado: doc.estado
+    }));
+
+    return this.excelGeneratorService.generateExcel({
+      title: 'Reporte de Documentos',
+      sheetName: 'Documentos',
+      columns: [
+        { header: 'Título/Archivo', key: 'titulo', width: 40 },
+        { header: 'Tipo', key: 'tipo', width: 25 },
+        { header: 'Entidad Relacionada', key: 'entidad', width: 40 },
+        { header: 'Fecha de Carga', key: 'fechaCarga', width: 20 },
+        { header: 'Fecha Documento', key: 'fechaDoc', width: 20 },
+        { header: 'Tamaño', key: 'tamano', width: 15 },
+        { header: 'Estado', key: 'estado', width: 15 }
+      ],
+      data: excelData
+    });
+  }
+
+  private formatBytes(bytes: number | undefined, decimals = 2) {
+    if (bytes === undefined || !+bytes) return '0 Bytes';
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
   }
 
   async getDownloadStream(id: string): Promise<{ stream: Readable; document: Document }> {

@@ -7,7 +7,10 @@ import {
   Patch,
   Post,
   Query,
+  Res,
+  StreamableFile,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import { OrganizationsService } from './organizations.service';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { UpdateOrganizationDto } from './dto/update-organization.dto';
@@ -25,6 +28,22 @@ export class OrganizationsController {
   @Post()
   create(@Body() createDto: CreateOrganizationDto) {
     return this.organizationsService.create(createDto);
+  }
+
+  /** GET /organizations/export — Exportar organizaciones a Excel */
+  @Get('export')
+  async exportExcel(
+    @Query('includeInactive') includeInactive: string,
+    @Query('searchTerm') searchTerm: string,
+    @Res() res: Response
+  ) {
+    const workbook = await this.organizationsService.exportToExcel(includeInactive === 'true', searchTerm);
+    
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename="organizaciones.xlsx"');
+    
+    await workbook.xlsx.write(res);
+    res.end();
   }
 
   /** GET /organizations — Listar organizaciones (por defecto no inactivas) */
@@ -85,7 +104,6 @@ export class OrganizationsController {
     return this.organizationsService.replaceRepresentative(id, dto);
   }
 
-  /** POST /organizations/:id/attended-groups/with-leader — Crear grupo con dirigente */
   @Roles('Administrador', 'Gestión Social')
   @Post(':id/attended-groups/with-leader')
   createAttendedGroupWithLeader(
@@ -93,5 +111,49 @@ export class OrganizationsController {
     @Body() dto: CreateAttendedGroupWithLeaderDto,
   ) {
     return this.organizationsService.createAttendedGroupWithLeader(id, dto);
+  }
+
+  @Roles('Administrador', 'Gestión Social')
+  @Get(':id/report')
+  async getReport(@Param('id', ParseUUIDPipe) id: string, @Res({ passthrough: true }) res: Response) {
+    const pdfDoc = await this.organizationsService.generateReport(id);
+    
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `inline; filename="ficha-organizacion-${id.substring(0, 8)}.pdf"`,
+    });
+
+    const chunks: Buffer[] = [];
+    return new Promise<StreamableFile>((resolve, reject) => {
+      pdfDoc.on('data', (chunk: Buffer) => chunks.push(chunk));
+      pdfDoc.on('end', () => {
+        const buffer = Buffer.concat(chunks);
+        resolve(new StreamableFile(buffer));
+      });
+      pdfDoc.on('error', reject);
+      pdfDoc.end();
+    });
+  }
+
+  @Roles('Administrador', 'Gestión Social')
+  @Get(':id/history')
+  async getHistoryReport(@Param('id', ParseUUIDPipe) id: string, @Res({ passthrough: true }) res: Response) {
+    const pdfDoc = await this.organizationsService.generateHistoryReport(id);
+    
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `inline; filename="historial-organizacion-${id.substring(0, 8)}.pdf"`,
+    });
+
+    const chunks: Buffer[] = [];
+    return new Promise<StreamableFile>((resolve, reject) => {
+      pdfDoc.on('data', (chunk: Buffer) => chunks.push(chunk));
+      pdfDoc.on('end', () => {
+        const buffer = Buffer.concat(chunks);
+        resolve(new StreamableFile(buffer));
+      });
+      pdfDoc.on('error', reject);
+      pdfDoc.end();
+    });
   }
 }

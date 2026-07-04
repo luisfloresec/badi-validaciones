@@ -9,6 +9,7 @@ import { RealizedDelivery } from '../realized-deliveries/entities/realized-deliv
 import { Document } from '../documents/entities/document.entity';
 import { User } from '../users/entities/user.entity';
 import { AuditLog } from '../audit/entities/audit-log.entity';
+import { ReportsModule } from '../reports/reports.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { AuditLog } from '../audit/entities/audit-log.entity';
       User,
       AuditLog,
     ]),
+    ReportsModule,
   ],
   controllers: [DashboardController],
   providers: [DashboardService],

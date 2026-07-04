@@ -16,6 +16,8 @@
       <p-button label="Volver a Convenios" icon="pi pi-arrow-left" [text]="true" severity="secondary"
         (onClick)="goBack()" />
       <div class="action-buttons">
+        <p-button label="Reporte PDF" icon="pi pi-file-pdf" severity="danger" 
+          [loading]="reportLoading" (onClick)="downloadReport()" />
         <p-button label="Activar convenio" icon="pi pi-check-circle" *ngIf="agreement.estado === 'Registrado'"
           (onClick)="activateAgreement()" />
         <p-button label="Editar convenio" icon="pi pi-pencil" [outlined]="true" severity="secondary"

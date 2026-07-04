@@ -42,6 +42,21 @@
         />
         <div class="action-buttons" *ngIf="authService.canEdit()">
           <p-button
+            label="Reporte PDF"
+            icon="pi pi-file-pdf"
+            severity="danger"
+            [loading]="reportLoading"
+            (onClick)="downloadReport()"
+          />
+          <p-button
+            label="Historial PDF"
+            icon="pi pi-book"
+            severity="danger"
+            [outlined]="true"
+            [loading]="historyLoading"
+            (onClick)="downloadHistoryReport()"
+          />
+          <p-button
             label="Editar organización"
             icon="pi pi-pencil"
             [outlined]="true"

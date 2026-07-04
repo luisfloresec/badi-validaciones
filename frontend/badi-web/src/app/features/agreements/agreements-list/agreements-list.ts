@@ -221,4 +221,32 @@ export class AgreementsListComponent implements OnInit {
   isHistorico(estado: string): boolean {
     return estado === 'Anulado' || estado === 'Finalizado';
   }
+
+  exportLoading = false;
+
+  exportExcel(): void {
+    this.exportLoading = true;
+    this.cdr.detectChanges();
+
+    this.agreementsService.exportExcel().subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Convenios_BADI_${new Date().getTime()}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        this.exportLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error exporting excel:', err);
+        this.snackBar.open('Error al exportar el listado a Excel', 'Cerrar', { duration: 3000 });
+        this.exportLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
 }

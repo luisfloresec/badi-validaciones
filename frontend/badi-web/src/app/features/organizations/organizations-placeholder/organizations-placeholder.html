@@ -6,10 +6,17 @@
       <h1>Organizaciones</h1>
       <p>Gestión de organizaciones sociales registradas</p>
     </div>
-    <button mat-flat-button class="btn-primary" (click)="createOrganization()" *ngIf="authService.canEdit()">
-      <mat-icon>add</mat-icon>
-      Nueva organización
-    </button>
+    <div class="header-actions" style="display: flex; gap: 12px;">
+      <button mat-stroked-button class="btn-refresh" (click)="exportExcel()" [disabled]="loading || exportLoading" matTooltip="Exportar vista actual a Excel">
+        <mat-icon *ngIf="!exportLoading">table_view</mat-icon>
+        <mat-spinner *ngIf="exportLoading" diameter="20" class="inline-spinner"></mat-spinner>
+        Exportar Excel
+      </button>
+      <button mat-flat-button class="btn-primary" (click)="createOrganization()" *ngIf="authService.canEdit()">
+        <mat-icon>add</mat-icon>
+        Nueva organización
+      </button>
+    </div>
   </div>
 
   <!-- Barra de búsqueda -->

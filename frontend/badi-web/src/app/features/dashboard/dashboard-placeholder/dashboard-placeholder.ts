@@ -196,4 +196,33 @@ export class DashboardPlaceholderComponent implements OnInit {
   navigateToPath(path: string): void {
     this.router.navigate([path]);
   }
+
+  exportLoading = false;
+
+  exportPdf(): void {
+    this.exportLoading = true;
+    this.cdr.detectChanges();
+
+    this.dashboardService.downloadReport().subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const month = String(new Date().getMonth() + 1).padStart(2, '0');
+        const year = new Date().getFullYear();
+        a.download = `Dashboard-BADI-${year}${month}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        this.exportLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error al exportar PDF:', err);
+        this.exportLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
 }
