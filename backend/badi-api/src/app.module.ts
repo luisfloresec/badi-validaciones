@@ -96,5 +96,5 @@ import { ClsModule } from 'nestjs-cls';
     { provide: APP_GUARD, useClass: RolesGuard },
   ],
 })
-export class AppModule {}
+export class AppModule { }
 

@@ -2,10 +2,10 @@
   <div class="sidebar-header">
     <img src="assets/logo-badi.png" alt="Logo BADI" class="logo-badi" />
   </div>
-  
+
   <div class="sidebar-menu">
     <div class="nav-section-label">MÓDULO GESTIÓN SOCIAL</div>
-    
+
     <mat-nav-list class="sidebar-nav">
       <a mat-list-item routerLink="/dashboard" routerLinkActive="active">
         <mat-icon matListItemIcon>dashboard</mat-icon>
@@ -27,17 +27,18 @@
         <mat-icon matListItemIcon>local_shipping</mat-icon>
         <span matListItemTitle>Entregas</span>
       </a>
-      
+
       <div class="nav-divider"></div>
       <div class="nav-section-label sub-section">DOCUMENTACIÓN</div>
-      
+
       <a mat-list-item routerLink="/documents" routerLinkActive="active">
         <mat-icon matListItemIcon>folder</mat-icon>
         <span matListItemTitle>Repositorio Global</span>
       </a>
 
       <div class="nav-divider" *ngIf="authService.hasRole('Administrador') || authService.hasRole('Auditor')"></div>
-      <div class="nav-section-label sub-section" *ngIf="authService.hasRole('Administrador') || authService.hasRole('Auditor')">SISTEMA</div>
+      <div class="nav-section-label sub-section"
+        *ngIf="authService.hasRole('Administrador') || authService.hasRole('Auditor')">SISTEMA</div>
 
       <ng-container *ngIf="authService.hasRole('Administrador')">
         <a mat-list-item routerLink="/users" routerLinkActive="active">
@@ -49,7 +50,8 @@
           <span matListItemTitle>Roles</span>
         </a>
       </ng-container>
-      <a mat-list-item routerLink="/audit" routerLinkActive="active" *ngIf="authService.hasAnyRole('Administrador', 'Auditor')">
+      <a mat-list-item routerLink="/audit" routerLinkActive="active"
+        *ngIf="authService.hasAnyRole('Administrador', 'Auditor')">
         <mat-icon matListItemIcon>history</mat-icon>
         <span matListItemTitle>Auditoría</span>
       </a>
@@ -63,7 +65,8 @@
       </div>
       <div class="user-info">
         <strong class="user-name" [title]="authService.getFullName()">{{ authService.getFullName() }}</strong>
-        <span class="user-email" [title]="authService.getCurrentUser()?.email">{{ authService.getCurrentUser()?.email }}</span>
+        <span class="user-email" [title]="authService.getCurrentUser()?.email">{{ authService.getCurrentUser()?.email
+          }}</span>
         <span class="user-role">{{ authService.getPrimaryRole() | uppercase }}</span>
       </div>
       <button mat-icon-button (click)="logout()" title="Cerrar sesión" class="logout-btn">

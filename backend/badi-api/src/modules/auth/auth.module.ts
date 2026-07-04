@@ -7,6 +7,9 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { User } from '../users/entities/user.entity';
+import { PasswordResetToken } from './entities/password-reset-token.entity';
+import { AuditLog } from '../audit/entities/audit-log.entity';
+import { BrevoMailService } from './services/brevo-mail.service';
 
 @Module({
   imports: [
@@ -21,10 +24,11 @@ import { User } from '../users/entities/user.entity';
         } as any,
       }),
     }),
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, PasswordResetToken, AuditLog]),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
-  exports: [AuthService, JwtModule],
+  providers: [AuthService, JwtStrategy, BrevoMailService],
+  exports: [AuthService, JwtModule, BrevoMailService],
 })
 export class AuthModule {}
+

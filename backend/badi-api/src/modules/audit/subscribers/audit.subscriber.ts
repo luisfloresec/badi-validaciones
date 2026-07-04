@@ -23,6 +23,7 @@ export class AuditSubscriber implements EntitySubscriberInterface<any> {
   private shouldAudit(entity: any, tableName?: string): boolean {
     if (!entity) return false;
     if (tableName === 'audit_logs') return false;
+    if (tableName === 'password_reset_tokens') return false;
     return true;
   }
 
@@ -66,7 +67,7 @@ export class AuditSubscriber implements EntitySubscriberInterface<any> {
       const clean = { ...data };
       
       // Eliminar campos sensibles
-      const camposSensibles = ['password', 'passwordHash', 'contrasena', 'token', 'secret'];
+      const camposSensibles = ['password', 'passwordHash', 'contrasena', 'token', 'tokenHash', 'secret'];
       for (const campo of camposSensibles) {
         if (clean[campo] !== undefined) {
           delete clean[campo];

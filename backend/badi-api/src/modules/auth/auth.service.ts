@@ -7,10 +7,17 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
+import { ConfigService } from '@nestjs/config';
 import { User } from '../users/entities/user.entity';
+import { PasswordResetToken } from './entities/password-reset-token.entity';
+import { AuditLog } from '../audit/entities/audit-log.entity';
+import { BrevoMailService } from './services/brevo-mail.service';
 import { LoginDto } from './dto/login.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { JwtPayload } from './interfaces/jwt-payload.interface';
 
 @Injectable()
@@ -18,7 +25,13 @@ export class AuthService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    @InjectRepository(PasswordResetToken)
+    private readonly passwordResetTokenRepository: Repository<PasswordResetToken>,
+    @InjectRepository(AuditLog)
+    private readonly auditRepository: Repository<AuditLog>,
     private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
+    private readonly brevoMailService: BrevoMailService,
   ) {}
 
   /**
@@ -159,4 +172,123 @@ export class AuthService {
 
     return { message: 'Contraseña actualizada correctamente.' };
   }
+
+  /**
+   * Solicita el envío de un enlace de recuperación de contraseña.
+   */
+  async forgotPassword(dto: ForgotPasswordDto): Promise<{ message: string }> {
+    const defaultResponse = { message: 'Si el correo está registrado, se enviará un enlace de recuperación.' };
+
+    const user = await this.usersRepository.findOne({ where: { email: dto.email } });
+    if (!user) {
+      return defaultResponse;
+    }
+
+    const token = crypto.randomBytes(32).toString('hex');
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+
+    const expiresInMinutes = Number(this.configService.get<string | number>('PASSWORD_RESET_TOKEN_EXPIRES_MINUTES')) || 15;
+    const expiresAt = new Date(Date.now() + expiresInMinutes * 60 * 1000);
+
+    const resetToken = this.passwordResetTokenRepository.create({
+      userId: user.id,
+      tokenHash,
+      expiresAt,
+    });
+    await this.passwordResetTokenRepository.save(resetToken);
+
+    const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:4200';
+    const resetLink = `${frontendUrl}/reset-password?token=${token}`;
+
+    await this.brevoMailService.sendPasswordResetEmail(user, resetLink);
+
+    // Auditoría: Registrar solicitud de recuperación de contraseña
+    const auditLog = this.auditRepository.create({
+      userId: user.id,
+      modulo: 'auth',
+      entidad: 'User',
+      entidadId: user.id,
+      accion: 'FORGOT_PASSWORD',
+      datosAnteriores: null,
+      datosNuevos: { email: user.email },
+      resultado: 'EXITO',
+    });
+    try {
+      await this.auditRepository.save(auditLog);
+    } catch (e) {
+      console.error('Error guardando auditoría de forgot password', e);
+    }
+
+    return defaultResponse;
+  }
+
+  /**
+   * Restablece la contraseña utilizando el token enviado por correo.
+   */
+  async resetPassword(dto: ResetPasswordDto): Promise<{ message: string }> {
+    if (dto.password !== dto.confirmPassword) {
+      throw new BadRequestException('Las contraseñas no coinciden.');
+    }
+
+    const tokenHash = crypto.createHash('sha256').update(dto.token).digest('hex');
+
+    const resetToken = await this.passwordResetTokenRepository.findOne({
+      where: { tokenHash },
+      relations: { user: true },
+    });
+
+    if (!resetToken || resetToken.usedAt || resetToken.expiresAt < new Date()) {
+      if (resetToken && resetToken.user) {
+        const auditLog = this.auditRepository.create({
+          userId: resetToken.user.id,
+          modulo: 'auth',
+          entidad: 'User',
+          entidadId: resetToken.user.id,
+          accion: 'RESET_PASSWORD',
+          datosAnteriores: null,
+          datosNuevos: null,
+          resultado: 'ERROR: TOKEN_INVALIDO_O_EXPIRADO',
+        });
+        try {
+          await this.auditRepository.save(auditLog);
+        } catch (e) {
+          console.error('Error guardando auditoría de reset password fallido', e);
+        }
+      }
+
+      throw new BadRequestException('El enlace de recuperación no es válido o ha expirado.');
+    }
+
+    const user = resetToken.user;
+
+    const salt = await bcrypt.genSalt(10);
+    user.passwordHash = await bcrypt.hash(dto.password, salt);
+    if (user.requiereCambioPassword) {
+      user.requiereCambioPassword = false;
+    }
+    await this.usersRepository.save(user);
+
+    resetToken.usedAt = new Date();
+    await this.passwordResetTokenRepository.save(resetToken);
+
+    // Auditoría de restablecimiento exitoso
+    const auditLog = this.auditRepository.create({
+      userId: user.id,
+      modulo: 'auth',
+      entidad: 'User',
+      entidadId: user.id,
+      accion: 'RESET_PASSWORD',
+      datosAnteriores: null,
+      datosNuevos: { email: user.email },
+      resultado: 'EXITO',
+    });
+    try {
+      await this.auditRepository.save(auditLog);
+    } catch (e) {
+      console.error('Error guardando auditoría de reset password exitoso', e);
+    }
+
+    return { message: 'Contraseña restablecida correctamente.' };
+  }
 }
+

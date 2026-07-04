@@ -160,6 +160,15 @@ export class AuthService {
     );
   }
 
+  forgotPassword(email: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.apiUrl}/forgot-password`, { email });
+  }
+
+  resetPassword(token: string, password: string, confirmPassword: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.apiUrl}/reset-password`, { token, password, confirmPassword });
+  }
+
+
   private getStoredUser(): LoginResponse['user'] | null {
     try {
       const stored = localStorage.getItem(USER_KEY);

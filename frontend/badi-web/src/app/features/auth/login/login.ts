@@ -1,7 +1,7 @@
 import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { ButtonModule } from 'primeng/button';
@@ -15,6 +15,7 @@ import { NotificationService } from '../../../shared/services/notification.servi
   imports: [
     CommonModule,
     FormsModule,
+    RouterModule,
     InputTextModule,
     PasswordModule,
     ButtonModule,

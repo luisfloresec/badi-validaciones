@@ -3,6 +3,8 @@ import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { Public } from './decorators/public.decorator';
 import { CurrentUser } from './decorators/current-user.decorator';
 import type { JwtPayload } from './interfaces/jwt-payload.interface';
@@ -16,6 +18,20 @@ export class AuthController {
   @Post('login')
   login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);
+  }
+
+  /** POST /auth/forgot-password — Solicitar recuperación de contraseña (público) */
+  @Public()
+  @Post('forgot-password')
+  forgotPassword(@Body() dto: ForgotPasswordDto) {
+    return this.authService.forgotPassword(dto);
+  }
+
+  /** POST /auth/reset-password — Restablecer contraseña con token (público) */
+  @Public()
+  @Post('reset-password')
+  resetPassword(@Body() dto: ResetPasswordDto) {
+    return this.authService.resetPassword(dto);
   }
 
   /** GET /auth/me — Obtener datos del usuario autenticado */
@@ -42,3 +58,4 @@ export class AuthController {
     return this.authService.changePassword(user.sub, dto);
   }
 }
+
