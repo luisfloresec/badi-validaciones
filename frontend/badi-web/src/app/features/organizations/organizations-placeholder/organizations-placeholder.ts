@@ -13,7 +13,7 @@ import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { InputTextModule } from 'primeng/inputtext';
-import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { SelectModule } from 'primeng/select';
 import { finalize } from 'rxjs/operators';
 import {
   OrganizationsService,
@@ -38,7 +38,7 @@ import { AuthService } from '../../../core/auth/auth.service';
     IconFieldModule,
     InputIconModule,
     InputTextModule,
-    ToggleSwitchModule
+    SelectModule
   ],
   templateUrl: './organizations-placeholder.html',
   styleUrl: './organizations-placeholder.scss'
@@ -49,7 +49,16 @@ export class OrganizationsPlaceholderComponent implements OnInit {
   filtered: OrganizationSummary[] = [];
   paginatedOrganizations: OrganizationSummary[] = [];
   searchTerm = '';
-  showInactive = false;
+  filterEstado = 'Activa';
+  filterTipo = 'TODOS';
+  
+  estadoOptions = [
+    { label: 'Todos los estados', value: 'TODOS' },
+    { label: 'Registradas', value: 'Registrada' },
+    { label: 'Activas', value: 'Activa' },
+    { label: 'Inactivas', value: 'Inactiva' }
+  ];
+  tiposOptions: {label: string, value: string}[] = [];
 
   loading = true;
   error: string | null = null;
@@ -75,7 +84,8 @@ export class OrganizationsPlaceholderComponent implements OnInit {
     this.loading = true;
     this.error = null;
 
-    this.orgService.getAll(this.showInactive)
+    // Cargamos TODAS (incluyendo inactivas) para poder filtrarlas en el frontend
+    this.orgService.getAll(true)
       .pipe(finalize(() => {
         this.loading = false;
         this.cdr.detectChanges();
@@ -83,6 +93,7 @@ export class OrganizationsPlaceholderComponent implements OnInit {
       .subscribe({
         next: (data) => {
           this.organizations = data ?? [];
+          this.extractTipos();
           this.applyFilter();
           this.cdr.detectChanges();
         },
@@ -97,21 +108,38 @@ export class OrganizationsPlaceholderComponent implements OnInit {
       });
   }
 
-  toggleInactive(): void {
-    this.loadOrganizations();
+  extractTipos(): void {
+    const tipos = Array.from(new Set(this.organizations.map(o => o.tipoOrganizacion?.nombre).filter(Boolean)));
+    this.tiposOptions = [
+      { label: 'Todos los tipos', value: 'TODOS' },
+      ...tipos.map(t => ({ label: t, value: t }))
+    ];
+  }
+
+  onSearchChange(term: string): void {
+    this.searchTerm = term;
+    this.applyFilter();
   }
 
   applyFilter(): void {
     const term = this.searchTerm.toLowerCase().trim();
-    if (!term) {
-      this.filtered = this.organizations;
-    } else {
-      this.filtered = this.organizations.filter(org =>
-        org.razonSocial.toLowerCase().includes(term) ||
-        org.ruc.toLowerCase().includes(term) ||
-        org.ciudad.toLowerCase().includes(term)
+    
+    this.filtered = this.organizations.filter(org => {
+      // Filtro por término
+      const matchesSearch = !term || (
+        (org.razonSocial && org.razonSocial.toLowerCase().includes(term)) ||
+        (org.ruc && org.ruc.toLowerCase().includes(term)) ||
+        (org.ciudad && org.ciudad.toLowerCase().includes(term))
       );
-    }
+
+      // Filtro por estado
+      const matchesEstado = this.filterEstado === 'TODOS' || org.estado === this.filterEstado;
+
+      // Filtro por tipo
+      const matchesTipo = this.filterTipo === 'TODOS' || org.tipoOrganizacion?.nombre === this.filterTipo;
+
+      return matchesSearch && matchesEstado && matchesTipo;
+    });
     this.totalItems = this.filtered.length;
     this.pageIndex = 0;
     this.updatePagination();
@@ -223,11 +251,18 @@ export class OrganizationsPlaceholderComponent implements OnInit {
 
   exportLoading = false;
 
+  clearFilters(): void {
+    this.searchTerm = '';
+    this.filterEstado = 'Activa';
+    this.filterTipo = 'TODOS';
+    this.applyFilter();
+  }
+
   exportExcel(): void {
     this.exportLoading = true;
     this.cdr.detectChanges();
 
-    this.orgService.exportExcel(this.showInactive, this.searchTerm).subscribe({
+    this.orgService.exportExcel(this.searchTerm, this.filterEstado, this.filterTipo).subscribe({
       next: (blob) => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -242,7 +277,6 @@ export class OrganizationsPlaceholderComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error exporting excel:', err);
-        this.error = 'No se pudo exportar el listado a Excel.';
         this.exportLoading = false;
         this.cdr.detectChanges();
       }

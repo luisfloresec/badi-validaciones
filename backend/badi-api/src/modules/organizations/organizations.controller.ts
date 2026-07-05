@@ -33,11 +33,12 @@ export class OrganizationsController {
   /** GET /organizations/export — Exportar organizaciones a Excel */
   @Get('export')
   async exportExcel(
-    @Query('includeInactive') includeInactive: string,
     @Query('searchTerm') searchTerm: string,
+    @Query('estado') estado: string,
+    @Query('tipoOrganizacion') tipoOrganizacion: string,
     @Res() res: Response
   ) {
-    const workbook = await this.organizationsService.exportToExcel(includeInactive === 'true', searchTerm);
+    const workbook = await this.organizationsService.exportToExcel(searchTerm, estado, tipoOrganizacion);
     
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', 'attachment; filename="organizaciones.xlsx"');

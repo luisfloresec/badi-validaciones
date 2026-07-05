@@ -234,10 +234,11 @@ export class OrganizationsService {
     });
   }
 
-  exportExcel(includeInactive: boolean, searchTerm: string): Observable<Blob> {
+  exportExcel(searchTerm: string, filterEstado: string, filterTipo: string): Observable<Blob> {
     let params = new HttpParams();
-    if (includeInactive) params = params.set('includeInactive', 'true');
     if (searchTerm) params = params.set('searchTerm', searchTerm);
+    if (filterEstado) params = params.set('estado', filterEstado);
+    if (filterTipo) params = params.set('tipoOrganizacion', filterTipo);
 
     return this.http.get(`${this.apiUrl}/export`, {
       params,

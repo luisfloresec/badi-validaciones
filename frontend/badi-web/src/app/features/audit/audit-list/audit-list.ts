@@ -46,7 +46,7 @@ export class AuditListComponent implements OnInit {
   loading = true;
   error: string | null = null;
 
-  modulos: string[] = ['Usuarios', 'Roles', 'Organizaciones', 'Convenios', 'Repositorio Global', 'Auth', 'Documentos', 'Tipos Documentales'];
+  modulos: string[] = ['Usuarios', 'Roles', 'Organizaciones', 'Convenios', 'Entregas', 'Cronogramas', 'Grupos Atendidos', 'Representantes', 'Dirigentes', 'Repositorio Global', 'Auth', 'Documentos', 'Tipos Documentales'];
   acciones: string[] = ['CREATE', 'UPDATE', 'DELETE', 'LOGIN', 'LOGOUT', 'SUBIR', 'DESCARGAR', 'ERROR'];
 
   // Filtros

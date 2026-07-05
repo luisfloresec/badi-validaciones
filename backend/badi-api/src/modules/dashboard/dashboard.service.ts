@@ -57,7 +57,7 @@ export class DashboardService {
 
     // --- Consultas eficientes (en paralelo para máximo rendimiento) ---
     const [
-      organizacionesActivas,
+      organizacionesRegistradas,
       conveniosActivos,
       entregasProgramadasMes,
       entregasRealizadasMes,
@@ -82,7 +82,7 @@ export class DashboardService {
       entregasPendientesCount,
     ] = await Promise.all([
       // Resumen general
-      this.organizationRepo.count({ where: [{ estado: 'Activa' }, { estado: 'Activo' }] }),
+      this.organizationRepo.count(),
       this.agreementRepo.count({ where: { estado: 'Activo' } }),
       this.scheduledDeliveryRepo.createQueryBuilder('s')
         .where('s.fechaProgramada >= :inicioMes', { inicioMes: inicioMesStr })
@@ -224,7 +224,7 @@ export class DashboardService {
 
     return {
       resumen: {
-        organizacionesActivas,
+        organizacionesRegistradas,
         conveniosActivos,
         entregasProgramadasMes,
         entregasRealizadasMes,
@@ -286,7 +286,7 @@ export class DashboardService {
     // 1. Resumen Ejecutivo (Indicadores Actuales)
     this.pdfGeneratorService.drawSectionTitle(doc, 'Resumen Ejecutivo');
     this.pdfGeneratorService.drawInstitutionalCard(doc, [
-      { label: 'Organizaciones Activas', value: summary.resumen.organizacionesActivas.toString() },
+      { label: 'Organizaciones Registradas', value: summary.resumen.organizacionesRegistradas.toString() },
       { label: 'Convenios Activos', value: summary.resumen.conveniosActivos.toString() },
       { label: 'Entregas en el Mes', value: summary.resumen.entregasRealizadasMes.toString() },
       { label: 'Kilos Entregados en el Mes', value: `${summary.resumen.kilosEntregadosMes.toFixed(2)} kg` },

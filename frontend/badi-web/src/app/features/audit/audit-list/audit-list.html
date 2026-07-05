@@ -31,16 +31,25 @@
   </div>
 
   <!-- Barra de búsqueda fiel a las guías -->
-  <div class="search-bar" *ngIf="!loading && !error && logs.length > 0">
+  <div class="search-bar" *ngIf="!loading && !error && (logs.length > 0 || filters.search || filters.modulo || filters.accion)">
     <p-iconfield class="search-field">
       <p-inputicon styleClass="pi pi-search"></p-inputicon>
       <input pInputText type="text"
              class="w-full"
-             placeholder="Buscar por usuario, acción, entidad, resumen..."
+             placeholder="Buscar por usuario, acción, entidad..."
              [(ngModel)]="filters.search"
              (ngModelChange)="applyFilters()" />
       <p-inputicon *ngIf="filters.search" styleClass="pi pi-times" style="cursor: pointer;" (click)="filters.search=''; applyFilters()"></p-inputicon>
     </p-iconfield>
+
+    <div class="filter-wrapper" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+      <p-select [(ngModel)]="filters.modulo" [options]="modulos" (onChange)="applyFilters()" styleClass="badi-select" placeholder="Módulo" [showClear]="true"></p-select>
+      <p-select [(ngModel)]="filters.accion" [options]="acciones" (onChange)="applyFilters()" styleClass="badi-select" placeholder="Acción" [showClear]="true"></p-select>
+    </div>
+
+    <button mat-stroked-button class="btn-clear-filters" *ngIf="filters.search || filters.modulo || filters.accion" (click)="clearFilters()">
+      <mat-icon>filter_alt_off</mat-icon> Limpiar
+    </button>
   </div>
 
   <!-- Loading State -->

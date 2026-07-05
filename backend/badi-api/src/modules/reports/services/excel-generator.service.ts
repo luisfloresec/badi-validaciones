@@ -20,7 +20,7 @@ export class ExcelGeneratorService {
   private readonly HEADER_FILL: ExcelJS.Fill = {
     type: 'pattern',
     pattern: 'solid',
-    fgColor: { argb: 'FF1A237E' }, // Azul institucional
+    fgColor: { argb: 'FF015641' }, // Verde institucional
   };
   private readonly HEADER_FONT: Partial<ExcelJS.Font> = {
     bold: true,
@@ -46,7 +46,7 @@ export class ExcelGeneratorService {
     sheet.mergeCells(1, 1, 1, totalCols);
     const instCell = sheet.getCell('A1');
     instCell.value = 'BADI — Banco de Alimentos de Imbabura';
-    instCell.font = { bold: true, size: 14, color: { argb: 'FF1A237E' } };
+    instCell.font = { bold: true, size: 14, color: { argb: 'FF015641' } };
     instCell.alignment = { horizontal: 'center' };
 
     // 2. Nombre del reporte

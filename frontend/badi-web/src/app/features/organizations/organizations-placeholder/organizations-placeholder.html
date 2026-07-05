@@ -31,10 +31,14 @@
       <p-inputicon *ngIf="searchTerm" styleClass="pi pi-times" style="cursor: pointer;" (click)="searchTerm=''; applyFilter()"></p-inputicon>
     </p-iconfield>
 
-    <div class="switch-wrapper">
-      <p-toggleswitch [(ngModel)]="showInactive" (onChange)="toggleInactive()" inputId="inactiveSwitch"></p-toggleswitch>
-      <label for="inactiveSwitch" class="switch-label cursor-pointer">Mostrar inactivas</label>
+    <div class="filter-wrapper" style="display: flex; gap: 10px;">
+      <p-select [(ngModel)]="filterTipo" [options]="tiposOptions" optionLabel="label" optionValue="value" (onChange)="applyFilter()" styleClass="badi-select" placeholder="Tipo de Organización"></p-select>
+      <p-select [(ngModel)]="filterEstado" [options]="estadoOptions" optionLabel="label" optionValue="value" (onChange)="applyFilter()" styleClass="badi-select" placeholder="Estado"></p-select>
     </div>
+
+    <button mat-stroked-button class="btn-clear-filters" *ngIf="searchTerm || filterEstado !== 'Activa' || filterTipo !== 'TODOS'" (click)="clearFilters()">
+      <mat-icon>filter_alt_off</mat-icon> Limpiar filtros
+    </button>
   </div>
 
   <!-- Loading -->

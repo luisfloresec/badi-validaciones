@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 
 export interface DashboardSummary {
   resumen: {
-    organizacionesActivas: number;
+    organizacionesRegistradas: number;
     conveniosActivos: number;
     entregasProgramadasMes: number;
     entregasRealizadasMes: number;

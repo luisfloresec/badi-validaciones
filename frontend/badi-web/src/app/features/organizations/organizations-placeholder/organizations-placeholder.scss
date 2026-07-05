@@ -85,17 +85,27 @@ $divider: #f3f4f6;
   max-width: 100%;
 }
 
-.switch-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+::ng-deep {
+  .badi-select {
+    width: 200px;
+  }
 }
 
-.switch-label {
-  font-size: 14px;
-  color: $g7;
-  font-weight: 500;
-  user-select: none;
+.btn-clear-filters {
+  border: 1px solid $g3 !important;
+  color: $g7 !important;
+  font-weight: 500 !important;
+  border-radius: 10px !important;
+  padding: 0 20px !important;
+  height: 40px;
+  background: #fff !important;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: $g1 !important;
+    border-color: #9ca3af !important;
+  }
+  mat-icon { margin-right: 6px; }
 }
 
 // States

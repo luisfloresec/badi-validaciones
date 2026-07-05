@@ -814,8 +814,10 @@ export class OrganizationsService {
     return doc;
   }
 
-  async exportToExcel(includeInactive: boolean, searchTerm?: string): Promise<ExcelJS.Workbook> {
-    let orgs = await this.findAll(includeInactive);
+  async exportToExcel(searchTerm?: string, estado?: string, tipoOrganizacion?: string): Promise<ExcelJS.Workbook> {
+    // Para exportar con filtros variados, obtenemos TODAS las organizaciones (includeInactive = true)
+    // y aplicamos los filtros manualmente en memoria, tal como lo hace el frontend.
+    let orgs = await this.findAll(true);
 
     if (searchTerm) {
       const term = searchTerm.toLowerCase().trim();
@@ -824,6 +826,14 @@ export class OrganizationsService {
         (org.ruc && org.ruc.toLowerCase().includes(term)) ||
         (org.ciudad && org.ciudad.toLowerCase().includes(term))
       );
+    }
+    
+    if (estado && estado !== 'TODOS') {
+      orgs = orgs.filter(org => org.estado === estado);
+    }
+
+    if (tipoOrganizacion && tipoOrganizacion !== 'TODOS') {
+      orgs = orgs.filter(org => org.tipoOrganizacion?.nombre === tipoOrganizacion);
     }
 
     const data = orgs.map(org => ({
