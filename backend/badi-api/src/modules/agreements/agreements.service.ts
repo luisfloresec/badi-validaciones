@@ -36,45 +36,31 @@ export class AgreementsService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    // Upsert tipos iniciales sin duplicar
-    const seedTypes = [
-      {
-        nombre: 'Convenio Piloto',
-        descripcion: 'Convenio piloto inicial',
-        duracionMeses: null as number | null,
-        maxRetiros: 4,
-        estado: 'Activo',
-      },
-      {
-        nombre: 'Convenio Vinculado',
-        descripcion: 'Convenio de vinculación formal',
-        duracionMeses: 12,
-        maxRetiros: null as number | null,
-        estado: 'Activo',
-      },
-    ];
+    // SEED DESACTIVADO — Los tipos de convenio se crean manualmente desde la interfaz.
+    // Para reactivar el seed automático, eliminar las dos líneas siguientes.
+    console.log('AgreementsService: Seed automático de tipos de convenio desactivado para validación.');
+    return;
 
-    for (const seed of seedTypes) {
-      let existing = await this.agreementTypesRepository.findOne({
-        where: { nombre: seed.nombre },
-      });
-      if (existing) {
-        existing.descripcion = seed.descripcion;
-        existing.duracionMeses = seed.duracionMeses;
-        existing.maxRetiros = seed.maxRetiros;
-        existing.estado = seed.estado;
-        await this.agreementTypesRepository.save(existing);
-      } else {
-        const newType = new AgreementType();
-        newType.nombre = seed.nombre;
-        newType.descripcion = seed.descripcion;
-        newType.duracionMeses = seed.duracionMeses;
-        newType.maxRetiros = seed.maxRetiros;
-        newType.estado = seed.estado;
-        await this.agreementTypesRepository.save(newType);
-      }
-    }
-    console.log('AgreementsService: Tipos de convenio sincronizados.');
+    // ----- Seed original (desactivado) -----
+    // const seedTypes = [
+    //   { nombre: 'Convenio Piloto', descripcion: 'Convenio piloto inicial', duracionMeses: null, maxRetiros: 4, estado: 'Activo' },
+    //   { nombre: 'Convenio Vinculado', descripcion: 'Convenio de vinculación formal', duracionMeses: 12, maxRetiros: null, estado: 'Activo' },
+    // ];
+    // for (const seed of seedTypes) {
+    //   let existing = await this.agreementTypesRepository.findOne({ where: { nombre: seed.nombre } });
+    //   if (existing) {
+    //     existing.descripcion = seed.descripcion; existing.duracionMeses = seed.duracionMeses;
+    //     existing.maxRetiros = seed.maxRetiros; existing.estado = seed.estado;
+    //     await this.agreementTypesRepository.save(existing);
+    //   } else {
+    //     const newType = new AgreementType();
+    //     newType.nombre = seed.nombre; newType.descripcion = seed.descripcion;
+    //     newType.duracionMeses = seed.duracionMeses; newType.maxRetiros = seed.maxRetiros;
+    //     newType.estado = seed.estado;
+    //     await this.agreementTypesRepository.save(newType);
+    //   }
+    // }
+    // console.log('AgreementsService: Tipos de convenio sincronizados.');
   }
 
   async findTypes() {
