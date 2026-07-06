@@ -12,6 +12,7 @@ import { IftaLabelModule } from 'primeng/iftalabel';
 import { FluidModule } from 'primeng/fluid';
 import { ButtonModule } from 'primeng/button';
 import { OrganizationsService } from '../../organizations.service';
+import { API_BASE_URL } from '../../../../core/config/api.config';
 
 export interface RepresentativeDialogData {
   organizationId: string;
@@ -124,7 +125,7 @@ export class RepresentativeFormDialogComponent implements OnInit {
       payload.organizationId = this.data.organizationId;
       payload.esPrincipal = true;
       
-      this.orgService['http'].post('http://localhost:3000/representatives', payload).subscribe({
+      this.orgService['http'].post(`${API_BASE_URL}/representatives`, payload).subscribe({
         next: (res) => {
           this.loading = false;
           this.cdr.detectChanges();

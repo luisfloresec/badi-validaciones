@@ -18,6 +18,7 @@ import { ScheduleCancelDialogComponent } from '../schedule-cancel-dialog/schedul
 import { finalize } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { API_BASE_URL } from '../../../core/config/api.config';
 
 @Component({
   selector: 'app-schedule-detail-dialog',
@@ -88,7 +89,7 @@ export class ScheduleDetailDialogComponent implements OnInit {
           this.delivery = res;
           
           if (this.delivery.estado !== 'Cancelado') {
-            this.http.get<any>(`http://localhost:3000/realized-deliveries/by-schedule/${this.delivery.id}`)
+            this.http.get<any>(`${API_BASE_URL}/realized-deliveries/by-schedule/${this.delivery.id}`)
               .pipe(finalize(() => {
                 this.isLoading = false;
                 this.cdr.markForCheck();

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { API_BASE_URL } from '../../core/config/api.config';
 import { DocumentType } from './document-types.service';
 
 export interface Document {
@@ -67,7 +68,7 @@ export interface DocumentStats {
   providedIn: 'root'
 })
 export class DocumentsService {
-  private apiUrl = 'http://localhost:3000/documents';
+  private apiUrl = `${API_BASE_URL}/documents`;
 
   constructor(private http: HttpClient) {}
 

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { API_BASE_URL } from '../config/api.config';
 
 export interface LoginResponse {
   access_token: string;
@@ -42,7 +43,7 @@ const USER_KEY = 'badi_user';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private apiUrl = 'http://localhost:3000/auth';
+  private apiUrl = `${API_BASE_URL}/auth`;
   private currentUserSubject = new BehaviorSubject<LoginResponse['user'] | null>(this.getStoredUser());
   
   currentUser$ = this.currentUserSubject.asObservable();

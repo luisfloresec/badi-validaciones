@@ -17,6 +17,7 @@ import { TextareaModule } from 'primeng/textarea';
 import { ButtonModule } from 'primeng/button';
 import { RealizedDeliveriesService } from '../realized-deliveries.service';
 import { HttpClient } from '@angular/common/http';
+import { API_BASE_URL } from '../../../core/config/api.config';
 
 @Component({
   selector: 'app-realized-delivery-form',
@@ -87,7 +88,7 @@ export class RealizedDeliveryFormComponent implements OnInit {
     this.scheduledDelivery = null;
     this.cdr.detectChanges();
 
-    this.http.get<any>(`http://localhost:3000/schedules/${this.scheduleId}`).subscribe({
+    this.http.get<any>(`${API_BASE_URL}/schedules/${this.scheduleId}`).subscribe({
       next: (schedule) => {
         this.scheduledDelivery = schedule;
         

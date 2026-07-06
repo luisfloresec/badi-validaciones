@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { API_BASE_URL } from '../../core/config/api.config';
 
 export interface AuditLog {
   id: string;
@@ -33,7 +34,7 @@ export interface AuditResponse {
   providedIn: 'root'
 })
 export class AuditService {
-  private apiUrl = 'http://localhost:3000/audit';
+  private apiUrl = `${API_BASE_URL}/audit`;
 
   constructor(private http: HttpClient) {}
 

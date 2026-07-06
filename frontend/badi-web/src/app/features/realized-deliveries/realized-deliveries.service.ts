@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { API_BASE_URL } from '../../core/config/api.config';
 
 export interface CreateRealizedDelivery {
   idEntregaProgramada: string;
@@ -30,7 +31,7 @@ export interface RealizedDelivery {
   providedIn: 'root'
 })
 export class RealizedDeliveriesService {
-  private apiUrl = 'http://localhost:3000/realized-deliveries';
+  private apiUrl = `${API_BASE_URL}/realized-deliveries`;
 
   constructor(private http: HttpClient) {}
 

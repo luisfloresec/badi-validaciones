@@ -96,7 +96,7 @@
   <div class="state-container state-error" *ngIf="!loading && error">
     <mat-icon class="state-icon">cloud_off</mat-icon>
     <p><strong>{{ error }}</strong></p>
-    <p class="state-hint">Verifica que el backend esté ejecutándose correctamente en http://localhost:3000</p>
+    <p class="state-hint">Verifica que el backend esté ejecutándose correctamente.</p>
     <button mat-stroked-button (click)="loadDocuments()">
       <mat-icon>refresh</mat-icon> Reintentar
     </button>

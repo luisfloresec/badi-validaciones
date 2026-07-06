@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { API_BASE_URL } from '../../core/config/api.config';
 
 /* ──────────────────────────────────────
    Interfaces — alineadas al backend
@@ -140,9 +141,9 @@ export interface OrganizationFullDetail {
 @Injectable({ providedIn: 'root' })
 export class OrganizationsService {
 
-  private readonly apiUrl = 'http://localhost:3000/organizations';
-  private readonly catalogUrl = 'http://localhost:3000/catalogs';
-  private readonly typesUrl = 'http://localhost:3000/organization-types';
+  private readonly apiUrl = `${API_BASE_URL}/organizations`;
+  private readonly catalogUrl = `${API_BASE_URL}/catalogs`;
+  private readonly typesUrl = `${API_BASE_URL}/organization-types`;
 
   constructor(private http: HttpClient) {}
 
@@ -193,7 +194,7 @@ export class OrganizationsService {
   }
 
   updateRepresentative(id: string, payload: any): Observable<any> {
-    return this.http.patch(`http://localhost:3000/representatives/${id}`, payload);
+    return this.http.patch(`${API_BASE_URL}/representatives/${id}`, payload);
   }
 
   createAttendedGroupWithLeader(organizationId: string, payload: any): Observable<any> {
@@ -201,25 +202,25 @@ export class OrganizationsService {
   }
 
   updateAttendedGroup(groupId: string, payload: any): Observable<any> {
-    return this.http.patch(`http://localhost:3000/attended-groups/${groupId}`, payload);
+    return this.http.patch(`${API_BASE_URL}/attended-groups/${groupId}`, payload);
   }
 
   deactivateAttendedGroup(groupId: string): Observable<any> {
-    return this.http.patch(`http://localhost:3000/attended-groups/${groupId}/deactivate`, {});
+    return this.http.patch(`${API_BASE_URL}/attended-groups/${groupId}/deactivate`, {});
   }
 
   // --- DIRIGENTES ---
 
   updateLeader(leaderId: string, payload: any): Observable<any> {
-    return this.http.patch(`http://localhost:3000/leaders/${leaderId}`, payload);
+    return this.http.patch(`${API_BASE_URL}/leaders/${leaderId}`, payload);
   }
 
   deactivateLeader(leaderId: string): Observable<any> {
-    return this.http.patch(`http://localhost:3000/leaders/${leaderId}/deactivate`, {});
+    return this.http.patch(`${API_BASE_URL}/leaders/${leaderId}/deactivate`, {});
   }
 
   replaceLeader(groupId: string, payload: any): Observable<any> {
-    return this.http.post(`http://localhost:3000/attended-groups/${groupId}/leaders/replace`, payload);
+    return this.http.post(`${API_BASE_URL}/attended-groups/${groupId}/leaders/replace`, payload);
   }
 
   downloadReport(id: string): Observable<Blob> {

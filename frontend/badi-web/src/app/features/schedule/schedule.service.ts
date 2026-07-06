@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { API_BASE_URL } from '../../core/config/api.config';
 
 export interface ScheduledDelivery {
   id: string;
@@ -63,7 +64,7 @@ export interface ScheduleFilters {
   providedIn: 'root'
 })
 export class ScheduleService {
-  private apiUrl = 'http://localhost:3000/schedules';
+  private apiUrl = `${API_BASE_URL}/schedules`;
 
   constructor(private http: HttpClient) {}
 

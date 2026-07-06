@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { API_BASE_URL } from '../../core/config/api.config';
 
 export interface DocumentType {
   id: string;
@@ -36,7 +37,7 @@ export interface UpdateDocumentTypeDto extends Partial<CreateDocumentTypeDto> {}
   providedIn: 'root'
 })
 export class DocumentTypesService {
-  private apiUrl = 'http://localhost:3000/documents/types';
+  private apiUrl = `${API_BASE_URL}/documents/types`;
 
   constructor(private http: HttpClient) {}
 

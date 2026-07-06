@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { API_BASE_URL } from '../../core/config/api.config';
 
 export interface AgreementType {
   id: string;
@@ -48,7 +49,7 @@ export interface UpdateAgreementDto {
   providedIn: 'root'
 })
 export class AgreementsService {
-  private apiUrl = 'http://localhost:3000/agreements';
+  private apiUrl = `${API_BASE_URL}/agreements`;
 
   constructor(private http: HttpClient) {}
 
