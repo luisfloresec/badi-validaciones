@@ -1,6 +1,6 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
@@ -12,6 +12,7 @@ import { IftaLabelModule } from 'primeng/iftalabel';
 import { finalize } from 'rxjs/operators';
 import { UsersService, User } from '../users.service';
 import { RolesService, Role } from '../../roles/roles.service';
+import { passwordStrongValidator, STRONG_PASSWORD_MESSAGE } from '../../../shared/validators/password-strong.validator';
 
 @Component({
   selector: 'app-user-form',
@@ -59,8 +60,11 @@ export class UserFormComponent implements OnInit {
     });
 
     if (this.mode === 'create') {
-      this.form.get('password')?.setValidators([Validators.required, Validators.minLength(8)]);
+      // Crear: contraseña obligatoria y fuerte
+      this.form.get('password')?.setValidators([Validators.required, passwordStrongValidator]);
     } else if (this.mode === 'edit' && this.user) {
+      // Editar: si se escribe contraseña debe ser fuerte; si está vacía se ignora
+      this.form.get('password')?.setValidators([passwordStrongValidator]);
       this.form.patchValue({
         nombres: this.user.nombres,
         apellidos: this.user.apellidos,
@@ -71,6 +75,9 @@ export class UserFormComponent implements OnInit {
       });
     }
   }
+
+  /** Exponer mensaje para el template */
+  readonly passwordHint = STRONG_PASSWORD_MESSAGE;
 
   ngOnInit(): void {
     this.rolesService.getAllActive().subscribe({

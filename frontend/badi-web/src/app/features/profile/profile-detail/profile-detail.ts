@@ -18,6 +18,7 @@ import { ButtonModule } from 'primeng/button';
 import { FluidModule } from 'primeng/fluid';
 import { AuthService, UserProfile } from '../../../core/auth/auth.service';
 import { NotificationService } from '../../../shared/services/notification.service';
+import { passwordStrongValidator, STRONG_PASSWORD_MESSAGE } from '../../../shared/validators/password-strong.validator';
 
 @Component({
   selector: 'app-profile-detail',
@@ -68,10 +69,13 @@ export class ProfileDetailComponent implements OnInit, OnDestroy {
 
     this.passwordForm = this.fb.group({
       currentPassword: ['', Validators.required],
-      newPassword: ['', [Validators.required, Validators.minLength(8)]],
+      newPassword: ['', [Validators.required, passwordStrongValidator]],
       confirmPassword: ['', Validators.required]
     }, { validators: this.passwordMatchValidator });
   }
+
+  /** Exponer mensaje para el template */
+  readonly passwordHint = STRONG_PASSWORD_MESSAGE;
 
   ngOnInit(): void {
     // Usar el usuario cacheado inmediatamente para pintar rápido sin depender de datos nulos

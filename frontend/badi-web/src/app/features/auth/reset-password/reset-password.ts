@@ -6,6 +6,7 @@ import { PasswordModule } from 'primeng/password';
 import { ButtonModule } from 'primeng/button';
 import { AuthService } from '../../../core/auth/auth.service';
 import { NotificationService } from '../../../shared/services/notification.service';
+import { STRONG_PASSWORD_REGEX, STRONG_PASSWORD_MESSAGE } from '../../../shared/validators/password-strong.validator';
 
 @Component({
   selector: 'app-reset-password',
@@ -26,6 +27,7 @@ export class ResetPasswordComponent implements OnInit {
   confirmPassword = '';
   isLoading = false;
   errorMessage = '';
+  readonly passwordHint = STRONG_PASSWORD_MESSAGE;
 
   constructor(
     private authService: AuthService,
@@ -55,8 +57,8 @@ export class ResetPasswordComponent implements OnInit {
       return;
     }
 
-    if (this.password.length < 8) {
-      this.errorMessage = 'La nueva contraseña debe tener al menos 8 caracteres.';
+    if (!STRONG_PASSWORD_REGEX.test(this.password)) {
+      this.errorMessage = STRONG_PASSWORD_MESSAGE;
       return;
     }
 

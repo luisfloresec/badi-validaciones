@@ -53,12 +53,12 @@
             <input pInputText type="password" formControlName="password" id="password" />
             <label for="password">Contraseña Temporal</label>
           </p-iftalabel>
-          <small class="field-hint">Mínimo 8 caracteres</small>
+          <small class="field-hint">{{ passwordHint }}</small>
           <small class="field-error" *ngIf="form.get('password')?.hasError('required') && form.get('password')?.touched">
             La contraseña temporal es obligatoria.
           </small>
-          <small class="field-error" *ngIf="form.get('password')?.hasError('minlength') && form.get('password')?.touched">
-            Debe tener al menos 8 caracteres.
+          <small class="field-error" *ngIf="form.get('password')?.hasError('weakPassword') && form.get('password')?.touched">
+            {{ form.get('password')?.getError('weakPassword') }}
           </small>
         </div>
 

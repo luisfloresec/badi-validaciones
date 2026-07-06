@@ -1,4 +1,5 @@
-import { IsNotEmpty, IsString, MinLength } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
+import { IsStrongPassword } from '../../../common/validators/password-strong.validator';
 
 export class ResetPasswordDto {
   @IsString()
@@ -7,7 +8,7 @@ export class ResetPasswordDto {
 
   @IsString()
   @IsNotEmpty({ message: 'La nueva contraseña es obligatoria.' })
-  @MinLength(8, { message: 'La nueva contraseña debe tener al menos 8 caracteres.' })
+  @IsStrongPassword()
   password: string;
 
   @IsString()

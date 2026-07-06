@@ -4,11 +4,11 @@ import {
   IsOptional,
   IsString,
   MaxLength,
-  MinLength,
   IsArray,
   IsUUID,
 } from 'class-validator';
 import { IsCedulaEcuatoriana } from '../../../common/validators/cedula-ecuatoriana.validator';
+import { IsStrongPassword } from '../../../common/validators/password-strong.validator';
 
 export class CreateUserDto {
   @IsString()
@@ -51,7 +51,7 @@ export class CreateUserDto {
 
   @IsString()
   @IsNotEmpty({ message: 'El campo password es obligatorio.' })
-  @MinLength(8, { message: 'La contraseña debe tener al menos 8 caracteres.' })
+  @IsStrongPassword()
   password: string;
 
   @IsOptional()
