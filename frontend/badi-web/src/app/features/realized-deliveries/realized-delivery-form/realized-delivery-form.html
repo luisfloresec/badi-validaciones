@@ -41,7 +41,7 @@
     <div class="form-grid">
       <div class="field-container col-half">
         <span class="d-block text-muted small fw-600">Organización:</span>
-        <span class="fw-500 text-slate-900">{{ scheduledDelivery.convenio?.organizacion?.razonSocial || scheduledDelivery.convenio?.organizacion?.nombreComercial || scheduledDelivery.convenio?.organizacion?.nombre || 'Desconocida' }}</span>
+        <span class="fw-500 text-slate-900">{{ scheduledDelivery.organizacion?.razonSocial || scheduledDelivery.organizacion?.nombreComercial || scheduledDelivery.organizacion?.nombre || 'Desconocida' }}</span>
       </div>
       <div class="field-container col-half">
         <span class="d-block text-muted small fw-600">Convenio:</span>
@@ -55,11 +55,8 @@
         <span class="d-block text-muted small fw-600">Estado Programado:</span>
         <span class="badge bg-primary">{{ scheduledDelivery.estado }}</span>
       </div>
-      <div class="field-container col-full" *ngIf="scheduledDelivery.descripcion">
-        <span class="d-block text-muted small fw-600">Descripción / Observaciones programadas:</span>
-        <p class="mb-0 text-slate-700 bg-white p-2 rounded border">{{ scheduledDelivery.descripcion }}</p>
-      </div>
     </div>
+
   </div>
 
   <!-- Formulario -->
@@ -94,57 +91,34 @@
           </small>
         </div>
 
-        <!-- Kilos Entregados (PrimeNG) -->
+        <!-- Cuota (PrimeNG) -->
         <div class="field-container col-half">
           <p-iftalabel>
-            <input pInputText type="number" step="0.01" formControlName="kilosEntregados" id="kilosEntregados" />
-            <label for="kilosEntregados">Kilos Entregados *</label>
+            <input pInputText type="number" step="0.01" formControlName="cuota" id="cuota" />
+            <label for="cuota">Cuota *</label>
           </p-iftalabel>
-          <small class="field-hint">Peso total en kilogramos entregados</small>
-          <small class="field-error" *ngIf="deliveryForm.get('kilosEntregados')?.hasError('required') && deliveryForm.get('kilosEntregados')?.touched">El peso en kilos es requerido.</small>
-          <small class="field-error" *ngIf="deliveryForm.get('kilosEntregados')?.hasError('min') && deliveryForm.get('kilosEntregados')?.touched">Debe ser mayor a 0.</small>
+          
+          <small class="field-error" *ngIf="deliveryForm.get('cuota')?.hasError('required') && deliveryForm.get('cuota')?.touched">La cuota es requerida.</small>
+          <small class="field-error" *ngIf="deliveryForm.get('cuota')?.hasError('min') && deliveryForm.get('cuota')?.touched">Debe ser mayor o igual a 0.</small>
+          
+          <!-- Bloque de Kilos Calculados -->
+          <div class="kilos-summary">
+            <div class="kilos-summary__label">Kilos estimados</div>
+            <div class="kilos-summary__value">{{ kilosEntregadosCalculado }} Kg</div>
+            <div class="kilos-summary__hint">Calculado automáticamente a partir de la cuota.</div>
+          </div>
         </div>
 
-        <!-- Personas Atendidas (PrimeNG) -->
+        <!-- Personas Atendidas o Usuarios (PrimeNG) -->
         <div class="field-container col-half">
           <p-iftalabel>
             <input pInputText type="number" formControlName="personasAtendidas" id="personasAtendidas" />
-            <label for="personasAtendidas">Personas Atendidas *</label>
+            <label for="personasAtendidas">Personas Atendidas o Usuarios *</label>
           </p-iftalabel>
-          <small class="field-hint">Número de personas atendidas en la entrega</small>
-          <small class="field-error" *ngIf="deliveryForm.get('personasAtendidas')?.hasError('required') && deliveryForm.get('personasAtendidas')?.touched">Personas atendidas es requerido.</small>
+          <small class="field-hint">Número de personas atendidas o usuarios beneficiados en la entrega</small>
+          <small class="field-error" *ngIf="deliveryForm.get('personasAtendidas')?.hasError('required') && deliveryForm.get('personasAtendidas')?.touched">Este campo es requerido.</small>
           <small class="field-error" *ngIf="deliveryForm.get('personasAtendidas')?.hasError('min') && deliveryForm.get('personasAtendidas')?.touched">Debe ser mayor o igual a 0.</small>
         </div>
-
-        <!-- Beneficiarios Directos (PrimeNG) -->
-        <div class="field-container col-half">
-          <p-iftalabel>
-            <input pInputText type="number" formControlName="beneficiariosAtendidos" id="beneficiariosAtendidos" />
-            <label for="beneficiariosAtendidos">Beneficiarios Directos (Opcional)</label>
-          </p-iftalabel>
-          <small class="field-hint">Beneficiarios específicos si aplica</small>
-          <small class="field-error" *ngIf="deliveryForm.get('beneficiariosAtendidos')?.hasError('min') && deliveryForm.get('beneficiariosAtendidos')?.touched">Debe ser mayor o igual a 0.</small>
-        </div>
-
-        <!-- Detalle de Productos (PrimeNG Textarea) -->
-        <div class="field-container col-full">
-          <p-iftalabel>
-            <textarea pTextarea formControlName="detalleProductos" id="detalleProductos" rows="3"></textarea>
-            <label for="detalleProductos">Detalle de Productos Entregados *</label>
-          </p-iftalabel>
-          <small class="field-hint">Especifica los productos, lotes o categorías entregadas</small>
-          <small class="field-error" *ngIf="deliveryForm.get('detalleProductos')?.hasError('required') && deliveryForm.get('detalleProductos')?.touched">El detalle de productos es obligatorio.</small>
-        </div>
-
-        <!-- Observaciones (PrimeNG Textarea) -->
-        <div class="field-container col-full">
-          <p-iftalabel>
-            <textarea pTextarea formControlName="observaciones" id="observaciones" rows="2"></textarea>
-            <label for="observaciones">Observaciones (Opcional)</label>
-          </p-iftalabel>
-          <small class="field-hint">Cualquier eventualidad o nota adicional sobre la entrega</small>
-        </div>
-
       </div>
     </div>
 

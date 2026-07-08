@@ -11,4 +11,6 @@ import { AuditSubscriber } from './subscribers/audit.subscriber';
   providers: [AuditService, AuditSubscriber],
   exports: [AuditService],
 })
-export class AuditModule {}
+export class AuditModule {
+  constructor(private readonly auditSubscriber: AuditSubscriber) {}
+}

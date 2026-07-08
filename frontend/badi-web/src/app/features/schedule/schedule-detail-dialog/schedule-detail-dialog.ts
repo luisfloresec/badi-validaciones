@@ -49,10 +49,10 @@ export class ScheduleDetailDialogComponent implements OnInit {
   // Tracking changes for calendar refresh
   hasChanges = false;
 
-  // Edit mode
   editMode = false;
   editDescripcion = '';
   editObservaciones = '';
+  editCuota: number | null = null;
   isSaving = false;
 
   constructor(
@@ -96,7 +96,7 @@ export class ScheduleDetailDialogComponent implements OnInit {
               }))
               .subscribe({
                 next: (rd) => {
-                  this.realizedDeliveryId = rd.id;
+                  this.realizedDeliveryId = rd ? rd.id : null;
                   this.cdr.markForCheck();
                 },
                 error: (err) => {
@@ -165,6 +165,7 @@ export class ScheduleDetailDialogComponent implements OnInit {
   enterEditMode(): void {
     this.editDescripcion = this.delivery?.descripcion || '';
     this.editObservaciones = this.delivery?.observaciones || '';
+    this.editCuota = this.delivery?.cuota ?? null;
     this.editMode = true;
   }
 
@@ -177,9 +178,10 @@ export class ScheduleDetailDialogComponent implements OnInit {
     if (this.editDescripcion.length > 300) return;
 
     this.isSaving = true;
-    const payload: { descripcion?: string; observaciones?: string } = {
+    const payload: { descripcion?: string; observaciones?: string; cuota?: number } = {
       descripcion: this.editDescripcion.trim() || undefined,
-      observaciones: this.editObservaciones.trim() || undefined
+      observaciones: this.editObservaciones.trim() || undefined,
+      cuota: this.editCuota !== null && this.editCuota !== undefined && this.editCuota.toString() !== '' ? Number(this.editCuota) : undefined
     };
 
     this.scheduleService.update(this.delivery.id, payload).subscribe({
@@ -200,6 +202,45 @@ export class ScheduleDetailDialogComponent implements OnInit {
         this.isSaving = false;
       }
     });
+  }
+
+  isSeguimientoDropdownOpen = false;
+
+  toggleSeguimientoDropdown(event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
+    this.isSeguimientoDropdownOpen = !this.isSeguimientoDropdownOpen;
+  }
+
+  onEstadoSeguimientoSelect(newState: string): void {
+    if (!this.delivery || this.delivery.estadoSeguimiento === newState) {
+      this.isSeguimientoDropdownOpen = false;
+      return;
+    }
+    
+    const oldState = this.delivery.estadoSeguimiento;
+    this.delivery.estadoSeguimiento = newState;
+    this.isSeguimientoDropdownOpen = false;
+    
+    this.scheduleService.update(this.delivery.id, { estadoSeguimiento: newState }).subscribe({
+      next: (updated) => {
+        this.delivery = updated;
+        this.hasChanges = true;
+        this.snackBar.open('Estado de seguimiento actualizado', 'Cerrar', { duration: 3000 });
+      },
+      error: () => {
+        this.snackBar.open('Error al actualizar el estado de seguimiento', 'Cerrar', { duration: 3000 });
+        this.delivery!.estadoSeguimiento = oldState; // revertir
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  getOrganizationName(): string {
+    return this.delivery?.organizacion?.razonSocial
+      || this.delivery?.organizacion?.nombreComercial
+      || 'Organización sin nombre';
   }
 
   // ── Reschedule ─────────────────────────

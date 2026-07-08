@@ -1,0 +1,71 @@
+<div class="dialog-container">
+  <div class="dialog-header">
+    <div class="header-title">
+      <mat-icon>add_photo_alternate</mat-icon>
+      <h2 mat-dialog-title>Cargar Evidencias de Entrega</h2>
+    </div>
+    <p-button icon="pi pi-times" [text]="true" severity="secondary" mat-dialog-close [disabled]="isUploading" />
+  </div>
+
+  <div class="dialog-content" mat-dialog-content>
+    <div class="evidence-instructions">
+      <p>Sube las fotografías que respaldan la ejecución de esta entrega. Selecciona o arrastra una o varias imágenes a la vez.</p>
+    </div>
+
+    <!-- Drag and drop zone -->
+    <div class="drop-zone" 
+         (click)="isUploading ? null : fileInput.click()" 
+         (dragover)="onDragOver($event)" 
+         (drop)="onDrop($event)"
+         [class.disabled]="isUploading">
+      <mat-icon class="drop-icon">cloud_upload</mat-icon>
+      <p class="drop-text">Arrastra o selecciona una o varias fotografías de la entrega.</p>
+      <small class="drop-hint">Formatos permitidos: JPG, PNG, WEBP</small>
+      
+      <input type="file" #fileInput multiple accept=".jpg,.jpeg,.png,.webp,image/*" 
+             style="display: none;" (change)="onFileSelected($event)" [disabled]="isUploading">
+    </div>
+
+    <!-- Upload Progress -->
+    <div class="upload-progress-container" *ngIf="isUploading">
+      <p class="progress-text">Subiendo imágenes ({{ uploadProgress }} de {{ totalToUpload }})...</p>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" [style.width.%]="(uploadProgress / totalToUpload) * 100"></div>
+      </div>
+    </div>
+
+    <!-- Image preview list -->
+    <div class="image-preview-list" *ngIf="selectedImages.length > 0">
+      <div class="image-item" *ngFor="let img of selectedImages; let i = index" [ngClass]="img.status">
+        <div class="img-thumbnail-wrapper">
+          <img [src]="img.previewUrl" class="img-thumbnail" />
+        </div>
+        <div class="img-details">
+          <span class="img-name">{{ img.file.name }}</span>
+          <span class="img-size">{{ (img.file.size / 1024 / 1024).toFixed(2) }} MB</span>
+        </div>
+        
+        <div class="img-status">
+          <mat-icon *ngIf="img.status === 'pending'" class="text-gray-400">hourglass_empty</mat-icon>
+          <mat-icon *ngIf="img.status === 'uploading'" class="text-blue-500 animate-spin">sync</mat-icon>
+          <mat-icon *ngIf="img.status === 'success'" class="text-green-500">check_circle</mat-icon>
+          <mat-icon *ngIf="img.status === 'error'" class="text-red-500" title="Error al subir">error</mat-icon>
+        </div>
+
+        <button mat-icon-button color="warn" (click)="removeImage(i)" *ngIf="!isUploading && img.status !== 'success'">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    </div>
+    
+  </div>
+
+  <div class="dialog-actions" mat-dialog-actions>
+    <p-button label="Cancelar" [outlined]="true" severity="secondary" mat-dialog-close [disabled]="isUploading" />
+    <p-button [label]="isUploading ? 'Subiendo...' : 'Subir evidencias'"
+              icon="pi pi-upload"
+              (onClick)="onSubmit()" 
+              [disabled]="selectedImages.length === 0 || isUploading"
+              [loading]="isUploading" />
+  </div>
+</div>

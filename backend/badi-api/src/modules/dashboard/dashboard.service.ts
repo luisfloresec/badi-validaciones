@@ -87,6 +87,7 @@ export class DashboardService {
       this.scheduledDeliveryRepo.createQueryBuilder('s')
         .where('s.fechaProgramada >= :inicioMes', { inicioMes: inicioMesStr })
         .andWhere('s.fechaProgramada <= :finMes', { finMes: finMesStr })
+        .andWhere('s.estado IN (:...estados)', { estados: ['Programado', 'Reprogramado'] })
         .getCount(),
       this.realizedDeliveryRepo.createQueryBuilder('r')
         .where('r.fechaRealizacion >= :inicioMes', { inicioMes: inicioMesStr })

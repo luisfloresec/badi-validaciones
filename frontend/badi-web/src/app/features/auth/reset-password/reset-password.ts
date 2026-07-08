@@ -73,7 +73,7 @@ export class ResetPasswordComponent implements OnInit {
     this.authService.resetPassword(this.token, this.password, this.confirmPassword).subscribe({
       next: (response) => {
         this.isLoading = false;
-        this.notificationService.success(response.message || 'Contraseña restablecida correctamente.');
+        this.notificationService.success('Contraseña actualizada correctamente.');
         this.router.navigate(['/login']);
       },
       error: (err) => {

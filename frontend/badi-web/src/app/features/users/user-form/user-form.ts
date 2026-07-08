@@ -60,8 +60,10 @@ export class UserFormComponent implements OnInit {
     });
 
     if (this.mode === 'create') {
-      // Crear: contraseña obligatoria y fuerte
+      // Crear: contraseña obligatoria y fuerte, correo @badiec.org
       this.form.get('password')?.setValidators([Validators.required, passwordStrongValidator]);
+      this.form.get('email')?.addValidators([Validators.pattern(/^[a-zA-Z0-9._%+-]+@badiec\.org$/)]);
+      this.form.get('email')?.updateValueAndValidity();
     } else if (this.mode === 'edit' && this.user) {
       // Editar: si se escribe contraseña debe ser fuerte; si está vacía se ignora
       this.form.get('password')?.setValidators([passwordStrongValidator]);

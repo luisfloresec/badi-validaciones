@@ -5,10 +5,10 @@ import { registerDecorator, ValidationOptions, ValidationArguments } from 'class
  * Mínimo 8 caracteres, al menos: 1 mayúscula, 1 minúscula, 1 número,
  * 1 carácter especial, sin espacios en blanco.
  */
-export const STRONG_PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s])[^\s]{8,}$/;
+export const STRONG_PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
 export const STRONG_PASSWORD_MESSAGE =
-  'La contraseña debe tener mínimo 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial, sin espacios.';
+  'La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial permitido: @ $ ! % * ? &.';
 
 /**
  * Decorator de class-validator reutilizable.

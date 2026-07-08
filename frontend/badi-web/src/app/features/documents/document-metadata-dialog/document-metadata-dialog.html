@@ -55,49 +55,9 @@
         </div>
       </div>
 
-      <!-- Fecha del Documento -->
-      <div class="form-row">
-        <div class="field-container col-full">
-          <div class="special-field special-field-clickable" [ngClass]="{'border-red-500': editForm.get('fechaDocumento')?.invalid && editForm.get('fechaDocumento')?.touched}" (click)="metaFechaDocPicker.open()">
-            <div class="special-field-content">
-              <span class="special-field-label">Fecha del Documento (Físico/Emisión) (Obligatorio)</span>
-              <div class="special-field-control datepicker-control-wrapper">
-                <span class="special-field-value">{{ formatDisplayDate(editForm.get('fechaDocumento')?.value) }}</span>
-                <mat-form-field appearance="outline" class="hidden-mat-field">
-                  <input matInput [matDatepicker]="metaFechaDocPicker" formControlName="fechaDocumento" class="hidden-datepicker-input" readonly>
-                </mat-form-field>
-              </div>
-            </div>
-            <mat-datepicker-toggle matIconSuffix [for]="metaFechaDocPicker" (click)="$event.stopPropagation()"></mat-datepicker-toggle>
-            <mat-datepicker #metaFechaDocPicker></mat-datepicker>
-          </div>
-          <small class="field-hint">Fecha oficial de emisión o firma del documento original</small>
-          <small class="field-error" *ngIf="editForm.get('fechaDocumento')?.invalid && editForm.get('fechaDocumento')?.touched">La fecha del documento físico es obligatoria. Seleccione una fecha en el calendario.</small>
-        </div>
-      </div>
 
-      <!-- Descripción -->
-      <div class="form-row">
-        <div class="field-container col-full">
-          <p-iftalabel>
-            <textarea pTextarea formControlName="descripcion" id="meta_descripcion" rows="2"></textarea>
-            <label for="meta_descripcion">Descripción (Opcional)</label>
-          </p-iftalabel>
-        </div>
-      </div>
 
-      <!-- Observaciones -->
-      <div class="form-row">
-        <div class="field-container col-full">
-          <p-iftalabel>
-            <textarea pTextarea formControlName="observaciones" id="meta_observaciones" rows="2" [ngClass]="{'ng-invalid ng-dirty': editForm.get('observaciones')?.invalid && editForm.get('observaciones')?.touched}"></textarea>
-            <label for="meta_observaciones">Observaciones {{ selectedType?.observacionesObligatorias ? '(Obligatorio)' : '(Opcional)' }}</label>
-          </p-iftalabel>
-          <small class="field-error" *ngIf="editForm.get('observaciones')?.hasError('required') && editForm.get('observaciones')?.touched">
-            Las observaciones son obligatorias según la regla de este tipo documental. Explique el contexto o detalles del archivo.
-          </small>
-        </div>
-      </div>
+
     </form>
   </div>
 

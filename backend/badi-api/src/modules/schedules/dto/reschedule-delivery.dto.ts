@@ -1,4 +1,4 @@
-import { IsDateString, IsNotEmpty, IsString } from 'class-validator';
+import { IsDateString, IsNotEmpty, IsString, IsOptional } from 'class-validator';
 
 export class RescheduleDeliveryDto {
   @IsDateString()
@@ -6,6 +6,10 @@ export class RescheduleDeliveryDto {
   nuevaFecha: string;
 
   @IsString()
+  @IsOptional()
+  motivoReprogramacion?: string;
+
+  @IsString()
   @IsNotEmpty()
-  motivoReprogramacion: string;
+  nuevaHora: string;
 }

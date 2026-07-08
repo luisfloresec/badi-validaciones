@@ -85,9 +85,7 @@ export class DocumentUploadDialogComponent implements OnInit {
       titulo: ['', [Validators.required, Validators.maxLength(300)]],
       descripcion: [''],
       entidadRelacionada: [{ value: this.prefilledEntity || '', disabled: !!this.prefilledEntity }],
-      idEntidadRelacionada: [{ value: this.prefilledEntityId || '', disabled: !!this.prefilledEntityId }],
-      fechaDocumento: [''],
-      observaciones: ['']
+      idEntidadRelacionada: [{ value: this.prefilledEntityId || '', disabled: !!this.prefilledEntityId }]
     });
   }
 
@@ -120,12 +118,7 @@ export class DocumentUploadDialogComponent implements OnInit {
 
   updateValidatorsBasedOnType() {
     if (!this.selectedType) return;
-    
-    if (this.selectedType.observacionesObligatorias) {
-      this.uploadForm.get('observaciones')?.setValidators([Validators.required]);
-    } else {
-      this.uploadForm.get('observaciones')?.clearValidators();
-    }
+    this.uploadForm.get('observaciones')?.clearValidators();
     this.uploadForm.get('observaciones')?.updateValueAndValidity();
   }
 
@@ -199,19 +192,11 @@ export class DocumentUploadDialogComponent implements OnInit {
     const entityId = formValue.idEntidadRelacionada || this.prefilledEntityId;
     if (entityId) payload['idEntidadRelacionada'] = entityId;
 
-    // Serialize fechaDocumento as YYYY-MM-DD (never as Date object or full ISO string)
-    if (formValue.fechaDocumento) {
-      const raw = formValue.fechaDocumento;
-      if (raw instanceof Date) {
-        const y = raw.getFullYear();
-        const m = String(raw.getMonth() + 1).padStart(2, '0');
-        const d = String(raw.getDate()).padStart(2, '0');
-        payload['fechaDocumento'] = `${y}-${m}-${d}`;
-      } else if (typeof raw === 'string' && raw.length > 0) {
-        // Take only the date part in case the datepicker returns a full ISO string
-        payload['fechaDocumento'] = raw.substring(0, 10);
-      }
-    }
+    const today = new Date();
+    const y = today.getFullYear();
+    const m = String(today.getMonth() + 1).padStart(2, '0');
+    const d = String(today.getDate()).padStart(2, '0');
+    payload['fechaDocumento'] = `${y}-${m}-${d}`;
 
     this.documentsService.upload(payload, this.selectedFile).subscribe({
       next: (doc) => {

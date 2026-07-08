@@ -6,9 +6,11 @@ import {
   UpdateEvent,
   RemoveEvent,
 } from 'typeorm';
+import { Injectable } from '@nestjs/common';
 import { ClsService } from 'nestjs-cls';
 import { AuditLog } from '../entities/audit-log.entity';
 
+@Injectable()
 @EventSubscriber()
 export class AuditSubscriber implements EntitySubscriberInterface<any> {
   constructor(

@@ -42,8 +42,11 @@
           <small class="field-error" *ngIf="form.get('email')?.hasError('required') && form.get('email')?.touched">
             El correo electrónico es obligatorio.
           </small>
-          <small class="field-error" *ngIf="form.get('email')?.hasError('email') && form.get('email')?.touched">
+          <small class="field-error" *ngIf="form.get('email')?.hasError('email') && !form.get('email')?.hasError('pattern') && form.get('email')?.touched">
             Formato de correo electrónico inválido.
+          </small>
+          <small class="field-error" *ngIf="form.get('email')?.hasError('pattern') && form.get('email')?.touched">
+            El correo institucional debe pertenecer al dominio @badiec.org.
           </small>
         </div>
 

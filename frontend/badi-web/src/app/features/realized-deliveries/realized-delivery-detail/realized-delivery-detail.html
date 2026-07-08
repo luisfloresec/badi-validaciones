@@ -8,7 +8,7 @@
     </a>
     <mat-icon class="separator">chevron_right</mat-icon>
     <span *ngIf="!delivery" class="current-page">Detalle</span>
-    <span *ngIf="delivery" class="current-page">{{ delivery.convenio?.organizacion?.razonSocial || delivery.convenio?.organizacion?.nombreComercial || 'Entrega' }}</span>
+    <span *ngIf="delivery" class="current-page">{{ delivery.organizacion?.razonSocial || delivery.organizacion?.nombreComercial || 'Entrega' }}</span>
   </div>
   
   <!-- Loading -->
@@ -48,7 +48,7 @@
         />
         <div class="action-buttons" *ngIf="authService.canEdit()">
           <p-button
-            label="Asociar evidencia"
+            label="Subir evidencia"
             icon="pi pi-paperclip"
             *ngIf="delivery.estado !== 'Anulada'"
             (onClick)="docSection.openUploadDialog()"
@@ -57,13 +57,11 @@
       </div>
 
       <div class="org-identity">
-        <div class="identity-main">
-          <h1>{{ delivery.convenio?.organizacion?.razonSocial || delivery.convenio?.organizacion?.nombreComercial || delivery.convenio?.organizacion?.nombre || 'Organización Desconocida' }}</h1>
-          <div class="identity-badges">
-            <span class="badge badge-ruc">Convenio: {{ delivery.convenio?.codigoConvenio || 'Sin Código' }}</span>
-            <span class="estado-chip" [ngClass]="getEstadoClass(delivery.estado)">
-              {{ delivery.estado }}
-            </span>
+        <div class="title-group">
+          <h1>{{ delivery.organizacion?.razonSocial || delivery.organizacion?.nombreComercial || delivery.organizacion?.nombre || 'Organización Desconocida' }}</h1>
+          <div class="badges">
+            <span class="badge badge-ruc">Convenio: {{ delivery.convenio?.codigoConvenio || 'Sin convenio' }}</span>
+            <span class="badge badge-estado" [ngClass]="getEstadoClass(delivery.estado)">{{ delivery.estado }}</span>
           </div>
           <p class="identity-location">
             <mat-icon>calendar_today</mat-icon> 
@@ -109,14 +107,14 @@
             <div class="info-item-icon-wrap"><mat-icon>business</mat-icon></div>
             <div>
               <label>Organización</label>
-              <span>{{ delivery.convenio?.organizacion?.razonSocial || delivery.convenio?.organizacion?.nombreComercial || 'Desconocida' }}</span>
+              <span>{{ delivery.organizacion?.razonSocial || delivery.organizacion?.nombreComercial || 'Desconocida' }}</span>
             </div>
           </div>
           <div class="info-item">
             <div class="info-item-icon-wrap"><mat-icon>description</mat-icon></div>
             <div>
               <label>Convenio Asociado</label>
-              <span *ngIf="!delivery.convenio">Sin Convenio</span>
+              <span *ngIf="!delivery.convenio">Sin convenio</span>
               <span *ngIf="delivery.convenio">
                 <a [routerLink]="['/agreements', delivery.convenio.id]" class="text-primary-badi text-decoration-none fw-600">
                   {{ delivery.convenio.codigoConvenio || 'Ver Convenio' }}
@@ -131,16 +129,9 @@
               <span>{{ (delivery.entregaProgramada?.fechaProgramada | date:'dd/MM/yyyy') || '—' }}</span>
             </div>
           </div>
-          <div class="info-item">
-            <div class="info-item-icon-wrap"><mat-icon>groups</mat-icon></div>
-            <div>
-              <label>Beneficiarios Directos</label>
-              <span>{{ delivery.beneficiariosAtendidos !== undefined && delivery.beneficiariosAtendidos !== null ? delivery.beneficiariosAtendidos : 'No especificado' }}</span>
-            </div>
-          </div>
 
           <!-- Fila 2: Detalle Productos -->
-          <div class="info-item full-width">
+          <div class="info-item full-width" *ngIf="delivery.detalleProductos">
             <div class="info-item-icon-wrap"><mat-icon>category</mat-icon></div>
             <div>
               <label>Productos Entregados</label>
@@ -148,14 +139,6 @@
             </div>
           </div>
 
-          <!-- Fila 3: Observaciones (si hay) -->
-          <div class="info-item full-width" *ngIf="delivery.observaciones">
-            <div class="info-item-icon-wrap"><mat-icon>note</mat-icon></div>
-            <div>
-              <label>Observaciones</label>
-              <span class="d-block mt-1 obs-text">{{ delivery.observaciones }}</span>
-            </div>
-          </div>
 
           <!-- Fila 4: Metadatos -->
           <div class="info-item full-width meta-item">

@@ -1,4 +1,4 @@
-<div class="dialog-container">
+<div class="dialog-container" (click)="isSeguimientoDropdownOpen = false">
   <!-- Loading state -->
   <div *ngIf="isLoading" class="state-container loading">
     <mat-spinner diameter="40"></mat-spinner>
@@ -45,92 +45,79 @@
             <span class="estado-chip mt-1" [ngClass]="getEstadoClass(delivery.estado)">{{ delivery.estado }}</span>
           </div>
 
+          <div class="info-item relative-dropdown-container">
+            <label>Seguimiento visual</label>
+            <div class="custom-dropdown" (click)="toggleSeguimientoDropdown($event)">
+              <div class="dropdown-trigger estado-chip mt-1" [ngClass]="'seguimiento-' + (delivery.estadoSeguimiento | lowercase)">
+                {{ delivery.estadoSeguimiento }}
+                <mat-icon class="dropdown-arrow">arrow_drop_down</mat-icon>
+              </div>
+              <div class="dropdown-menu shadow-2" *ngIf="isSeguimientoDropdownOpen">
+                <div class="dropdown-item" (click)="onEstadoSeguimientoSelect('Pendiente'); $event.stopPropagation()">
+                  <span class="color-dot dot-yellow"></span> Pendiente
+                </div>
+                <div class="dropdown-item" (click)="onEstadoSeguimientoSelect('Confirmado'); $event.stopPropagation()">
+                  <span class="color-dot dot-green"></span> Confirmado
+                </div>
+                <div class="dropdown-item" (click)="onEstadoSeguimientoSelect('Detenido'); $event.stopPropagation()">
+                  <span class="color-dot dot-red"></span> Detenido
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="info-item">
             <label>Fecha programada</label>
             <span class="date-value">{{ delivery.fechaProgramada | date:'dd/MM/yyyy' }}</span>
           </div>
 
-          <div class="info-item full-width" *ngIf="delivery.descripcion">
-            <label>Descripción</label>
-            <span>{{ delivery.descripcion }}</span>
+          <div class="info-item">
+            <label>Hora programada</label>
+            <span class="date-value">{{ delivery.horaProgramada || 'N/A' }}</span>
           </div>
 
-          <div class="info-item full-width" *ngIf="delivery.observaciones">
-            <label>Observaciones</label>
-            <span class="text-block">{{ delivery.observaciones }}</span>
+          <div class="info-item" *ngIf="delivery.cuota">
+            <label>Cuota</label>
+            <span>{{ delivery.cuota }}</span>
           </div>
 
-          <div class="info-item full-width" *ngIf="!delivery.descripcion && !delivery.observaciones">
-            <span class="text-muted-sm">Sin descripción ni observaciones registradas.</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Bloque 1b: Información Principal (edición) -->
-      <div class="detail-section edit-section" *ngIf="editMode">
-        <div class="detail-header">
-          <mat-icon>edit</mat-icon>
-          <h3>Editar información</h3>
-        </div>
-
-        <div class="edit-form p-fluid badi-form">
-          <div class="form-row">
-            <div class="field-container col-full">
-              <p-iftalabel>
-                <input pInputText [(ngModel)]="editDescripcion" id="editDescripcion" maxlength="300" />
-                <label for="editDescripcion">Descripción</label>
-              </p-iftalabel>
-              <div class="field-hint-container flex justify-content-between">
-                <small class="field-hint">Descripción de la entrega</small>
-                <small class="field-hint">{{ descripcionLength }} / 300</small>
-              </div>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="field-container col-full">
-              <p-iftalabel>
-                <textarea pTextarea [(ngModel)]="editObservaciones" id="editObservaciones" rows="3"></textarea>
-                <label for="editObservaciones">Observaciones</label>
-              </p-iftalabel>
-              <small class="field-hint">Observaciones adicionales</small>
-            </div>
-          </div>
-
-          <div class="edit-actions">
-            <p-button label="Cancelar edición" [outlined]="true" severity="secondary" (onClick)="cancelEditMode()" [disabled]="isSaving" />
-            <p-button label="Guardar cambios" icon="pi pi-save" (onClick)="saveEdit()" [disabled]="isSaving || descripcionLength > 300" [loading]="isSaving" />
+          <div class="info-item" *ngIf="delivery.kilosEstimados">
+            <label>Kilos Estimados</label>
+            <span>{{ delivery.kilosEstimados }} kg</span>
           </div>
         </div>
       </div>
 
-      <!-- Bloque 2: Información del Convenio -->
-      <div class="detail-section" *ngIf="delivery.convenio">
+
+
+      <!-- Bloque 2: Información de Organización y Convenio -->
+      <div class="detail-section">
         <div class="detail-header">
-          <mat-icon>handshake</mat-icon>
-          <h3>Convenio Asociado</h3>
+          <mat-icon>business</mat-icon>
+          <h3>Organización / Convenio</h3>
         </div>
 
         <div class="info-grid">
-          <div class="info-item">
-            <label>Código de convenio</label>
-            <span class="fw-500">{{ delivery.convenio.codigoConvenio || 'S/N' }}</span>
-          </div>
-
-          <div class="info-item" *ngIf="delivery.convenio.tipoConvenio">
-            <label>Tipo</label>
-            <span>{{ delivery.convenio.tipoConvenio.nombre }}</span>
-          </div>
-
-          <div class="info-item full-width" *ngIf="delivery.convenio.organizacion">
+          <div class="info-item full-width" *ngIf="delivery.organizacion">
             <label>Organización</label>
-            <span class="fw-500 text-primary">{{ delivery.convenio.organizacion.razonSocial || delivery.convenio.organizacion.nombreComercial }}</span>
+            <span class="fw-500 text-primary">{{ getOrganizationName() }}</span>
           </div>
 
-          <div class="info-item">
-            <label>Estado del convenio</label>
-            <span>{{ delivery.convenio.estado }}</span>
-          </div>
+          <ng-container *ngIf="delivery.convenio; else sinConvenio">
+            <div class="info-item">
+              <label>Código de convenio</label>
+              <span class="fw-500">{{ delivery.convenio.codigoConvenio || 'S/N' }}</span>
+            </div>
+
+            <div class="info-item" *ngIf="delivery.convenio.tipoConvenio">
+              <label>Tipo</label>
+              <span>{{ delivery.convenio.tipoConvenio.nombre }}</span>
+            </div>
+
+            <div class="info-item">
+              <label>Estado del convenio</label>
+              <span>{{ delivery.convenio.estado }}</span>
+            </div>
 
           <div class="info-item" *ngIf="delivery.convenio.tipoConvenio?.maxRetiros">
             <label>Retiros del convenio</label>
@@ -142,10 +129,14 @@
             <span class="date-value-sm">{{ delivery.convenio.fechaActivacion | date:'dd/MM/yyyy' }}</span>
           </div>
 
-          <div class="info-item" *ngIf="delivery.convenio.fechaFinEstimada">
-            <label>Vigente hasta</label>
-            <span class="date-value-sm">{{ delivery.convenio.fechaFinEstimada | date:'dd/MM/yyyy' }}</span>
-          </div>
+          </ng-container>
+
+          <ng-template #sinConvenio>
+            <div class="info-item">
+              <label>Convenio</label>
+              <span class="fw-500 text-600">Sin convenio asociado</span>
+            </div>
+          </ng-template>
         </div>
       </div>
 
@@ -160,11 +151,8 @@
             <label>Fecha original</label>
             <span class="date-value-sm strike-through">{{ delivery.fechaOriginal | date:'dd/MM/yyyy' }}</span>
           </div>
-          <div class="info-item full-width" *ngIf="delivery.motivoReprogramacion">
-            <label>Motivo de reprogramación</label>
-            <span class="text-block">{{ delivery.motivoReprogramacion }}</span>
-          </div>
         </div>
+
       </div>
 
       <!-- Bloque 4: Cancelación (si aplica) -->
@@ -198,7 +186,6 @@
 
         <ng-container *ngIf="isEditable && !editMode">
           <p-button *ngIf="canRegisterDelivery" label="Registrar entrega realizada" icon="pi pi-check-circle" (onClick)="registerRealizedDelivery()" />
-          <p-button label="Editar" icon="pi pi-file-edit" severity="secondary" [outlined]="true" (onClick)="enterEditMode()" />
           <p-button label="Reprogramar" icon="pi pi-calendar-clock" severity="secondary" [outlined]="true" (onClick)="openReschedule()" />
         </ng-container>
       </div>

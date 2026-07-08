@@ -52,7 +52,8 @@ export class ScheduleRescheduleDialogComponent {
   ) {
     this.form = this.fb.group({
       nuevaFecha: [null, Validators.required],
-      motivoReprogramacion: ['', [Validators.required, Validators.minLength(5)]]
+      nuevaHora: ['09:00', Validators.required],
+      motivoReprogramacion: ['']
     });
   }
 
@@ -98,7 +99,8 @@ export class ScheduleRescheduleDialogComponent {
 
     const payload = {
       nuevaFecha: this.normalizeDateForPayload(v.nuevaFecha),
-      motivoReprogramacion: v.motivoReprogramacion.trim()
+      nuevaHora: v.nuevaHora,
+      motivoReprogramacion: v.motivoReprogramacion ? v.motivoReprogramacion.trim() : ''
     };
 
     this.scheduleService.reschedule(this.data.id, payload).subscribe({

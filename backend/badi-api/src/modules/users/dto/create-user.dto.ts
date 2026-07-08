@@ -6,6 +6,7 @@ import {
   MaxLength,
   IsArray,
   IsUUID,
+  Matches,
 } from 'class-validator';
 import { IsCedulaEcuatoriana } from '../../../common/validators/cedula-ecuatoriana.validator';
 import { IsStrongPassword } from '../../../common/validators/password-strong.validator';
@@ -45,6 +46,7 @@ export class CreateUserDto {
   roleIds?: string[];
 
   @IsEmail({}, { message: 'El campo email debe tener un formato válido.' })
+  @Matches(/^[a-zA-Z0-9._%+-]+@badiec\.org$/, { message: 'El correo institucional debe pertenecer al dominio @badiec.org.' })
   @IsNotEmpty({ message: 'El campo email es obligatorio.' })
   @MaxLength(120, { message: 'El campo email no debe exceder 120 caracteres.' })
   email: string;

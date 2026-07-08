@@ -9,7 +9,7 @@
 
   <div class="dialog-info-banner">
     <mat-icon>info</mat-icon>
-    <span>La fecha actual programada es <strong>{{ data.fechaActual | date:'dd/MM/yyyy' }}</strong>. Selecciona una nueva fecha y proporciona el motivo de la reprogramación.</span>
+    <span>La fecha actual programada es <strong>{{ data.fechaActual | date:'dd/MM/yyyy' }}</strong>. Selecciona una nueva fecha.</span>
   </div>
 
   <div class="dialog-content" mat-dialog-content>
@@ -39,18 +39,23 @@
         </div>
       </div>
 
-      <!-- Motivo de reprogramación -->
+      <!-- Nueva hora programada -->
       <div class="form-row">
         <div class="field-container col-full">
-          <p-iftalabel>
-            <textarea pTextarea formControlName="motivoReprogramacion" id="motivoReprogramacion" rows="3"></textarea>
-            <label for="motivoReprogramacion">Motivo de reprogramación</label>
-          </p-iftalabel>
-          <small class="field-hint">Ej: Cambio en la disponibilidad del equipo de logística</small>
-          <small class="field-error" *ngIf="form.get('motivoReprogramacion')?.hasError('required') && form.get('motivoReprogramacion')?.touched">El motivo es obligatorio.</small>
-          <small class="field-error" *ngIf="form.get('motivoReprogramacion')?.hasError('minlength') && form.get('motivoReprogramacion')?.touched">Mínimo 5 caracteres.</small>
+          <div class="special-field">
+            <div class="special-field-content">
+              <span class="special-field-label">Nueva hora programada *</span>
+              <div class="special-field-control">
+                <mat-form-field appearance="outline" class="w-full special-mat-field">
+                  <input matInput type="time" formControlName="nuevaHora">
+                </mat-form-field>
+              </div>
+            </div>
+          </div>
+          <small class="field-error" *ngIf="form.get('nuevaHora')?.hasError('required') && form.get('nuevaHora')?.touched">La hora es obligatoria.</small>
         </div>
       </div>
+
     </form>
   </div>
 

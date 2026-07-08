@@ -67,8 +67,7 @@ export class DocumentMetadataDialogComponent implements OnInit {
       titulo: [this.doc.titulo, [Validators.required, Validators.maxLength(300)]],
       tipoDocumentoId: [this.doc.tipoDocumento?.id, Validators.required],
       descripcion: [this.doc.descripcion],
-      fechaDocumento: [this.doc.fechaDocumento ? this.parseDateForForm(this.doc.fechaDocumento) : '', Validators.required],
-      observaciones: [this.doc.observaciones, this.doc.tipoDocumento?.observacionesObligatorias ? [Validators.required] : []]
+      observaciones: [this.doc.observaciones]
     });
   }
 
@@ -91,11 +90,7 @@ export class DocumentMetadataDialogComponent implements OnInit {
 
     this.editForm.get('tipoDocumentoId')?.valueChanges.subscribe(id => {
       this.selectedType = this.documentTypes.find(t => t.id === id) || null;
-      if (this.selectedType?.observacionesObligatorias) {
-        this.editForm.get('observaciones')?.setValidators([Validators.required]);
-      } else {
-        this.editForm.get('observaciones')?.clearValidators();
-      }
+      this.editForm.get('observaciones')?.clearValidators();
       this.editForm.get('observaciones')?.updateValueAndValidity();
       this.cdr.detectChanges();
     });
@@ -136,18 +131,6 @@ export class DocumentMetadataDialogComponent implements OnInit {
 
     const formValue = this.editForm.value;
     const payload: any = { ...formValue };
-
-    if (formValue.fechaDocumento) {
-      const raw = formValue.fechaDocumento;
-      if (raw instanceof Date) {
-        const y = raw.getFullYear();
-        const m = String(raw.getMonth() + 1).padStart(2, '0');
-        const d = String(raw.getDate()).padStart(2, '0');
-        payload.fechaDocumento = `${y}-${m}-${d}`;
-      } else if (typeof raw === 'string' && raw.length > 0) {
-        payload.fechaDocumento = raw.substring(0, 10);
-      }
-    }
 
     this.documentsService.update(this.doc.id, payload).subscribe({
       next: (updatedDoc) => {

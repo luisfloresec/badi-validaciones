@@ -29,28 +29,52 @@ export class RealizedDeliveriesService {
     await queryRunner.startTransaction();
 
     try {
-      // 1. Obtener Entrega Programada con bloqueo para evitar concurrencia
-      const scheduledDelivery = await queryRunner.manager.findOne(ScheduledDelivery, {
-        where: { id: createDto.idEntregaProgramada },
-        relations: { convenio: { tipoConvenio: true } },
-        lock: { mode: 'pessimistic_write' },
-      });
+      // 1. Obtener Entrega Programada con bloqueo para evitar concurrencia (solo tabla base)
+      const scheduledDeliveryLocked = await queryRunner.manager
+        .getRepository(ScheduledDelivery)
+        .createQueryBuilder('sd')
+        .where('sd.id = :id', { id: createDto.idEntregaProgramada })
+        .setLock('pessimistic_write')
+        .getOne();
 
-      if (!scheduledDelivery) {
+      if (!scheduledDeliveryLocked) {
         throw new NotFoundException('La entrega programada no existe.');
       }
 
-      // Validar estado de la entrega programada
-      if (['Cancelado', 'Realizado'].includes(scheduledDelivery.estado)) {
-        throw new BadRequestException(`No se puede registrar entrega porque su estado actual es ${scheduledDelivery.estado}.`);
+      // Validar estado de la entrega programada antes de continuar
+      if (['Cancelado', 'Realizado'].includes(scheduledDeliveryLocked.estado)) {
+        throw new BadRequestException(`No se puede registrar entrega porque su estado actual es ${scheduledDeliveryLocked.estado}.`);
       }
 
-      const agreement = scheduledDelivery.convenio;
-      if (!agreement || agreement.estado !== 'Activo') {
-        throw new BadRequestException('El convenio asociado no existe o no está activo.');
+      // 2. Cargar la misma entrega con sus relaciones, SIN lock
+      const scheduledDelivery = await queryRunner.manager.findOne(ScheduledDelivery, {
+        where: { id: createDto.idEntregaProgramada },
+        relations: { convenio: true, organizacion: true },
+      });
+
+      if (!scheduledDelivery || !scheduledDelivery.organizacion) {
+        throw new BadRequestException('La entrega programada no tiene organización asociada.');
       }
 
-      // Evitar doble registro validando si ya existe una entrega realizada para este cronograma
+
+      const agreement = scheduledDelivery.convenio ?? null;
+
+      // Si hay convenio, cargar tipoConvenio y validar estado
+      if (agreement) {
+        const fullAgreement = await queryRunner.manager.findOne(Agreement, {
+          where: { id: agreement.id },
+          relations: { tipoConvenio: true },
+        });
+        if (fullAgreement) {
+          // Copiar tipoConvenio al agreement en memoria
+          agreement.tipoConvenio = fullAgreement.tipoConvenio;
+        }
+        if (agreement.estado !== 'Activo') {
+          throw new BadRequestException('El convenio asociado no está activo.');
+        }
+      }
+
+      // Evitar doble registro
       const existingDelivery = await queryRunner.manager.findOne(RealizedDelivery, {
         where: { entregaProgramada: { id: createDto.idEntregaProgramada } },
       });
@@ -59,33 +83,38 @@ export class RealizedDeliveriesService {
         throw new BadRequestException('Ya existe un registro de entrega realizada para esta entrega programada.');
       }
 
-      // 2. Crear Entrega Realizada
+      // Calcular kilos
+      const cuota = createDto.cuota !== undefined && createDto.cuota !== null ? Number(createDto.cuota) : 0;
+      const kilosEntregados = Number((cuota / 0.5).toFixed(2));
+
       const realizedDelivery = queryRunner.manager.create(RealizedDelivery, {
         entregaProgramada: scheduledDelivery,
+        organizacion: scheduledDelivery.organizacion,
         convenio: agreement,
-        fechaRealizacion: createDto.fechaRealizacion as any,
-        kilosEntregados: createDto.kilosEntregados,
-        personasAtendidas: createDto.personasAtendidas,
-        beneficiariosAtendidos: createDto.beneficiariosAtendidos,
-        detalleProductos: createDto.detalleProductos,
-        observaciones: createDto.observaciones,
+        fechaRealizacion: new Date(createDto.fechaRealizacion),
+        cuota: cuota,
+        kilosEntregados: kilosEntregados,
+        personasAtendidas: Number(createDto.personasAtendidas || 0),
+        beneficiariosAtendidos: createDto.beneficiariosAtendidos != null ? Number(createDto.beneficiariosAtendidos) : null,
+        detalleProductos: createDto.detalleProductos ? String(createDto.detalleProductos) : null,
+        observaciones: createDto.observaciones?.trim() || null,
       });
 
       const savedRealizedDelivery = await queryRunner.manager.save(realizedDelivery);
 
-      // 3. Cambiar estado de la entrega programada
+      // Cambiar estado de la entrega programada
       scheduledDelivery.estado = 'Realizado';
       await queryRunner.manager.save(scheduledDelivery);
 
-      // 4. Incrementar retirosRealizados del convenio y evaluar finalización
-      agreement.retirosRealizados += 1;
-
-      if (agreement.tipoConvenio.maxRetiros && agreement.retirosRealizados >= agreement.tipoConvenio.maxRetiros) {
-        agreement.estado = 'Finalizado';
-        agreement.fechaFinalizacion = new Date();
+      // Actualizar retiros del convenio si existe
+      if (agreement) {
+        agreement.retirosRealizados = (agreement.retirosRealizados || 0) + 1;
+        if (agreement.tipoConvenio?.maxRetiros && agreement.retirosRealizados >= agreement.tipoConvenio.maxRetiros) {
+          agreement.estado = 'Finalizado';
+          agreement.fechaFinalizacion = new Date();
+        }
+        await queryRunner.manager.save(agreement);
       }
-
-      await queryRunner.manager.save(agreement);
 
       // Commit Transaction
       await queryRunner.commitTransaction();
@@ -96,7 +125,9 @@ export class RealizedDeliveriesService {
       if (err instanceof BadRequestException || err instanceof NotFoundException) {
         throw err;
       }
-      throw new InternalServerErrorException('Error interno al guardar la entrega realizada');
+      console.error('[RealizedDeliveriesService.create] Error inesperado:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
+      throw new InternalServerErrorException(`Error interno al guardar la entrega realizada: ${errorMessage}`);
     } finally {
       await queryRunner.release();
     }
@@ -104,7 +135,7 @@ export class RealizedDeliveriesService {
 
   async findAll(): Promise<RealizedDelivery[]> {
     return this.realizedDeliveryRepository.find({
-      relations: { entregaProgramada: true, convenio: { organizacion: true } },
+      relations: { organizacion: true, entregaProgramada: true, convenio: { organizacion: true } },
       order: { fechaRealizacion: 'DESC' },
     });
   }
@@ -112,7 +143,7 @@ export class RealizedDeliveriesService {
   async findOne(id: string): Promise<RealizedDelivery> {
     const delivery = await this.realizedDeliveryRepository.findOne({
       where: { id },
-      relations: { entregaProgramada: true, convenio: { organizacion: true } },
+      relations: { organizacion: true, entregaProgramada: true, convenio: { organizacion: true } },
     });
 
     if (!delivery) {
@@ -125,15 +156,18 @@ export class RealizedDeliveriesService {
   async findByAgreement(agreementId: string): Promise<RealizedDelivery[]> {
     return this.realizedDeliveryRepository.find({
       where: { convenio: { id: agreementId } },
-      relations: { entregaProgramada: true, convenio: { organizacion: true } },
+      relations: { organizacion: true, entregaProgramada: true, convenio: { organizacion: true } },
       order: { fechaRealizacion: 'DESC' },
     });
   }
 
   async findByOrganization(organizationId: string): Promise<RealizedDelivery[]> {
     return this.realizedDeliveryRepository.find({
-      where: { convenio: { organizacion: { id: organizationId } } },
-      relations: { entregaProgramada: true, convenio: { organizacion: true } },
+      where: [
+        { convenio: { organizacion: { id: organizationId } } },
+        { organizacion: { id: organizationId } }
+      ],
+      relations: { organizacion: true, entregaProgramada: true, convenio: { organizacion: true } },
       order: { fechaRealizacion: 'DESC' },
     });
   }
@@ -142,16 +176,13 @@ export class RealizedDeliveriesService {
     const delivery = await this.realizedDeliveryRepository.findOne({
       where: { entregaProgramada: { id: scheduleId } },
     });
-    if (!delivery) {
-      throw new NotFoundException(`No se encontró entrega realizada para el cronograma ${scheduleId}`);
-    }
     return delivery;
   }
 
   async generateReport(id: string): Promise<PDFKit.PDFDocument> {
     const delivery = await this.findOne(id);
-    const { convenio } = delivery;
-    const organizacion = convenio.organizacion;
+    const convenio = delivery.convenio;
+    const organizacion = delivery.organizacion;
 
     // Buscar evidencias
     const docs = await this.documentsService.findAll({
@@ -191,7 +222,7 @@ export class RealizedDeliveriesService {
       { label: 'Organización', value: organizacion?.razonSocial || organizacion?.nombreComercial || 'Desconocida' },
       { label: 'Responsable', value: 'No registrado' },
       { label: 'Estado', value: delivery.estado },
-      { label: 'Convenio Asociado', value: convenio.codigoConvenio || 'S/N' },
+      { label: 'Convenio Asociado', value: convenio?.codigoConvenio || 'Sin convenio' },
       { label: 'Beneficiarios Directos', value: delivery.beneficiariosAtendidos !== null && delivery.beneficiariosAtendidos !== undefined ? delivery.beneficiariosAtendidos.toString() : 'No especificado' }
     ]);
 
@@ -255,8 +286,8 @@ export class RealizedDeliveriesService {
     if (searchTerm) {
       const term = searchTerm.toLowerCase().trim();
       deliveries = deliveries.filter(d => {
-        const orgName = d.convenio?.organizacion?.razonSocial?.toLowerCase() || '';
-        const orgComercial = d.convenio?.organizacion?.nombreComercial?.toLowerCase() || '';
+        const orgName = d.organizacion?.razonSocial?.toLowerCase() || d.convenio?.organizacion?.razonSocial?.toLowerCase() || '';
+        const orgComercial = d.organizacion?.nombreComercial?.toLowerCase() || d.convenio?.organizacion?.nombreComercial?.toLowerCase() || '';
         const convCode = d.convenio?.codigoConvenio?.toLowerCase() || '';
         return orgName.includes(term) || orgComercial.includes(term) || convCode.includes(term);
       });
@@ -265,8 +296,8 @@ export class RealizedDeliveriesService {
     const data = deliveries.map(d => ({
       id: d.id.split('-')[0].toUpperCase(),
       fecha: d.fechaRealizacion ? new Date(d.fechaRealizacion) : null,
-      convenio: d.convenio?.codigoConvenio || 'S/N',
-      organizacion: d.convenio?.organizacion?.razonSocial || '—',
+      convenio: d.convenio?.codigoConvenio || 'Sin convenio',
+      organizacion: d.organizacion?.razonSocial || d.organizacion?.nombreComercial || d.convenio?.organizacion?.razonSocial || '—',
       estado: d.estado,
       kilos: Number(d.kilosEntregados) || 0,
       personas: Number(d.personasAtendidas) || 0

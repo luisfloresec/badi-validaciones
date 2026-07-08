@@ -173,9 +173,9 @@ $border: #e5e7eb;
   height: 10px;
   border-radius: 50%;
   
-  &.status-programado { background-color: #015641; }
-  &.status-reprogramado { background-color: #d97706; }
-  &.status-cancelado { background-color: #9ca3af; }
+  &.status-confirmado { background-color: #16a34a; }
+  &.status-pendiente { background-color: #eab308; }
+  &.status-detenido { background-color: #ef4444; }
 }
 
 .toolbar-indicator {
@@ -308,20 +308,23 @@ $border: #e5e7eb;
   }
 
   .fc .fc-daygrid-event {
-    border-radius: 6px;
-    padding: 2px 6px;
-    font-size: 11.5px;
-    font-weight: 500;
-    margin: 1px 4px;
-    border-width: 0;
-    border-left-width: 3px;
+    border-radius: 5px;
+    padding: 0;
+    margin: 2px 4px;
+    border: 1px solid $border;
     cursor: pointer;
-    transition: opacity 0.15s ease, transform 0.1s ease;
+    transition: box-shadow 0.15s ease, transform 0.1s ease;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
 
     &:hover {
-      opacity: 0.85;
-      transform: scale(1.01);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      transform: translateY(-1px);
     }
+  }
+
+  .fc .fc-daygrid-event .fc-event-main {
+    padding: 0;
+    border-radius: 0;
   }
 
   .fc .fc-daygrid-event .fc-event-title {

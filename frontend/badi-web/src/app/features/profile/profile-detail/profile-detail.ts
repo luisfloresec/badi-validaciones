@@ -192,6 +192,11 @@ export class ProfileDetailComponent implements OnInit, OnDestroy {
         if (this.userProfile?.requiereCambioPassword) {
           this.loadProfile();
         }
+
+        // Redirigir a la vista principal del perfil inmediatamente
+        this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+          this.router.navigate(['/profile']);
+        });
       },
       error: (err) => {
         const msg = err.error?.message || 'Error al cambiar contraseña';

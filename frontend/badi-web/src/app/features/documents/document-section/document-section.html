@@ -31,8 +31,8 @@
     <!-- Empty State -->
     <div class="organization-empty-state" *ngIf="!loading && !error && documents.length === 0">
       <mat-icon class="text-muted">{{ entityType === 'ENTREGA_REALIZADA' ? 'image_not_supported' : 'find_in_page' }}</mat-icon>
-      <p class="mt-2"><strong>No hay archivos adjuntos registrados.</strong></p>
-      <p class="state-hint" *ngIf="!readonly">Usa el botón superior para asociar el primer documento.</p>
+      <p class="mt-2"><strong>{{ entityType === 'ENTREGA_REALIZADA' ? 'No hay evidencias registradas para esta entrega.' : 'No hay archivos adjuntos registrados.' }}</strong></p>
+      <p class="state-hint" *ngIf="!readonly">{{ entityType === 'ENTREGA_REALIZADA' ? 'Usa el botón superior para subir la primera fotografía.' : 'Usa el botón superior para asociar el primer documento.' }}</p>
     </div>
 
     <!-- Galería Gráfica (Para Entregas Realizadas / Imágenes) -->

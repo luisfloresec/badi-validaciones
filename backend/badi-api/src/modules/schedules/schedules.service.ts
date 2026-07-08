@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between, In, Not } from 'typeorm';
 import { ScheduledDelivery } from './entities/scheduled-delivery.entity';
 import { Agreement } from '../agreements/entities/agreement.entity';
+import { Organization } from '../organizations/entities/organization.entity';
 import { CreateScheduledDeliveryDto } from './dto/create-scheduled-delivery.dto';
 import { UpdateScheduledDeliveryDto } from './dto/update-scheduled-delivery.dto';
 import { RescheduleDeliveryDto } from './dto/reschedule-delivery.dto';
@@ -15,6 +16,8 @@ export class SchedulesService {
     private scheduledDeliveryRepository: Repository<ScheduledDelivery>,
     @InjectRepository(Agreement)
     private agreementsRepository: Repository<Agreement>,
+    @InjectRepository(Organization)
+    private organizationsRepository: Repository<Organization>,
   ) {}
 
   private normalizeDateOnly(value: string | Date): string {
@@ -29,8 +32,9 @@ export class SchedulesService {
   }
 
   private async validateDateAndLimits(
-    agreement: Agreement,
     targetDateInput: string | Date,
+    organization: Organization,
+    agreement?: Agreement,
     excludeDeliveryId?: string,
   ) {
     const targetDateStr = this.normalizeDateOnly(targetDateInput);
@@ -40,63 +44,77 @@ export class SchedulesService {
       throw new BadRequestException('No se puede programar en una fecha pasada.');
     }
 
-    if (agreement.fechaFinEstimada) {
-      const fechaFinStr = this.normalizeDateOnly(agreement.fechaFinEstimada as any);
-      if (targetDateStr > fechaFinStr) {
-        throw new BadRequestException('La fecha programada excede la vigencia del convenio.');
+    if (agreement) {
+      if (agreement.fechaFinEstimada) {
+        const fechaFinStr = this.normalizeDateOnly(agreement.fechaFinEstimada as any);
+        if (targetDateStr > fechaFinStr) {
+          throw new BadRequestException('La fecha programada excede la vigencia del convenio.');
+        }
       }
-    }
 
-    // Check duplicates
-    const duplicateQuery = this.scheduledDeliveryRepository
-      .createQueryBuilder('sd')
-      .where('sd.id_convenio = :agreementId', { agreementId: agreement.id })
-      .andWhere('sd.fecha_programada = :targetDate', { targetDate: targetDateStr })
-      .andWhere('sd.estado IN (:...estados)', { estados: ['Programado', 'Reprogramado'] });
+      if (!excludeDeliveryId && agreement.tipoConvenio?.maxRetiros) {
+        const activeDeliveriesCount = await this.scheduledDeliveryRepository
+          .createQueryBuilder('sd')
+          .where('sd.id_convenio = :agreementId', { agreementId: agreement.id })
+          .andWhere('sd.estado IN (:...estados)', { estados: ['Programado', 'Reprogramado'] })
+          .getCount();
 
-    if (excludeDeliveryId) {
-      duplicateQuery.andWhere('sd.id_entrega != :excludeId', { excludeId: excludeDeliveryId });
-    }
-
-    const duplicate = await duplicateQuery.getOne();
-    if (duplicate) {
-      throw new BadRequestException('Ya existe una entrega programada para esta fecha en este convenio.');
-    }
-
-    if (!excludeDeliveryId && agreement.tipoConvenio?.maxRetiros) {
-      const activeDeliveriesCount = await this.scheduledDeliveryRepository
-        .createQueryBuilder('sd')
-        .where('sd.id_convenio = :agreementId', { agreementId: agreement.id })
-        .andWhere('sd.estado IN (:...estados)', { estados: ['Programado', 'Reprogramado'] })
-        .getCount();
-
-      const occupiedSlots = (agreement.retirosRealizados || 0) + activeDeliveriesCount;
-      if (occupiedSlots >= agreement.tipoConvenio.maxRetiros) {
-        throw new BadRequestException('Se alcanzó el límite de retiros para este convenio.');
+        const occupiedSlots = (agreement.retirosRealizados || 0) + activeDeliveriesCount;
+        if (occupiedSlots >= agreement.tipoConvenio.maxRetiros) {
+          throw new BadRequestException('Se alcanzó el límite de retiros para este convenio.');
+        }
       }
     }
   }
 
   async create(createDto: CreateScheduledDeliveryDto) {
-    const agreement = await this.agreementsRepository.findOne({
-      where: { id: createDto.agreementId },
-      relations: { tipoConvenio: true, organizacion: true },
+    const organization = await this.organizationsRepository.findOne({
+      where: { id: createDto.organizationId }
     });
 
-    if (!agreement) {
-      throw new NotFoundException('Convenio no encontrado.');
+    if (!organization) {
+      throw new NotFoundException('Organización no encontrada.');
     }
 
-    if (agreement.estado !== 'Activo') {
-      throw new BadRequestException('Solo se pueden programar entregas para convenios activos.');
+    let agreement: Agreement | undefined;
+    if (createDto.agreementId) {
+      const foundAgreement = await this.agreementsRepository.findOne({
+        where: { id: createDto.agreementId },
+        relations: { tipoConvenio: true, organizacion: true },
+      });
+
+      if (!foundAgreement) {
+        throw new NotFoundException('Convenio no encontrado.');
+      }
+
+      if (foundAgreement.organizacion.id !== organization.id) {
+        throw new BadRequestException('El convenio no pertenece a la organización seleccionada.');
+      }
+
+      if (foundAgreement.estado !== 'Activo') {
+        throw new BadRequestException('Solo se pueden programar entregas para convenios activos.');
+      }
+      agreement = foundAgreement;
     }
 
     const targetDateStr = this.normalizeDateOnly(createDto.fechaProgramada);
-    await this.validateDateAndLimits(agreement, targetDateStr);
+    await this.validateDateAndLimits(targetDateStr, organization, agreement);
 
     const delivery = new ScheduledDelivery();
-    delivery.convenio = agreement;
+    delivery.organizacion = organization;
+    if (agreement) {
+      delivery.convenio = agreement;
+    }
+    
     delivery.fechaProgramada = targetDateStr as any;
+    delivery.horaProgramada = createDto.horaProgramada;
+    
+
+
+    if (createDto.estadoSeguimiento) {
+      delivery.estadoSeguimiento = createDto.estadoSeguimiento;
+    }
+
     delivery.descripcion = createDto.descripcion as any;
     delivery.observaciones = createDto.observaciones as any;
 
@@ -112,6 +130,7 @@ export class SchedulesService {
   }) {
     const query = this.scheduledDeliveryRepository
       .createQueryBuilder('sd')
+      .leftJoinAndSelect('sd.organizacion', 'organizacionDirecta')
       .leftJoinAndSelect('sd.convenio', 'convenio')
       .leftJoinAndSelect('convenio.tipoConvenio', 'tipoConvenio')
       .leftJoinAndSelect('convenio.organizacion', 'organizacion');
@@ -126,7 +145,10 @@ export class SchedulesService {
       query.andWhere('convenio.id_convenio = :agreementId', { agreementId: filters.agreementId });
     }
     if (filters.organizationId) {
-      query.andWhere('organizacion.id_organizacion = :organizationId', { organizationId: filters.organizationId });
+      query.andWhere(
+        '(organizacion.id_organizacion = :organizationId OR organizacionDirecta.id_organizacion = :organizationId)', 
+        { organizationId: filters.organizationId }
+      );
     }
     if (filters.estado) {
       const estados = filters.estado.split(',');
@@ -230,6 +252,7 @@ export class SchedulesService {
     const delivery = await this.scheduledDeliveryRepository.findOne({
       where: { id },
       relations: {
+        organizacion: true,
         convenio: {
           tipoConvenio: true,
           organizacion: true
@@ -248,6 +271,7 @@ export class SchedulesService {
     return this.scheduledDeliveryRepository.find({
       where: { convenio: { id: agreementId } },
       relations: {
+        organizacion: true,
         convenio: {
           tipoConvenio: true,
           organizacion: true
@@ -261,7 +285,9 @@ export class SchedulesService {
     const delivery = await this.findOne(id);
 
     if (delivery.estado === 'Cancelado') {
-      throw new BadRequestException('No se puede editar una entrega cancelada.');
+      if (updateDto.descripcion !== undefined || updateDto.observaciones !== undefined) {
+        throw new BadRequestException('No se puede editar los detalles principales de una entrega cancelada.');
+      }
     }
 
     if (updateDto.descripcion !== undefined) {
@@ -270,6 +296,10 @@ export class SchedulesService {
     if (updateDto.observaciones !== undefined) {
       delivery.observaciones = updateDto.observaciones;
     }
+    if (updateDto.estadoSeguimiento !== undefined) {
+      delivery.estadoSeguimiento = updateDto.estadoSeguimiento;
+    }
+
 
     return this.scheduledDeliveryRepository.save(delivery);
   }
@@ -282,14 +312,15 @@ export class SchedulesService {
     }
 
     const targetDateStr = this.normalizeDateOnly(rescheduleDto.nuevaFecha);
-    await this.validateDateAndLimits(delivery.convenio, targetDateStr, delivery.id);
+    await this.validateDateAndLimits(targetDateStr, delivery.organizacion, delivery.convenio, delivery.id);
 
     if (!delivery.fechaOriginal) {
       delivery.fechaOriginal = delivery.fechaProgramada;
     }
 
     delivery.fechaProgramada = targetDateStr as any;
-    delivery.motivoReprogramacion = rescheduleDto.motivoReprogramacion;
+    delivery.horaProgramada = rescheduleDto.nuevaHora;
+    delivery.motivoReprogramacion = rescheduleDto.motivoReprogramacion?.trim() || 'Reprogramación sin motivo registrado';
     delivery.estado = 'Reprogramado';
 
     return this.scheduledDeliveryRepository.save(delivery);

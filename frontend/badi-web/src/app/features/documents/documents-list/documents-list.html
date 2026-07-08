@@ -25,7 +25,7 @@
         <p-inputicon styleClass="pi pi-search"></p-inputicon>
         <input pInputText type="text"
                class="w-full"
-               placeholder="Buscar por título, archivo, observaciones, entidad..."
+               placeholder="Buscar por título, archivo, entidad..."
                [ngModel]="filters.search"
                (ngModelChange)="onSearchChange($event)" />
         <p-inputicon *ngIf="filters.search" styleClass="pi pi-times" style="cursor: pointer;" (click)="filters.search=''; onSearchChange('')"></p-inputicon>
@@ -143,7 +143,7 @@
                 <div class="doc-meta">
                   <span class="doc-title" [matTooltip]="doc.titulo">{{ doc.titulo }}</span>
                   <span class="doc-filename" [matTooltip]="doc.nombreOriginal || doc.nombreArchivo">{{ doc.nombreOriginal || doc.nombreArchivo }}</span>
-                  <span class="doc-obs" *ngIf="doc.observaciones" [matTooltip]="doc.observaciones">{{ doc.observaciones }}</span>
+
                 </div>
               </div>
             </td>

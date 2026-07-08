@@ -141,8 +141,8 @@ export class RealizedDeliveriesListComponent implements OnInit {
 
       if (!term) return true;
 
-      const orgName = d.convenio?.organizacion?.razonSocial?.toLowerCase() || '';
-      const orgComercial = d.convenio?.organizacion?.nombreComercial?.toLowerCase() || '';
+      const orgName = d.organizacion?.razonSocial?.toLowerCase() || '';
+      const orgComercial = d.organizacion?.nombreComercial?.toLowerCase() || '';
       const convCode = d.convenio?.codigoConvenio?.toLowerCase() || '';
       return orgName.includes(term) || orgComercial.includes(term) || convCode.includes(term);
     });

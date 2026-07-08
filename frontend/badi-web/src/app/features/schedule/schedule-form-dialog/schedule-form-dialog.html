@@ -20,7 +20,7 @@
           <ng-container *ngIf="agreementLocked && selectedAgreement; else selectAgreement">
             <div class="special-field locked-field">
               <div class="special-field-content">
-                <span class="special-field-label">Organización / Convenio activo</span>
+                <span class="special-field-label">Organización seleccionada</span>
                 <div class="special-field-control">
                   <span class="special-field-value locked-value">
                     <mat-icon class="lock-icon">lock</mat-icon>
@@ -34,26 +34,50 @@
           <ng-template #selectAgreement>
             <div class="special-field">
               <div class="special-field-content">
-                <span class="special-field-label">Organización / Convenio activo</span>
+                <span class="special-field-label">Organización *</span>
                 <div class="special-field-control">
                   <mat-form-field appearance="outline" class="w-full special-mat-field">
-                    <mat-select formControlName="agreementId"
-                                placeholder="Seleccione un convenio activo"
+                    <mat-select formControlName="organizationId"
+                                placeholder="Seleccione una organización"
                                 (selectionChange)="onAgreementChange()">
-                      <mat-option *ngFor="let a of agreements" [value]="a.id">
-                        {{ getAgreementLabel(a) }}
+                      <mat-option *ngFor="let o of organizations" [value]="o.id">
+                        {{ o.razonSocial || o.nombreComercial }}
                       </mat-option>
                     </mat-select>
                   </mat-form-field>
                 </div>
               </div>
             </div>
-            <small class="field-error" *ngIf="form.get('agreementId')?.hasError('required') && form.get('agreementId')?.touched">
-              El convenio es obligatorio.
+            <small class="field-error" *ngIf="form.get('organizationId')?.hasError('required') && form.get('organizationId')?.touched">
+              La organización es obligatoria.
             </small>
-            <small class="field-hint" *ngIf="agreementsLoading">Cargando convenios...</small>
-            <small class="field-hint" *ngIf="!agreementsLoading && agreements.length === 0">No hay convenios activos disponibles.</small>
+            <small class="field-hint" *ngIf="organizationsLoading">Cargando organizaciones...</small>
+            <small class="field-hint" *ngIf="!organizationsLoading && organizations.length === 0">No hay organizaciones disponibles.</small>
           </ng-template>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="field-container col-full">
+          <div class="special-field">
+            <div class="special-field-content">
+              <span class="special-field-label">Convenio activo (Opcional)</span>
+              <div class="special-field-control">
+                <mat-form-field appearance="outline" class="w-full special-mat-field">
+                  <mat-select formControlName="agreementId"
+                              placeholder="Sin convenio (General)"
+                              (selectionChange)="onAgreementChange()">
+                    <mat-option [value]="''">-- Sin convenio --</mat-option>
+                    <mat-option *ngFor="let a of filteredAgreements" [value]="a.id">
+                      {{ getAgreementLabel(a) }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+            </div>
+          </div>
+          <small class="field-hint" *ngIf="agreementsLoading">Cargando convenios...</small>
+          <small class="field-hint" *ngIf="!agreementsLoading && filteredAgreements.length === 0 && form.get('organizationId')?.value">Esta organización no tiene convenios activos.</small>
 
           <!-- Resumen del convenio seleccionado -->
           <div class="type-summary-box" *ngIf="selectedAgreement">
@@ -91,35 +115,25 @@
         </div>
       </div>
 
-      <div class="section-title-container">
-        <h3 class="form-section-title">Detalles de la Entrega</h3>
-      </div>
-
-      <!-- Descripción -->
       <div class="form-row">
         <div class="field-container col-full">
-          <p-iftalabel>
-            <textarea pTextarea formControlName="descripcion" id="descripcion" rows="2"></textarea>
-            <label for="descripcion">Descripción</label>
-          </p-iftalabel>
-          <div class="field-hint-container flex justify-content-between">
-            <small class="field-hint">Ej: Entrega mensual de alimentos</small>
-            <small class="field-hint">{{ descripcionLength }} / 300</small>
+          <div class="special-field">
+            <div class="special-field-content">
+              <span class="special-field-label">Hora programada *</span>
+              <div class="special-field-control">
+                <mat-form-field appearance="outline" class="w-full special-mat-field">
+                  <input matInput type="time" formControlName="horaProgramada">
+                </mat-form-field>
+              </div>
+            </div>
           </div>
-          <small class="field-error" *ngIf="form.get('descripcion')?.hasError('maxlength')">Máximo 300 caracteres.</small>
+          <small class="field-error" *ngIf="form.get('horaProgramada')?.hasError('required') && form.get('horaProgramada')?.touched">La hora es obligatoria.</small>
         </div>
       </div>
 
-      <!-- Observaciones -->
-      <div class="form-row">
-        <div class="field-container col-full">
-          <p-iftalabel>
-            <textarea pTextarea formControlName="observaciones" id="observaciones" rows="2"></textarea>
-            <label for="observaciones">Observaciones (Opcional)</label>
-          </p-iftalabel>
-          <small class="field-hint">Información adicional para esta entrega</small>
-        </div>
-      </div>
+
+
+
 
     </form>
   </div>

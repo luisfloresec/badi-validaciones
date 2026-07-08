@@ -1,4 +1,4 @@
-import { IsOptional, IsString, MaxLength } from 'class-validator';
+import { IsOptional, IsString, IsNumber, MaxLength } from 'class-validator';
 
 export class UpdateScheduledDeliveryDto {
   @IsString()
@@ -9,4 +9,12 @@ export class UpdateScheduledDeliveryDto {
   @IsString()
   @IsOptional()
   observaciones?: string;
+
+  @IsString()
+  @IsOptional()
+  estadoSeguimiento?: string;
+
+  @IsNumber()
+  @IsOptional()
+  cuota?: number;
 }

@@ -45,7 +45,7 @@ export class ExcelGeneratorService {
     // 1. Título institucional superior
     sheet.mergeCells(1, 1, 1, totalCols);
     const instCell = sheet.getCell('A1');
-    instCell.value = 'BADI — Banco de Alimentos de Imbabura';
+    instCell.value = 'BADI — Banco de Alimentos Imbabura';
     instCell.font = { bold: true, size: 14, color: { argb: 'FF015641' } };
     instCell.alignment = { horizontal: 'center' };
 

@@ -124,8 +124,8 @@
         <tbody>
           <tr *ngFor="let delivery of paginatedDeliveries">
             <td class="col-mono">{{ delivery.fechaRealizacion | date:'dd/MM/yyyy' }}</td>
-            <td class="col-primary">{{ delivery.convenio?.organizacion?.razonSocial || delivery.convenio?.organizacion?.nombreComercial || '—' }}</td>
-            <td class="col-mono">{{ delivery.convenio?.codigoConvenio || '—' }}</td>
+            <td class="col-primary">{{ delivery.organizacion?.razonSocial || delivery.organizacion?.nombreComercial || '—' }}</td>
+            <td class="col-mono">{{ delivery.convenio?.codigoConvenio || 'Sin convenio' }}</td>
             <td class="text-right">{{ delivery.kilosEntregados }} kg</td>
             <td class="text-right">{{ delivery.personasAtendidas }}</td>
             <td class="text-center">

@@ -62,7 +62,7 @@ export class PdfGeneratorService {
       bufferPages: true,
       info: {
         Title: options.title,
-        Author: 'Banco de Alimentos de Imbabura (BADI)',
+        Author: 'Banco de Alimentos Imbabura (BADI)',
         Creator: 'Sistema Web de Gestión Social',
       },
     });
@@ -87,7 +87,7 @@ export class PdfGeneratorService {
 
     // 2. Nombre institucional + subtítulo
     doc.font(this.FONT_BOLD).fontSize(15).fillColor(this.COLOR_PRIMARY)
-      .text('BANCO DE ALIMENTOS DE IMBABURA', textStartX, blockTop + 4, {
+      .text('BANCO DE ALIMENTOS IMBABURA', textStartX, blockTop + 4, {
         align: 'left',
         characterSpacing: 0.4,
       });

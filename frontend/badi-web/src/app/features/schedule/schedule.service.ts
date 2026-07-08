@@ -5,7 +5,12 @@ import { API_BASE_URL } from '../../core/config/api.config';
 
 export interface ScheduledDelivery {
   id: string;
-  convenio: {
+  organizacion?: {
+    id: string;
+    razonSocial?: string;
+    nombreComercial?: string;
+  };
+  convenio?: {
     id: string;
     codigoConvenio?: string;
     fechaInicio?: string;
@@ -13,11 +18,6 @@ export interface ScheduledDelivery {
     fechaFinEstimada?: string;
     retirosRealizados?: number;
     estado: string;
-    organizacion?: {
-      id: string;
-      razonSocial?: string;
-      nombreComercial?: string;
-    };
     tipoConvenio?: {
       id: string;
       nombre: string;
@@ -27,11 +27,15 @@ export interface ScheduledDelivery {
   };
   fechaProgramada: string;
   fechaOriginal?: string;
+  horaProgramada?: string;
+  cuota?: number;
+  kilosEstimados?: number;
   descripcion?: string;
   observaciones?: string;
   motivoCancelacion?: string;
   motivoReprogramacion?: string;
   estado: string;
+  estadoSeguimiento: string;
   fechaCreacion: string;
   fechaActualizacion?: string;
 }
@@ -46,10 +50,14 @@ export interface ScheduleStats {
 }
 
 export interface CreateScheduledDeliveryDto {
-  agreementId: string;
+  organizationId: string;
+  agreementId?: string;
   fechaProgramada: string;
+  horaProgramada: string;
   descripcion?: string;
   observaciones?: string;
+  estadoSeguimiento?: string;
+  cuota?: number;
 }
 
 export interface ScheduleFilters {
@@ -96,11 +104,11 @@ export class ScheduleService {
     return this.http.get<ScheduledDelivery[]>(`${this.apiUrl}/by-agreement/${agreementId}`);
   }
 
-  update(id: string, data: { descripcion?: string; observaciones?: string }): Observable<ScheduledDelivery> {
+  update(id: string, data: { descripcion?: string; observaciones?: string; estadoSeguimiento?: string; cuota?: number }): Observable<ScheduledDelivery> {
     return this.http.patch<ScheduledDelivery>(`${this.apiUrl}/${id}`, data);
   }
 
-  reschedule(id: string, data: { nuevaFecha: string; motivoReprogramacion: string }): Observable<ScheduledDelivery> {
+  reschedule(id: string, data: { nuevaFecha: string; nuevaHora: string; motivoReprogramacion: string }): Observable<ScheduledDelivery> {
     return this.http.patch<ScheduledDelivery>(`${this.apiUrl}/${id}/reschedule`, data);
   }
 

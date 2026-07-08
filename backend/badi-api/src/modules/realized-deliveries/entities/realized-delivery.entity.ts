@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { Agreement } from '../../agreements/entities/agreement.entity';
 import { ScheduledDelivery } from '../../schedules/entities/scheduled-delivery.entity';
+import { Organization } from '../../organizations/entities/organization.entity';
 
 @Entity('entrega_realizada')
 export class RealizedDelivery {
@@ -19,9 +20,13 @@ export class RealizedDelivery {
   @JoinColumn({ name: 'id_entrega_programada' })
   entregaProgramada: ScheduledDelivery;
 
-  @ManyToOne(() => Agreement, { nullable: false })
+  @ManyToOne(() => Organization, { nullable: false })
+  @JoinColumn({ name: 'id_organizacion' })
+  organizacion: Organization;
+
+  @ManyToOne(() => Agreement, { nullable: true })
   @JoinColumn({ name: 'id_convenio' })
-  convenio: Agreement;
+  convenio: Agreement | null;
 
   @Column({ name: 'fecha_realizacion', type: 'date' })
   fechaRealizacion: Date;
@@ -33,13 +38,16 @@ export class RealizedDelivery {
   personasAtendidas: number;
 
   @Column({ name: 'beneficiarios_atendidos', type: 'int', nullable: true })
-  beneficiariosAtendidos: number;
+  beneficiariosAtendidos: number | null;
 
-  @Column({ name: 'detalle_productos', type: 'text' })
-  detalleProductos: string;
+  @Column({ name: 'cuota', type: 'numeric', precision: 10, scale: 2, nullable: true })
+  cuota: number | null;
+
+  @Column({ name: 'detalle_productos', type: 'text', nullable: true })
+  detalleProductos: string | null;
 
   @Column({ type: 'text', nullable: true })
-  observaciones: string;
+  observaciones: string | null;
 
   @Column({ type: 'varchar', length: 20, default: 'Registrada' })
   estado: string;

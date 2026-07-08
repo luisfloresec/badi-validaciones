@@ -3,28 +3,62 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../../core/config/api.config';
 
+export interface OrganizacionRef {
+  id: string;
+  razonSocial?: string;
+  nombreComercial?: string;
+  nombre?: string;
+}
+
+export interface ConvenioRef {
+  id: string;
+  codigoConvenio?: string;
+  estado?: string;
+  retirosRealizados?: number;
+  tipoConvenio?: {
+    id?: string;
+    nombre?: string;
+    maxRetiros?: number;
+  };
+  organizacion?: OrganizacionRef;
+}
+
+export interface EntregaProgramadaRef {
+  id: string;
+  fechaProgramada?: string;
+  horaProgramada?: string;
+  estado?: string;
+  descripcion?: string;
+  observaciones?: string;
+  cuota?: number;
+  kilosEstimados?: number;
+}
+
 export interface CreateRealizedDelivery {
   idEntregaProgramada: string;
   fechaRealizacion: string;
-  kilosEntregados: number;
+  cuota: number;
+  kilosEntregados?: number;
   personasAtendidas: number;
   beneficiariosAtendidos?: number;
-  detalleProductos: string;
+  detalleProductos?: string;
   observaciones?: string;
 }
 
 export interface RealizedDelivery {
   id: string;
   fechaRealizacion: string;
+  cuota?: number | null;
   kilosEntregados: number;
   personasAtendidas: number;
-  beneficiariosAtendidos?: number;
-  detalleProductos: string;
-  observaciones?: string;
+  beneficiariosAtendidos?: number | null;
+  detalleProductos?: string | null;
+  observaciones?: string | null;
   estado: string;
   fechaCreacion: string;
-  entregaProgramada: any;
-  convenio: any;
+  organizacion?: OrganizacionRef | null;
+  convenio?: ConvenioRef | null;
+  entregaProgramada?: EntregaProgramadaRef | null;
 }
 
 @Injectable({

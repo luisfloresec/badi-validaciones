@@ -345,3 +345,33 @@ $border: #e2e8f0;
     .col-half { grid-column: 1 / -1; }
   }
 }
+
+/* ── Kilos Summary ───────────────────────── */
+.kilos-summary {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border: 1px solid #dfe7df;
+  border-radius: 10px;
+  background: #f8fbf8;
+}
+
+.kilos-summary__label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #5f6b7a;
+  margin-bottom: 4px;
+}
+
+.kilos-summary__value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0b6b50;
+  line-height: 1.2;
+  margin-bottom: 4px;
+}
+
+.kilos-summary__hint {
+  font-size: 0.85rem;
+  color: #6f7c8b;
+  line-height: 1.3;
+}

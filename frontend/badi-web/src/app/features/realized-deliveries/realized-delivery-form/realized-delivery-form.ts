@@ -61,10 +61,10 @@ export class RealizedDeliveryFormComponent implements OnInit {
   ) {
     this.deliveryForm = this.fb.group({
       fechaRealizacion: ['', Validators.required],
-      kilosEntregados: ['', [Validators.required, Validators.min(0.01)]],
+      cuota: ['', [Validators.required, Validators.min(0)]],
       personasAtendidas: ['', [Validators.required, Validators.min(0)]],
-      beneficiariosAtendidos: ['', [Validators.min(0)]],
-      detalleProductos: ['', Validators.required],
+      beneficiariosAtendidos: [''],
+      detalleProductos: [''],
       observaciones: ['']
     });
   }
@@ -145,6 +145,12 @@ export class RealizedDeliveryFormComponent implements OnInit {
     return `${day}/${month}/${year}`;
   }
 
+  get kilosEntregadosCalculado(): number {
+    const cuota = this.deliveryForm.get('cuota')?.value;
+    if (cuota === null || cuota === undefined || cuota === '') return 0;
+    return Number((Number(cuota) / 0.5).toFixed(2));
+  }
+
   onSubmit() {
     if (this.deliveryForm.invalid || !this.scheduleId) {
       this.deliveryForm.markAllAsTouched();
@@ -152,28 +158,31 @@ export class RealizedDeliveryFormComponent implements OnInit {
     }
 
     this.isSaving = true;
+
     const formValue = this.deliveryForm.value;
 
     const payload = {
       idEntregaProgramada: this.scheduleId,
       fechaRealizacion: this.normalizeDateForPayload(formValue.fechaRealizacion)!,
-      kilosEntregados: Number(formValue.kilosEntregados),
+      cuota: Number(formValue.cuota),
+      kilosEntregados: Number((Number(formValue.cuota) / 0.5).toFixed(2)),
       personasAtendidas: Number(formValue.personasAtendidas),
       beneficiariosAtendidos: formValue.beneficiariosAtendidos !== null && formValue.beneficiariosAtendidos !== '' ? Number(formValue.beneficiariosAtendidos) : undefined,
-      detalleProductos: formValue.detalleProductos,
-      observaciones: formValue.observaciones
+      detalleProductos: formValue.detalleProductos || '[]',
+      observaciones: formValue.observaciones || undefined
     };
 
     this.realizedDeliveriesService.create(payload).subscribe({
       next: (res) => {
-        this.isSaving = false;
+        // No cambiamos isSaving = false porque el componente se destruirá al navegar,
+        // lo que evita el NG0100 y previene doble-clicks.
         this.snackBar.open('Entrega realizada registrada con éxito.', 'Cerrar', { duration: 3000 });
         this.router.navigate(['/realized-deliveries', res.id]);
       },
       error: (err) => {
         this.isSaving = false;
         const msg = err.error?.message || 'Error al guardar la entrega.';
-        this.snackBar.open(msg, 'Cerrar', { duration: 5000 });
+        this.snackBar.open(Array.isArray(msg) ? msg.join('. ') : msg, 'Cerrar', { duration: 5000 });
       }
     });
   }

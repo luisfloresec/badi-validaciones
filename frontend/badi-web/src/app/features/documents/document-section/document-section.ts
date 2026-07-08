@@ -14,6 +14,7 @@ import { finalize } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 import { DocumentsService, Document } from '../documents.service';
 import { DocumentUploadDialogComponent } from '../document-upload-dialog/document-upload-dialog';
+import { DeliveryEvidenceUploadDialogComponent } from '../delivery-evidence-upload-dialog/delivery-evidence-upload-dialog';
 import { AuthService } from '../../../core/auth/auth.service';
 
 @Component({
@@ -142,22 +143,45 @@ export class DocumentSectionComponent implements OnInit, OnDestroy {
   openUploadDialog() {
     if (this.readonly) return;
 
-    const dialogRef = this.dialog.open(DocumentUploadDialogComponent, {
-      width: '650px',
-      disableClose: true,
-      data: {
-        entidadRelacionada: this.entityType,
-        idEntidadRelacionada: this.entityId,
-        entityName: this.entityName,
-        origin: this.entityType
-      }
-    });
+    if (this.entityType === 'ENTREGA_REALIZADA') {
+      const dialogRef = this.dialog.open(DeliveryEvidenceUploadDialogComponent, {
+        width: '650px',
+        disableClose: true,
+        data: {
+          entidadRelacionada: this.entityType,
+          idEntidadRelacionada: this.entityId,
+          entityName: this.entityName,
+          origin: this.entityType
+        }
+      });
 
-    dialogRef.afterClosed().subscribe(res => {
-      if (res) {
-        this.loadDocuments();
-      }
-    });
+      dialogRef.afterClosed().subscribe(res => {
+        if (res) {
+          setTimeout(() => {
+            this.loadDocuments();
+          }, 0);
+        }
+      });
+    } else {
+      const dialogRef = this.dialog.open(DocumentUploadDialogComponent, {
+        width: '650px',
+        disableClose: true,
+        data: {
+          entidadRelacionada: this.entityType,
+          idEntidadRelacionada: this.entityId,
+          entityName: this.entityName,
+          origin: this.entityType
+        }
+      });
+
+      dialogRef.afterClosed().subscribe(res => {
+        if (res) {
+          setTimeout(() => {
+            this.loadDocuments();
+          }, 0);
+        }
+      });
+    }
   }
 
   /** Download with auth token via blob trick */

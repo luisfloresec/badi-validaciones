@@ -72,48 +72,6 @@
         </div>
       </div>
 
-      <!-- Fecha del Documento -->
-      <div class="form-row">
-        <div class="field-container col-full">
-          <div class="special-field special-field-clickable" (click)="fechaDocPicker.open()">
-            <div class="special-field-content">
-              <span class="special-field-label">Fecha del Documento (Físico/Emisión)</span>
-              <div class="special-field-control datepicker-control-wrapper">
-                <span class="special-field-value">{{ formatDisplayDate(uploadForm.get('fechaDocumento')?.value) }}</span>
-                <mat-form-field appearance="outline" class="hidden-mat-field">
-                  <input matInput [matDatepicker]="fechaDocPicker" formControlName="fechaDocumento" class="hidden-datepicker-input" readonly>
-                </mat-form-field>
-              </div>
-            </div>
-            <mat-datepicker-toggle matIconSuffix [for]="fechaDocPicker" (click)="$event.stopPropagation()"></mat-datepicker-toggle>
-            <mat-datepicker #fechaDocPicker></mat-datepicker>
-          </div>
-          <small class="field-hint">Fecha oficial de emisión del documento original</small>
-        </div>
-      </div>
-
-      <!-- Descripción -->
-      <div class="form-row">
-        <div class="field-container col-full">
-          <p-iftalabel>
-            <textarea pTextarea formControlName="descripcion" id="descripcion" rows="2" placeholder="Detalles adicionales sobre el contenido del archivo"></textarea>
-            <label for="descripcion">Descripción (Opcional)</label>
-          </p-iftalabel>
-        </div>
-      </div>
-
-      <!-- Observaciones -->
-      <div class="form-row">
-        <div class="field-container col-full">
-          <p-iftalabel>
-            <textarea pTextarea formControlName="observaciones" id="observaciones" rows="2" placeholder="Notas internas u observaciones operativas"></textarea>
-            <label for="observaciones">Observaciones {{ selectedType?.observacionesObligatorias ? '(Obligatorio)' : '(Opcional)' }}</label>
-          </p-iftalabel>
-          <small class="field-error" *ngIf="uploadForm.get('observaciones')?.hasError('required') && uploadForm.get('observaciones')?.touched">
-            Las observaciones son obligatorias para este tipo documental.
-          </small>
-        </div>
-      </div>
 
     </form>
   </div>

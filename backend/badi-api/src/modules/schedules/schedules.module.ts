@@ -4,9 +4,10 @@ import { SchedulesService } from './schedules.service';
 import { SchedulesController } from './schedules.controller';
 import { ScheduledDelivery } from './entities/scheduled-delivery.entity';
 import { Agreement } from '../agreements/entities/agreement.entity';
+import { Organization } from '../organizations/entities/organization.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ScheduledDelivery, Agreement])],
+  imports: [TypeOrmModule.forFeature([ScheduledDelivery, Agreement, Organization])],
   controllers: [SchedulesController],
   providers: [SchedulesService],
   exports: [SchedulesService],

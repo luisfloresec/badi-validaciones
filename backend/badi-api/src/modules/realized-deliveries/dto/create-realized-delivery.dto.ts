@@ -18,9 +18,14 @@ export class CreateRealizedDeliveryDto {
   fechaRealizacion: string;
 
   @IsNumber({ maxDecimalPlaces: 2 })
-  @Min(0.01)
+  @Min(0)
   @IsNotEmpty()
-  kilosEntregados: number;
+  cuota: number;
+
+  @IsOptional()
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @Min(0)
+  kilosEntregados?: number;
 
   @IsNumber()
   @Min(0)
@@ -32,9 +37,9 @@ export class CreateRealizedDeliveryDto {
   @Min(0)
   beneficiariosAtendidos?: number;
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  detalleProductos: string;
+  detalleProductos?: string;
 
   @IsOptional()
   @IsString()
