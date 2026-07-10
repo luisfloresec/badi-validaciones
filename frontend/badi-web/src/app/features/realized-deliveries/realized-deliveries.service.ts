@@ -8,6 +8,12 @@ export interface OrganizacionRef {
   razonSocial?: string;
   nombreComercial?: string;
   nombre?: string;
+  segmento?: {
+    id?: string;
+    nombre?: string;
+    descripcion?: string;
+    valor?: string;
+  } | null;
 }
 
 export interface ConvenioRef {
@@ -32,6 +38,7 @@ export interface EntregaProgramadaRef {
   observaciones?: string;
   cuota?: number;
   kilosEstimados?: number;
+  estadoSeguimiento?: string;
 }
 
 export interface CreateRealizedDelivery {

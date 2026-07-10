@@ -32,6 +32,7 @@ export class RealizedDeliveryDetailComponent implements OnInit, OnDestroy {
   delivery: RealizedDelivery | null = null;
   isLoading = true;
   error: string | null = null;
+  returnUrl: string = '/realized-deliveries';
 
   private routeSub: Subscription | null = null;
 
@@ -45,6 +46,7 @@ export class RealizedDeliveryDetailComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    this.returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/realized-deliveries';
     // Subscribe to paramMap so the component reloads if the ID changes
     // (e.g. navigating from one detail to another without leaving the component)
     this.routeSub = this.route.paramMap.subscribe(params => {
@@ -85,7 +87,7 @@ export class RealizedDeliveryDetailComponent implements OnInit, OnDestroy {
   }
 
   goBack(): void {
-    this.router.navigate(['/realized-deliveries']);
+    this.router.navigateByUrl(this.returnUrl);
   }
 
   getEstadoClass(estado: string): string {

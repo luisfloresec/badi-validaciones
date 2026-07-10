@@ -135,7 +135,7 @@ export class RealizedDeliveriesService {
 
   async findAll(): Promise<RealizedDelivery[]> {
     return this.realizedDeliveryRepository.find({
-      relations: { organizacion: true, entregaProgramada: true, convenio: { organizacion: true } },
+      relations: { organizacion: { segmento: true }, entregaProgramada: true, convenio: { organizacion: true } },
       order: { fechaRealizacion: 'DESC' },
     });
   }
@@ -143,7 +143,7 @@ export class RealizedDeliveriesService {
   async findOne(id: string): Promise<RealizedDelivery> {
     const delivery = await this.realizedDeliveryRepository.findOne({
       where: { id },
-      relations: { organizacion: true, entregaProgramada: true, convenio: { organizacion: true } },
+      relations: { organizacion: { segmento: true }, entregaProgramada: true, convenio: { organizacion: true } },
     });
 
     if (!delivery) {

@@ -49,6 +49,7 @@ export class RealizedDeliveryFormComponent implements OnInit {
   scheduleId: string | null = null;
   scheduledDelivery: any = null;
   error: string | null = null;
+  returnUrl: string = '/schedules';
 
   constructor(
     private fb: FormBuilder,
@@ -71,6 +72,7 @@ export class RealizedDeliveryFormComponent implements OnInit {
 
   ngOnInit(): void {
     this.route.queryParamMap.subscribe(params => {
+      this.returnUrl = params.get('returnUrl') || '/schedules';
       this.scheduleId = params.get('scheduleId');
       if (!this.scheduleId) {
         this.error = 'No se proporcionó un ID de entrega programada válido.';
@@ -189,7 +191,7 @@ export class RealizedDeliveryFormComponent implements OnInit {
         // No cambiamos isSaving = false porque el componente se destruirá al navegar,
         // lo que evita el NG0100 y previene doble-clicks.
         this.snackBar.open('Entrega realizada registrada con éxito.', 'Cerrar', { duration: 3000 });
-        this.router.navigate(['/realized-deliveries', res.id]);
+        this.router.navigate(['/realized-deliveries', res.id], { queryParams: { returnUrl: this.returnUrl } });
       },
       error: (err) => {
         this.isSaving = false;
@@ -197,5 +199,9 @@ export class RealizedDeliveryFormComponent implements OnInit {
         this.snackBar.open(Array.isArray(msg) ? msg.join('. ') : msg, 'Cerrar', { duration: 5000 });
       }
     });
+  }
+
+  cancel(): void {
+    this.router.navigateByUrl(this.returnUrl);
   }
 }

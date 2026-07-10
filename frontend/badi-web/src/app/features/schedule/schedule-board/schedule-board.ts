@@ -508,13 +508,15 @@ export class ScheduleBoardComponent implements OnInit {
 
   registerDelivery(row: BoardRow): void {
     this.router.navigate(['/realized-deliveries/new'], {
-      queryParams: { scheduleId: row.delivery.id }
+      queryParams: { scheduleId: row.delivery.id, returnUrl: this.router.url }
     });
   }
 
   viewRealizedDelivery(row: BoardRow): void {
     if (row.realizedDelivery) {
-      this.router.navigate(['/realized-deliveries', row.realizedDelivery.id]);
+      this.router.navigate(['/realized-deliveries', row.realizedDelivery.id], {
+        queryParams: { returnUrl: this.router.url }
+      });
     }
   }
 

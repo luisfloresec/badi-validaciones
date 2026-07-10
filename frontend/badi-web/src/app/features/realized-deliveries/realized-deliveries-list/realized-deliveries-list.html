@@ -134,7 +134,7 @@
               </span>
             </td>
             <td class="text-center col-actions">
-              <button mat-icon-button [routerLink]="['/realized-deliveries', delivery.id]" matTooltip="Ver detalle">
+              <button mat-icon-button [routerLink]="['/realized-deliveries', delivery.id]" [queryParams]="{ returnUrl: '/realized-deliveries' }" matTooltip="Ver detalle">
                 <mat-icon>visibility</mat-icon>
               </button>
             </td>

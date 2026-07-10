@@ -132,7 +132,7 @@
 
     <!-- Acciones -->
     <div class="form-actions">
-      <button mat-stroked-button type="button" (click)="router.navigate(['/schedules'])" [disabled]="isSaving">
+      <button mat-stroked-button type="button" (click)="cancel()" [disabled]="isSaving">
         Cancelar
       </button>
       <button mat-flat-button class="btn-primary" type="submit" [disabled]="deliveryForm.invalid || isSaving">

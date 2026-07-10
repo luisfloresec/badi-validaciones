@@ -300,13 +300,17 @@ export class ScheduleDetailDialogComponent implements OnInit {
   registerRealizedDelivery(): void {
     if (!this.delivery) return;
     this.dialogRef.close(this.hasChanges);
-    this.router.navigate(['/realized-deliveries/new'], { queryParams: { scheduleId: this.delivery.id } });
+    this.router.navigate(['/realized-deliveries/new'], { 
+      queryParams: { scheduleId: this.delivery.id, returnUrl: this.router.url } 
+    });
   }
 
   // ── View Realized Delivery ──────────────
   viewRealizedDelivery(): void {
     if (!this.realizedDeliveryId) return;
     this.dialogRef.close(this.hasChanges);
-    this.router.navigate(['/realized-deliveries', this.realizedDeliveryId]);
+    this.router.navigate(['/realized-deliveries', this.realizedDeliveryId], {
+      queryParams: { returnUrl: this.router.url }
+    });
   }
 }
