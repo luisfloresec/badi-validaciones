@@ -58,7 +58,13 @@ export const routes: Routes = [
           { path: 'types', loadComponent: () => import('./features/documents/document-types-list/document-types-list').then(m => m.DocumentTypesListComponent) }
         ]
       },
-      { path: 'schedule', loadComponent: () => import('./features/schedule/schedule-calendar/schedule-calendar').then(m => m.ScheduleCalendarComponent) },
+      {
+        path: 'schedule',
+        children: [
+          { path: '', loadComponent: () => import('./features/schedule/schedule-calendar/schedule-calendar').then(m => m.ScheduleCalendarComponent) },
+          { path: 'board', loadComponent: () => import('./features/schedule/schedule-board/schedule-board').then(m => m.ScheduleBoardComponent) }
+        ]
+      },
       {
         path: 'realized-deliveries',
         children: [

@@ -1,5 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -30,6 +31,7 @@ interface StatCard {
   standalone: true,
   imports: [
     CommonModule,
+    RouterModule,
     FormsModule,
     MatButtonModule,
     MatIconModule,

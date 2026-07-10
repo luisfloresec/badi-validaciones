@@ -68,6 +68,23 @@ $border: #e5e7eb;
   }
 }
 
+.btn-toggle {
+  border-radius: 10px !important;
+  color: $g7 !important;
+  border-color: $g3 !important;
+  height: 40px;
+
+  mat-icon {
+    margin-right: 6px;
+    color: $g5;
+  }
+
+  &:hover {
+    background-color: $g1 !important;
+    color: $g9 !important;
+  }
+}
+
 /* ── Stats Grid ──────────────────────── */
 .stats-grid {
   display: grid;

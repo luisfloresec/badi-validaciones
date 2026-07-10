@@ -1,0 +1,591 @@
+$green: #015641;
+$green-light: #016b50;
+$green-bg: #f1faf7;
+$g9: #111827;
+$g7: #374151;
+$g5: #6b7280;
+$g3: #d1d5db;
+$g1: #f3f4f6;
+$border: #e5e7eb;
+$primary: #0284c7; // Azul primario para links
+
+.page-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ── Header ──────────────────────────── */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.header-content {
+  h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: $g9;
+    margin: 0;
+    letter-spacing: -0.02em;
+  }
+}
+
+.subtitle {
+  color: $g5;
+  margin: 4px 0 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-primary {
+  background-color: $green !important;
+  color: #fff !important;
+  font-weight: 500 !important;
+  border-radius: 10px !important;
+  padding: 0 20px !important;
+  height: 40px;
+  box-shadow: 0 1px 3px rgba(1, 86, 65, 0.2);
+  transition: all 0.2s ease;
+
+  &:hover:not([disabled]) {
+    background-color: $green-light !important;
+    box-shadow: 0 4px 12px rgba(1, 86, 65, 0.25);
+  }
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    margin-right: 6px;
+  }
+}
+
+.btn-toggle {
+  border-radius: 10px !important;
+  color: $g7 !important;
+  border-color: $g3 !important;
+  height: 40px;
+
+  mat-icon {
+    margin-right: 6px;
+    color: $g5;
+  }
+
+  &:hover {
+    background-color: $g1 !important;
+    color: $g9 !important;
+  }
+}
+
+/* ── Toolbar ─────────────────────────── */
+.board-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid $border;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.nav-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  .week-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    color: $g9;
+    padding: 0 12px;
+
+    mat-icon {
+      color: $green;
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  .btn-today {
+    border-radius: 6px !important;
+    height: 32px;
+    line-height: 30px;
+    font-size: 13px;
+    font-weight: 600 !important;
+    color: $g7 !important;
+    border-color: $g3 !important;
+
+    &:hover {
+      background-color: $g1 !important;
+      color: $g9 !important;
+    }
+  }
+}
+
+.toolbar-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: $g5;
+
+  mat-spinner {
+    ::ng-deep circle { stroke: $green !important; }
+  }
+}
+
+/* ── Board Content ───────────────────── */
+.board-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.day-group {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid $border;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+
+  &.is-today {
+    border-color: rgba(1, 86, 65, 0.3);
+    box-shadow: 0 4px 12px rgba(1, 86, 65, 0.06);
+    
+    .day-header {
+      background: $green-bg;
+      border-bottom: 1px solid rgba(1, 86, 65, 0.1);
+    }
+  }
+}
+
+/* ── Day Header ──────────────────────── */
+.day-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: #fafbfc;
+  border-bottom: 1px solid transparent;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background: $g1;
+  }
+}
+
+.day-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  .toggle-icon {
+    color: $g5;
+    transition: transform 0.2s ease;
+  }
+
+  h2 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: $g9;
+  }
+}
+
+.day-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: $green;
+  color: #fff;
+  letter-spacing: 0.5px;
+
+  &.past {
+    background: $g3;
+    color: $g7;
+  }
+}
+
+.day-summary {
+  display: flex;
+  gap: 16px;
+
+  .summary-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: $g7;
+
+    mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+      color: $g5;
+    }
+  }
+}
+
+/* ── Day Body ────────────────────────── */
+.day-body {
+  border-top: 1px solid $border;
+}
+
+.empty-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  color: $g5;
+
+  mat-icon {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+    margin-bottom: 8px;
+    opacity: 0.5;
+  }
+
+  p {
+    margin: 0;
+    font-size: 14px;
+  }
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.board-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 900px;
+
+  th, td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid $border;
+    font-size: 13px;
+  }
+
+  th {
+    font-weight: 600;
+    color: $g5;
+    background: #fff;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+  }
+
+  tbody tr {
+    transition: background-color 0.15s ease;
+
+    &:hover {
+      background-color: #f8fafc;
+    }
+
+    &:last-child td {
+      border-bottom: none;
+    }
+
+    &.totals-row {
+      background-color: #fafbfc;
+      &:hover { background-color: #fafbfc; }
+      td {
+        border-top: 2px solid $border;
+        border-bottom: none;
+      }
+    }
+
+    &.cancelled-row {
+      opacity: 0.6;
+      td:not(.col-estado) {
+        text-decoration: line-through;
+      }
+    }
+  }
+}
+
+/* ── Columns ─────────────────────────── */
+.col-org { width: 22%; min-width: 180px; }
+.col-conv { width: 12%; }
+.col-hora { width: 8%; }
+.col-cuota { width: 10%; }
+.col-seg { width: 12%; }
+.col-desc { width: 18%; }
+.col-estado { width: 10%; }
+.col-acciones { width: 8%; min-width: 100px; }
+
+.text-primary { color: $primary !important; }
+.fw-500 { font-weight: 500; }
+.fw-600 { font-weight: 600; }
+.text-right { text-align: right !important; }
+.text-center { text-align: center !important; }
+
+.col-mono {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 12.5px;
+  color: $g7;
+}
+
+.conv-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.text-truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+}
+
+/* ── Editable Cells ──────────────────── */
+.editable-cell {
+  position: relative;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background-color: rgba(0,0,0,0.03);
+    
+    .cell-content::after {
+      content: 'edit';
+      font-family: 'Material Icons';
+      font-size: 14px;
+      color: $g5;
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      opacity: 0.5;
+    }
+  }
+
+  .cell-content {
+    min-height: 20px;
+    position: relative;
+    padding-right: 24px; /* Space for edit icon */
+  }
+}
+
+.edit-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+
+  .inline-input {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid $primary;
+    border-radius: 4px;
+    font-size: 13px;
+    font-family: inherit;
+    outline: none;
+    background: #fff;
+    box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.1);
+
+    &:focus {
+      border-color: $primary;
+    }
+  }
+
+  .saving-icon {
+    position: absolute;
+    right: 8px;
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    color: $g5;
+    animation: spin 1s linear infinite;
+  }
+}
+
+/* ── Seguimiento Badge ───────────────── */
+.seg-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid transparent;
+  user-select: none;
+  transition: all 0.2s ease;
+
+  &.clickable {
+    cursor: pointer;
+    &:hover:not(.disabled) {
+      filter: brightness(0.95);
+    }
+  }
+
+  &.disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+
+  .seg-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  .spin {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+    margin-left: 2px;
+    animation: spin 1s linear infinite;
+  }
+
+  &.seg-confirmado {
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+    color: #166534;
+    .seg-dot { background: #22c55e; }
+  }
+
+  &.seg-pendiente {
+    background: #fefce8;
+    border-color: #fef08a;
+    color: #854d0e;
+    .seg-dot { background: #eab308; }
+  }
+
+  &.seg-detenido {
+    background: #fef2f2;
+    border-color: #fecaca;
+    color: #991b1b;
+    .seg-dot { background: #ef4444; }
+  }
+}
+
+/* ── Estado Chip ─────────────────────── */
+.estado-chip {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+
+  &.est-programado { background-color: #f1f5f9; color: #475569; }
+  &.est-reprogramado { background-color: #fff7ed; color: #c2410c; }
+  &.est-cancelado { background-color: #fef2f2; color: #b91c1c; }
+}
+
+/* ── Acciones ────────────────────────── */
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+
+  mat-spinner {
+    ::ng-deep circle { stroke: $g5 !important; }
+  }
+
+  .action-btn {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: $g5;
+    transition: all 0.2s ease;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+
+    &.register-btn {
+      color: #ea580c;
+      background: rgba(234, 88, 12, 0.1);
+      &:hover {
+        background: rgba(234, 88, 12, 0.2);
+        color: #c2410c;
+      }
+    }
+
+    &.view-realized-btn {
+      color: $green;
+      background: $green-bg;
+      &:hover {
+        background: rgba(1, 86, 65, 0.15);
+        color: $green-light;
+      }
+    }
+
+    &.detail-btn:hover {
+      background: $g1;
+      color: $g9;
+    }
+  }
+}
+
+/* ── Totals ──────────────────────────── */
+.totals-badges {
+  display: flex;
+  gap: 8px;
+
+  .tot-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+
+    &.confirmados { background: #dcfce7; color: #166534; }
+    &.pendientes { background: #fef9c3; color: #854d0e; }
+    &.detenidos { background: #fee2e2; color: #991b1b; }
+  }
+}
+
+/* ── Animations ──────────────────────── */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .board-toolbar {
+    flex-direction: column;
+    gap: 12px;
+  }
+}

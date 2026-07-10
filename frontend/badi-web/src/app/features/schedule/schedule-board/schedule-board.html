@@ -1,0 +1,201 @@
+<div class="page-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1>Tablero Operativo</h1>
+      <p class="subtitle">Gestión detallada de entregas programadas</p>
+    </div>
+    <div class="header-actions">
+      <button mat-stroked-button class="btn-toggle" routerLink="/schedule">
+        <mat-icon>calendar_month</mat-icon> Vista Calendario
+      </button>
+      <button mat-flat-button class="btn-primary" (click)="openScheduleForm()">
+        <mat-icon>add</mat-icon> Programar entrega
+      </button>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="board-toolbar badi-card">
+    <div class="nav-controls">
+      <button mat-icon-button (click)="previousWeek()" matTooltip="Semana anterior">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+      <div class="week-label">
+        <mat-icon>calendar_today</mat-icon>
+        <span>{{ weekLabel }}</span>
+      </div>
+      <button mat-icon-button (click)="nextWeek()" matTooltip="Semana siguiente">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+      <button mat-stroked-button class="btn-today ml-2" (click)="goToCurrentWeek()">
+        Hoy
+      </button>
+    </div>
+    <div class="toolbar-indicator" *ngIf="loading">
+      <mat-spinner diameter="20"></mat-spinner>
+      <span>Cargando tablero...</span>
+    </div>
+  </div>
+
+  <!-- Board Content -->
+  <div class="board-content" *ngIf="!loading && !error">
+    <div class="day-group" *ngFor="let group of dayGroups" [class.is-today]="isToday(group.dateKey)">
+      
+      <!-- Day Header -->
+      <div class="day-header" (click)="toggleDay(group)">
+        <div class="day-title">
+          <mat-icon class="toggle-icon">{{ group.expanded ? 'expand_more' : 'chevron_right' }}</mat-icon>
+          <h2>{{ group.label }}</h2>
+          <span class="day-badge" *ngIf="isToday(group.dateKey)">HOY</span>
+          <span class="day-badge past" *ngIf="isPast(group.dateKey) && !isToday(group.dateKey)">PASADO</span>
+        </div>
+        <div class="day-summary">
+          <span class="summary-item"><mat-icon>local_shipping</mat-icon> {{ group.totals.count }} entregas</span>
+          <span class="summary-item" *ngIf="group.totals.cuotaSum > 0"><mat-icon>attach_money</mat-icon> ${{ group.totals.cuotaSum | number:'1.2-2' }}</span>
+        </div>
+      </div>
+
+      <!-- Day Body -->
+      <div class="day-body" *ngIf="group.expanded">
+        <div class="empty-day" *ngIf="group.deliveries.length === 0">
+          <mat-icon>event_busy</mat-icon>
+          <p>No hay entregas programadas para este día.</p>
+        </div>
+
+        <div class="table-wrapper" *ngIf="group.deliveries.length > 0">
+          <table class="board-table">
+            <thead>
+              <tr>
+                <th class="col-org">Organización</th>
+                <th class="col-conv">Convenio</th>
+                <th class="col-hora">Hora</th>
+                <th class="col-cuota">Cuota</th>
+                <th class="col-seg">Seguimiento</th>
+                <th class="col-desc">Descripción</th>
+                <th class="col-estado">Estado</th>
+                <th class="col-acciones text-center">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Data Rows -->
+              <tr *ngFor="let row of group.deliveries" [class.cancelled-row]="row.delivery.estado === 'Cancelado'">
+                
+                <!-- Organización -->
+                <td class="col-org fw-500 text-primary">
+                  {{ getOrgName(row.delivery) }}
+                </td>
+
+                <!-- Convenio -->
+                <td class="col-conv">
+                  <span class="conv-badge">{{ getConvenioCode(row.delivery) }}</span>
+                </td>
+
+                <!-- Hora -->
+                <td class="col-hora col-mono">
+                  {{ row.delivery.horaProgramada || '—' }}
+                </td>
+
+                <!-- Cuota (Editable) -->
+                <td class="col-cuota editable-cell" (click)="startEdit(row, 'cuota')">
+                  <div class="cell-content" *ngIf="row.editingField !== 'cuota'">
+                    {{ row.delivery.cuota ? '$' + (row.delivery.cuota | number:'1.2-2') : '—' }}
+                  </div>
+                  <div class="edit-input-wrapper" *ngIf="row.editingField === 'cuota'" (click)="$event.stopPropagation()">
+                    <input type="number" class="inline-input" [(ngModel)]="row.editValue" 
+                           (keydown)="onEditKeydown($event, row)" (blur)="saveEdit(row)" autofocus>
+                    <mat-icon class="saving-icon" *ngIf="row.saving">sync</mat-icon>
+                  </div>
+                </td>
+
+                <!-- Seguimiento (Editable/Clickable) -->
+                <td class="col-seg">
+                  <div class="seg-badge clickable" [ngClass]="getSeguimientoClass(row.delivery.estadoSeguimiento)" 
+                       (click)="cycleSeguimiento(row)"
+                       [class.disabled]="row.delivery.estado === 'Cancelado' || row.saving">
+                    <span class="seg-dot"></span>
+                    {{ row.delivery.estadoSeguimiento }}
+                    <mat-icon class="spin" *ngIf="row.saving && !row.editingField">sync</mat-icon>
+                  </div>
+                </td>
+
+                <!-- Descripción (Editable) -->
+                <td class="col-desc editable-cell" (click)="startEdit(row, 'descripcion')">
+                  <div class="cell-content text-truncate" *ngIf="row.editingField !== 'descripcion'" [title]="row.delivery.descripcion || '—'">
+                    {{ row.delivery.descripcion || '—' }}
+                  </div>
+                  <div class="edit-input-wrapper" *ngIf="row.editingField === 'descripcion'" (click)="$event.stopPropagation()">
+                    <input type="text" class="inline-input" [(ngModel)]="row.editValue" 
+                           (keydown)="onEditKeydown($event, row)" (blur)="saveEdit(row)" autofocus>
+                    <mat-icon class="saving-icon" *ngIf="row.saving">sync</mat-icon>
+                  </div>
+                </td>
+
+                <!-- Estado -->
+                <td class="col-estado">
+                  <span class="estado-chip" [ngClass]="getEstadoClass(row.delivery.estado)">
+                    {{ row.delivery.estado }}
+                  </span>
+                </td>
+
+                <!-- Acciones -->
+                <td class="col-acciones text-center">
+                  <!-- Actions based on state -->
+                  <div class="action-buttons">
+                    
+                    <ng-container *ngIf="row.checkingRealized">
+                      <mat-spinner diameter="20"></mat-spinner>
+                    </ng-container>
+
+                    <ng-container *ngIf="!row.checkingRealized">
+                      <button mat-icon-button class="action-btn register-btn" 
+                              *ngIf="canRegisterDelivery(row)" 
+                              (click)="registerDelivery(row)" 
+                              matTooltip="Registrar entrega realizada">
+                        <mat-icon>check_circle</mat-icon>
+                      </button>
+
+                      <button mat-icon-button class="action-btn view-realized-btn" 
+                              *ngIf="row.realizedDeliveryId" 
+                              (click)="viewRealizedDelivery(row)" 
+                              matTooltip="Ver entrega realizada">
+                        <mat-icon>receipt_long</mat-icon>
+                      </button>
+                    </ng-container>
+
+                    <button mat-icon-button class="action-btn detail-btn" 
+                            (click)="openDetail(row)" 
+                            matTooltip="Detalle y gestión">
+                      <mat-icon>visibility</mat-icon>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- Totals Row -->
+              <tr class="totals-row" *ngIf="group.deliveries.length > 0">
+                <td colspan="3" class="text-right fw-600">TOTALES DEL DÍA</td>
+                <td class="col-cuota fw-600 text-primary">${{ group.totals.cuotaSum | number:'1.2-2' }}</td>
+                <td colspan="4">
+                  <div class="totals-badges">
+                    <span class="tot-badge confirmados" *ngIf="group.totals.confirmados > 0">{{ group.totals.confirmados }} Confir.</span>
+                    <span class="tot-badge pendientes" *ngIf="group.totals.pendientes > 0">{{ group.totals.pendientes }} Pend.</span>
+                    <span class="tot-badge detenidos" *ngIf="group.totals.detenidos > 0">{{ group.totals.detenidos }} Deten.</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error state -->
+  <div *ngIf="!loading && error" class="state-container error">
+    <mat-icon color="warn">error_outline</mat-icon>
+    <p class="mt-2">{{ error }}</p>
+    <button mat-stroked-button (click)="loadData()" class="mt-3">Reintentar</button>
+  </div>
+
+</div>
