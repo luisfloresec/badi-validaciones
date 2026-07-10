@@ -62,7 +62,7 @@ export class DocumentSectionComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     if (!this.entityType || !this.entityId) {
       this.error = 'Faltan parámetros requeridos';
-      this.loading = false;
+      this.setLoadingSafely(false);
       return;
     }
     this.loadDocuments();
@@ -75,7 +75,7 @@ export class DocumentSectionComponent implements OnInit, OnDestroy {
   }
 
   loadDocuments() {
-    this.loading = true;
+    this.setLoadingSafely(true);
     this.error = null;
 
     const sub = this.documentsService.getAll({
@@ -85,8 +85,7 @@ export class DocumentSectionComponent implements OnInit, OnDestroy {
       limit: 50
     })
     .pipe(finalize(() => {
-      this.loading = false;
-      this.cdr.detectChanges();
+      this.setLoadingSafely(false);
     }))
     .subscribe({
       next: (res) => {
@@ -104,6 +103,19 @@ export class DocumentSectionComponent implements OnInit, OnDestroy {
       }
     });
     this.subs.push(sub);
+  }
+
+  private refreshDocumentsSafely(): void {
+    setTimeout(() => {
+      this.loadDocuments();
+    }, 0);
+  }
+
+  private setLoadingSafely(value: boolean): void {
+    setTimeout(() => {
+      this.loading = value;
+      this.cdr.detectChanges();
+    }, 0);
   }
 
   /** Fetch image bytes with auth token and create a local blob URL */
@@ -157,9 +169,7 @@ export class DocumentSectionComponent implements OnInit, OnDestroy {
 
       dialogRef.afterClosed().subscribe(res => {
         if (res) {
-          setTimeout(() => {
-            this.loadDocuments();
-          }, 0);
+          this.refreshDocumentsSafely();
         }
       });
     } else {
@@ -176,9 +186,7 @@ export class DocumentSectionComponent implements OnInit, OnDestroy {
 
       dialogRef.afterClosed().subscribe(res => {
         if (res) {
-          setTimeout(() => {
-            this.loadDocuments();
-          }, 0);
+          this.refreshDocumentsSafely();
         }
       });
     }

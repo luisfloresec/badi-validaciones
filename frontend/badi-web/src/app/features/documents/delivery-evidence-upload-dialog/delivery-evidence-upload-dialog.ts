@@ -170,15 +170,16 @@ export class DeliveryEvidenceUploadDialogComponent implements OnInit {
       this.cdr.detectChanges();
     }
 
-    this.isUploading = false;
-    this.cdr.detectChanges();
-
     if (errorCount === 0) {
       this.snackBar.open('Evidencias cargadas correctamente.', 'Cerrar', { duration: 4000 });
       setTimeout(() => {
+        this.isUploading = false;
+        this.cdr.detectChanges();
         this.dialogRef.close(true); // close and signal success
       }, 0);
     } else {
+      this.isUploading = false;
+      this.cdr.detectChanges();
       this.snackBar.open(`Se cargaron ${successCount} imágenes, pero fallaron ${errorCount}. Por favor revisa e intenta de nuevo.`, 'Cerrar', { duration: 6000 });
     }
   }

@@ -200,10 +200,12 @@ export class DocumentUploadDialogComponent implements OnInit {
 
     this.documentsService.upload(payload, this.selectedFile).subscribe({
       next: (doc) => {
-        this.isUploading = false;
-        this.cdr.detectChanges();
         this.snackBar.open('Documento subido con éxito', 'Cerrar', { duration: 3000 });
-        this.dialogRef.close(doc);
+        setTimeout(() => {
+          this.isUploading = false;
+          this.cdr.detectChanges();
+          this.dialogRef.close(doc);
+        }, 0);
       },
       error: (err) => {
         this.isUploading = false;

@@ -68,18 +68,26 @@
         <!-- Roles Asignados -->
         <div class="field-container col-full">
           <div class="special-field">
-            <div class="special-field-content">
-              <span class="special-field-label">Roles Asignados</span>
-              <div class="special-field-control">
-                <mat-form-field appearance="outline" class="w-full special-mat-field">
-                  <mat-select formControlName="roles" multiple placeholder="Seleccione uno o más roles">
-                    <mat-option *ngFor="let rol of availableRoles" [value]="rol.id">
-                      <strong>{{ rol.nombre }}</strong> <span class="rol-profile">({{ rol.perfilAcceso }})</span>
-                    </mat-option>
-                  </mat-select>
-                </mat-form-field>
+            <ng-container *ngIf="rolesLoaded; else loadingRoles">
+              <div class="special-field-content">
+                <span class="special-field-label">Roles Asignados</span>
+                <div class="special-field-control">
+                  <mat-form-field appearance="outline" class="w-full special-mat-field">
+                    <mat-select formControlName="roles" multiple placeholder="Seleccione uno o más roles">
+                      <mat-option *ngFor="let rol of availableRoles" [value]="rol.id">
+                        <strong>{{ rol.nombre }}</strong> <span class="rol-profile">({{ rol.perfilAcceso }})</span>
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
               </div>
-            </div>
+            </ng-container>
+            <ng-template #loadingRoles>
+              <div class="state-container compact p-3">
+                <mat-spinner diameter="24"></mat-spinner>
+                <span class="ml-2">Cargando roles...</span>
+              </div>
+            </ng-template>
           </div>
           <small class="field-hint">Un usuario puede tener múltiples roles combinados.</small>
           <small class="field-error" *ngIf="form.get('roles')?.hasError('required') && form.get('roles')?.touched">

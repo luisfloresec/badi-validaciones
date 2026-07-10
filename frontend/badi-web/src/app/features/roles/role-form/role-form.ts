@@ -94,25 +94,29 @@ export class RoleFormComponent implements OnInit {
 
     if (this.mode === 'create') {
       this.rolesService.create(dto)
-        .pipe(finalize(() => this.loading = false))
         .subscribe({
           next: () => {
             this.snackBar.open('Rol creado exitosamente', 'Cerrar', { duration: 3000 });
-            this.dialogRef.close(true);
+            setTimeout(() => {
+              this.dialogRef.close(true);
+            }, 0);
           },
           error: (err) => {
+            this.loading = false;
             this.snackBar.open(err.error?.message || 'Error al crear el rol', 'Cerrar', { duration: 3000 });
           }
         });
     } else {
       this.rolesService.update(this.role!.id, dto)
-        .pipe(finalize(() => this.loading = false))
         .subscribe({
           next: () => {
             this.snackBar.open('Rol actualizado exitosamente', 'Cerrar', { duration: 3000 });
-            this.dialogRef.close(true);
+            setTimeout(() => {
+              this.dialogRef.close(true);
+            }, 0);
           },
           error: (err) => {
+            this.loading = false;
             this.snackBar.open(err.error?.message || 'Error al actualizar el rol', 'Cerrar', { duration: 3000 });
           }
         });

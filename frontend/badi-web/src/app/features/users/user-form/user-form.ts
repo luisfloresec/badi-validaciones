@@ -9,6 +9,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { IftaLabelModule } from 'primeng/iftalabel';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { finalize } from 'rxjs/operators';
 import { UsersService, User } from '../users.service';
 import { RolesService, Role } from '../../roles/roles.service';
@@ -24,6 +25,7 @@ import { passwordStrongValidator, STRONG_PASSWORD_MESSAGE } from '../../../share
     MatFormFieldModule,
     MatSelectModule,
     MatIconModule,
+    MatProgressSpinnerModule,
     InputTextModule,
     ButtonModule,
     IftaLabelModule
@@ -37,6 +39,7 @@ export class UserFormComponent implements OnInit {
   mode: 'create' | 'edit';
   user?: User;
   availableRoles: Role[] = [];
+  rolesLoaded = false;
 
   constructor(
     private fb: FormBuilder,
@@ -84,9 +87,16 @@ export class UserFormComponent implements OnInit {
   ngOnInit(): void {
     this.rolesService.getAllActive().subscribe({
       next: (roles) => {
-        this.availableRoles = roles;
+        setTimeout(() => {
+          this.availableRoles = roles;
+          this.rolesLoaded = true;
+        }, 0);
       },
       error: (err) => {
+        setTimeout(() => {
+          this.availableRoles = [];
+          this.rolesLoaded = true;
+        }, 0);
         console.error('Error loading roles', err);
         this.snackBar.open('Error al cargar roles', 'Cerrar', { duration: 3000 });
       }
@@ -117,25 +127,29 @@ export class UserFormComponent implements OnInit {
 
     if (this.mode === 'create') {
       this.usersService.create(dto)
-        .pipe(finalize(() => this.loading = false))
         .subscribe({
           next: () => {
             this.snackBar.open('Usuario creado exitosamente', 'Cerrar', { duration: 3000 });
-            this.dialogRef.close(true);
+            setTimeout(() => {
+              this.dialogRef.close(true);
+            }, 0);
           },
           error: (err) => {
+            this.loading = false;
             this.snackBar.open(err.error?.message || 'Error al crear el usuario', 'Cerrar', { duration: 3000 });
           }
         });
     } else {
       this.usersService.update(this.user!.id, dto)
-        .pipe(finalize(() => this.loading = false))
         .subscribe({
           next: () => {
             this.snackBar.open('Usuario actualizado exitosamente', 'Cerrar', { duration: 3000 });
-            this.dialogRef.close(true);
+            setTimeout(() => {
+              this.dialogRef.close(true);
+            }, 0);
           },
           error: (err) => {
+            this.loading = false;
             this.snackBar.open(err.error?.message || 'Error al actualizar el usuario', 'Cerrar', { duration: 3000 });
           }
         });

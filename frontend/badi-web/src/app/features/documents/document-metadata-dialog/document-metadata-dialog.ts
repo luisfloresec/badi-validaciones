@@ -134,9 +134,11 @@ export class DocumentMetadataDialogComponent implements OnInit {
 
     this.documentsService.update(this.doc.id, payload).subscribe({
       next: (updatedDoc) => {
-        this.isSaving = false;
         this.snackBar.open('Metadatos actualizados exitosamente', 'Cerrar', { duration: 3000 });
-        this.dialogRef.close(updatedDoc);
+        setTimeout(() => {
+          this.isSaving = false;
+          this.dialogRef.close(updatedDoc);
+        }, 0);
       },
       error: () => {
         this.isSaving = false;

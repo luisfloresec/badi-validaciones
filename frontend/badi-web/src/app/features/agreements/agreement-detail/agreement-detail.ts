@@ -36,6 +36,8 @@ export class AgreementDetailComponent implements OnInit {
   agreement: Agreement | null = null;
   loading = true;
   error: string | null = null;
+  agreementEntityName = '';
+  agreementReadonly = false;
 
   // Cronograma
   deliveries: ScheduledDelivery[] = [];
@@ -74,6 +76,8 @@ export class AgreementDetailComponent implements OnInit {
       .subscribe({
         next: (data) => {
           this.agreement = data;
+          this.agreementEntityName = 'Convenio ' + (data.codigoConvenio || 'S/N');
+          this.agreementReadonly = data.estado === 'Anulado' || data.estado === 'Finalizado';
           this.loadDeliveries(id);
         },
         error: () => {

@@ -272,7 +272,7 @@
 
   <!-- Documentos Asociados -->
   <app-document-section entityType="CONVENIO" [entityId]="agreement.id"
-    [entityName]="'Convenio ' + (agreement.codigoConvenio || 'S/N')" [readonly]="isHistorico()">
+    [entityName]="agreementEntityName" [readonly]="agreementReadonly">
   </app-document-section>
 
   <!-- Cronograma de entregas -->
