@@ -19,26 +19,45 @@
     </div>
   </div>
 
-  <!-- Barra de búsqueda -->
-  <div class="search-bar" *ngIf="!loading && !error && organizations.length > 0">
-    <p-iconfield class="search-field">
-      <p-inputicon styleClass="pi pi-search"></p-inputicon>
-      <input pInputText type="text"
-             class="w-full"
-             placeholder="Buscar por razón social, RUC o ciudad"
-             [(ngModel)]="searchTerm"
-             (ngModelChange)="applyFilter()" />
-      <p-inputicon *ngIf="searchTerm" styleClass="pi pi-times" style="cursor: pointer;" (click)="searchTerm=''; applyFilter()"></p-inputicon>
-    </p-iconfield>
+  <!-- Barra de Búsqueda y Filtros (Siempre visible para no perder foco) -->
+  <div class="filter-panel">
+    <div class="filter-row">
+      <p-iconfield class="search-field">
+        <p-inputicon styleClass="pi pi-search"></p-inputicon>
+        <input pInputText type="text"
+               class="w-full"
+               placeholder="Buscar por razón social, RUC o ciudad..."
+               [ngModel]="searchTerm"
+               (ngModelChange)="onSearchChange($event)" />
+        <p-inputicon *ngIf="searchTerm" styleClass="pi pi-times" style="cursor: pointer;" (click)="searchTerm=''; onSearchChange('')"></p-inputicon>
+      </p-iconfield>
 
-    <div class="filter-wrapper" style="display: flex; gap: 10px;">
-      <p-select [(ngModel)]="filterTipo" [options]="tiposOptions" optionLabel="label" optionValue="value" (onChange)="applyFilter()" styleClass="badi-select" placeholder="Tipo de Organización"></p-select>
-      <p-select [(ngModel)]="filterEstado" [options]="estadoOptions" optionLabel="label" optionValue="value" (onChange)="applyFilter()" styleClass="badi-select" placeholder="Estado"></p-select>
+      <div class="filter-select">
+        <p-select [(ngModel)]="filterTipo" [options]="tiposOptions" optionLabel="label" optionValue="value" (onChange)="applyFilter()" styleClass="w-full badi-select" placeholder="Tipo de Organización" appendTo="body"></p-select>
+      </div>
     </div>
 
-    <button mat-stroked-button class="btn-clear-filters" *ngIf="searchTerm || filterEstado !== 'Activa' || filterTipo !== 'TODOS'" (click)="clearFilters()">
-      <mat-icon>filter_alt_off</mat-icon> Limpiar filtros
-    </button>
+    <div class="filter-row secondary-filter-row">
+      <div class="filter-datepicker">
+        <p-datepicker [(ngModel)]="fechaDesdeObj" (onSelect)="applyFilter()" (onClear)="applyFilter()"
+                      placeholder="Fecha Desde" dateFormat="yy-mm-dd" [showClear]="!!fechaDesdeObj" styleClass="w-full" appendTo="body"></p-datepicker>
+      </div>
+
+      <div class="filter-datepicker">
+        <p-datepicker [(ngModel)]="fechaHastaObj" (onSelect)="applyFilter()" (onClear)="applyFilter()"
+                      placeholder="Fecha Hasta" dateFormat="yy-mm-dd" [showClear]="!!fechaHastaObj" styleClass="w-full" appendTo="body"></p-datepicker>
+      </div>
+
+      <div class="switch-wrapper">
+        <p-toggleswitch [(ngModel)]="showInactive" (onChange)="applyFilter()" inputId="inactivaSwitch"></p-toggleswitch>
+        <label for="inactivaSwitch" class="switch-label cursor-pointer">{{ showInactive ? 'Ocultar inactivas' : 'Mostrar inactivas' }}</label>
+      </div>
+
+      <button type="button" mat-stroked-button color="warn" class="btn-clear" (click)="clearFilters()" *ngIf="hasActiveFilters()">
+        <mat-icon>filter_alt_off</mat-icon>
+        Limpiar Filtros
+      </button>
+    </div>
   </div>
 
   <!-- Loading -->

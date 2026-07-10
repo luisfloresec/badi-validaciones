@@ -19,6 +19,43 @@
     </div>
   </div>
 
+  <!-- Barra de Búsqueda y Filtros (Siempre visible para no perder foco) -->
+  <div class="filter-panel">
+    <div class="filter-row">
+      <p-iconfield class="search-field">
+        <p-inputicon styleClass="pi pi-search"></p-inputicon>
+        <input pInputText type="text"
+               class="w-full"
+               placeholder="Buscar por código, organización, tipo, observaciones..."
+               [ngModel]="searchTerm"
+               (ngModelChange)="onSearchChange($event)" />
+        <p-inputicon *ngIf="searchTerm" styleClass="pi pi-times" style="cursor: pointer;" (click)="searchTerm=''; onSearchChange('')"></p-inputicon>
+      </p-iconfield>
+    </div>
+
+    <div class="filter-row secondary-filter-row">
+      <div class="filter-datepicker">
+        <p-datepicker [(ngModel)]="fechaDesdeObj" (onSelect)="applyFilter()" (onClear)="applyFilter()"
+                      placeholder="Fecha Desde" dateFormat="yy-mm-dd" [showClear]="!!fechaDesdeObj" styleClass="w-full" appendTo="body"></p-datepicker>
+      </div>
+
+      <div class="filter-datepicker">
+        <p-datepicker [(ngModel)]="fechaHastaObj" (onSelect)="applyFilter()" (onClear)="applyFilter()"
+                      placeholder="Fecha Hasta" dateFormat="yy-mm-dd" [showClear]="!!fechaHastaObj" styleClass="w-full" appendTo="body"></p-datepicker>
+      </div>
+
+      <div class="switch-wrapper">
+        <p-toggleswitch [(ngModel)]="showAnulados" (onChange)="applyFilter()" inputId="anuladosSwitch"></p-toggleswitch>
+        <label for="anuladosSwitch" class="switch-label cursor-pointer">{{ showAnulados ? 'Ocultar anulados' : 'Mostrar anulados' }}</label>
+      </div>
+
+      <button type="button" mat-stroked-button color="warn" class="btn-clear" (click)="clearFilters()" *ngIf="hasActiveFilters()">
+        <mat-icon>filter_alt_off</mat-icon>
+        Limpiar Filtros
+      </button>
+    </div>
+  </div>
+
   <div class="badi-card">
     <div class="table-container">
 

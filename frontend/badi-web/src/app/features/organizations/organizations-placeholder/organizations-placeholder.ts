@@ -14,6 +14,8 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
+import { DatePickerModule } from 'primeng/datepicker';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { finalize } from 'rxjs/operators';
 import {
   OrganizationsService,
@@ -38,7 +40,9 @@ import { AuthService } from '../../../core/auth/auth.service';
     IconFieldModule,
     InputIconModule,
     InputTextModule,
-    SelectModule
+    SelectModule,
+    DatePickerModule,
+    ToggleSwitchModule
   ],
   templateUrl: './organizations-placeholder.html',
   styleUrl: './organizations-placeholder.scss'
@@ -49,15 +53,12 @@ export class OrganizationsPlaceholderComponent implements OnInit {
   filtered: OrganizationSummary[] = [];
   paginatedOrganizations: OrganizationSummary[] = [];
   searchTerm = '';
-  filterEstado = 'Activa';
   filterTipo = 'TODOS';
+  showInactive = false;
   
-  estadoOptions = [
-    { label: 'Todos los estados', value: 'TODOS' },
-    { label: 'Registradas', value: 'Registrada' },
-    { label: 'Activas', value: 'Activa' },
-    { label: 'Inactivas', value: 'Inactiva' }
-  ];
+  fechaDesdeObj: Date | null = null;
+  fechaHastaObj: Date | null = null;
+
   tiposOptions: {label: string, value: string}[] = [];
 
   loading = true;
@@ -129,20 +130,58 @@ export class OrganizationsPlaceholderComponent implements OnInit {
       const matchesSearch = !term || (
         (org.razonSocial && org.razonSocial.toLowerCase().includes(term)) ||
         (org.ruc && org.ruc.toLowerCase().includes(term)) ||
-        (org.ciudad && org.ciudad.toLowerCase().includes(term))
+        (org.ciudad && org.ciudad.toLowerCase().includes(term)) ||
+        (org.nombreComercial && org.nombreComercial.toLowerCase().includes(term)) ||
+        (org.email && org.email.toLowerCase().includes(term)) ||
+        (org.sectorBarrio && org.sectorBarrio.toLowerCase().includes(term)) ||
+        (org.direccion && org.direccion.toLowerCase().includes(term))
       );
 
-      // Filtro por estado
-      const matchesEstado = this.filterEstado === 'TODOS' || org.estado === this.filterEstado;
+      // Filtro por estado (inactivas)
+      const matchesEstado = this.showInactive ? true : org.estado !== 'Inactiva';
 
       // Filtro por tipo
       const matchesTipo = this.filterTipo === 'TODOS' || org.tipoOrganizacion?.nombre === this.filterTipo;
 
-      return matchesSearch && matchesEstado && matchesTipo;
+      // Filtro por fechas (sobre fechaRegistro)
+      let matchesDate = true;
+      if (this.fechaDesdeObj || this.fechaHastaObj) {
+        if (org.fechaRegistro) {
+          const regDate = new Date(org.fechaRegistro);
+          regDate.setHours(0, 0, 0, 0);
+
+          if (this.fechaDesdeObj) {
+            const desde = new Date(this.fechaDesdeObj);
+            desde.setHours(0, 0, 0, 0);
+            if (regDate < desde) matchesDate = false;
+          }
+
+          if (this.fechaHastaObj) {
+            const hasta = new Date(this.fechaHastaObj);
+            hasta.setHours(0, 0, 0, 0);
+            if (regDate > hasta) matchesDate = false;
+          }
+        } else {
+          // If the organization doesn't have a registration date but we are filtering by date
+          matchesDate = false;
+        }
+      }
+
+      return matchesSearch && matchesEstado && matchesTipo && matchesDate;
     });
     this.totalItems = this.filtered.length;
     this.pageIndex = 0;
     this.updatePagination();
+  }
+
+  hasActiveFilters(): boolean {
+    return !!(
+      this.searchTerm ||
+      this.filterTipo !== 'TODOS' ||
+      this.fechaDesdeObj ||
+      this.fechaHastaObj ||
+      this.showInactive
+    );
   }
 
   onPageChange(event: PageEvent): void {
@@ -253,8 +292,10 @@ export class OrganizationsPlaceholderComponent implements OnInit {
 
   clearFilters(): void {
     this.searchTerm = '';
-    this.filterEstado = 'Activa';
     this.filterTipo = 'TODOS';
+    this.showInactive = false;
+    this.fechaDesdeObj = null;
+    this.fechaHastaObj = null;
     this.applyFilter();
   }
 
@@ -262,7 +303,8 @@ export class OrganizationsPlaceholderComponent implements OnInit {
     this.exportLoading = true;
     this.cdr.detectChanges();
 
-    this.orgService.exportExcel(this.searchTerm, this.filterEstado, this.filterTipo).subscribe({
+    const currentEstado = this.showInactive ? 'TODOS' : 'Activa';
+    this.orgService.exportExcel(this.searchTerm, currentEstado, this.filterTipo).subscribe({
       next: (blob) => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');

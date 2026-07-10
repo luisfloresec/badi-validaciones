@@ -30,26 +30,48 @@
     </div>
   </div>
 
-  <!-- Barra de búsqueda fiel a las guías -->
-  <div class="search-bar" *ngIf="!loading && !error && (logs.length > 0 || filters.search || filters.modulo || filters.accion)">
-    <p-iconfield class="search-field">
-      <p-inputicon styleClass="pi pi-search"></p-inputicon>
-      <input pInputText type="text"
-             class="w-full"
-             placeholder="Buscar por usuario, acción, entidad..."
-             [(ngModel)]="filters.search"
-             (ngModelChange)="applyFilters()" />
-      <p-inputicon *ngIf="filters.search" styleClass="pi pi-times" style="cursor: pointer;" (click)="filters.search=''; applyFilters()"></p-inputicon>
-    </p-iconfield>
-
-    <div class="filter-wrapper" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-      <p-select [(ngModel)]="filters.modulo" [options]="modulos" (onChange)="applyFilters()" styleClass="badi-select" placeholder="Módulo" [showClear]="true"></p-select>
-      <p-select [(ngModel)]="filters.accion" [options]="acciones" (onChange)="applyFilters()" styleClass="badi-select" placeholder="Acción" [showClear]="true"></p-select>
+  <!-- Barra de Búsqueda y Filtros (Siempre visible para no perder foco) -->
+  <div class="filter-panel">
+    <div class="filter-row">
+      <p-iconfield class="search-field">
+        <p-inputicon styleClass="pi pi-search"></p-inputicon>
+        <input pInputText type="text"
+               class="w-full"
+               placeholder="Buscar por usuario, acción, entidad, detalles..."
+               [ngModel]="filters.search"
+               (ngModelChange)="filters.search=$event; applyFilters()" />
+        <p-inputicon *ngIf="filters.search" styleClass="pi pi-times" style="cursor: pointer;" (click)="filters.search=''; applyFilters()"></p-inputicon>
+      </p-iconfield>
     </div>
 
-    <button mat-stroked-button class="btn-clear-filters" *ngIf="filters.search || filters.modulo || filters.accion" (click)="clearFilters()">
-      <mat-icon>filter_alt_off</mat-icon> Limpiar
-    </button>
+    <div class="filter-row secondary-filter-row">
+      <div class="filter-select">
+        <p-select [(ngModel)]="filters.userId" [options]="userOptions" optionLabel="label" optionValue="value" (onChange)="applyFilters()" styleClass="w-full" placeholder="Usuario" [showClear]="!!filters.userId" appendTo="body"></p-select>
+      </div>
+
+      <div class="filter-select">
+        <p-select [(ngModel)]="filters.modulo" [options]="moduloOptions" optionLabel="label" optionValue="value" (onChange)="applyFilters()" styleClass="w-full" placeholder="Módulo" [showClear]="!!filters.modulo" appendTo="body"></p-select>
+      </div>
+
+      <div class="filter-select">
+        <p-select [(ngModel)]="filters.accion" [options]="accionOptions" optionLabel="label" optionValue="value" (onChange)="applyFilters()" styleClass="w-full" placeholder="Acción" [showClear]="!!filters.accion" appendTo="body"></p-select>
+      </div>
+
+      <div class="filter-datepicker">
+        <p-datepicker [(ngModel)]="filters.fechaDesde" (onSelect)="applyFilters()" (onClear)="applyFilters()"
+                      placeholder="Fecha Desde" dateFormat="yy-mm-dd" [showClear]="!!filters.fechaDesde" styleClass="w-full" appendTo="body"></p-datepicker>
+      </div>
+
+      <div class="filter-datepicker">
+        <p-datepicker [(ngModel)]="filters.fechaHasta" (onSelect)="applyFilters()" (onClear)="applyFilters()"
+                      placeholder="Fecha Hasta" dateFormat="yy-mm-dd" [showClear]="!!filters.fechaHasta" styleClass="w-full" appendTo="body"></p-datepicker>
+      </div>
+
+      <button type="button" mat-stroked-button color="warn" class="btn-clear" (click)="clearFilters()" *ngIf="hasActiveFilters()">
+        <mat-icon>filter_alt_off</mat-icon>
+        Limpiar Filtros
+      </button>
+    </div>
   </div>
 
   <!-- Loading State -->

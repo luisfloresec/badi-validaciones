@@ -39,6 +39,8 @@ export interface EntregaProgramadaRef {
   cuota?: number;
   kilosEstimados?: number;
   estadoSeguimiento?: string;
+  organizacion?: OrganizacionRef | null;
+  convenio?: ConvenioRef | null;
 }
 
 export interface CreateRealizedDelivery {

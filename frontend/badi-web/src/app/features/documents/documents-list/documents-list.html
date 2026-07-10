@@ -51,7 +51,7 @@
       </div>
     </div>
 
-    <div class="filter-row secondary-filter-row" *ngIf="filters.entityType === 'ORGANIZACION' || filters.entityType === 'CONVENIO' || fechaDesdeObj || fechaHastaObj || filters.mostrarAnulados || filters.search || filters.tipoDocumentoId || filters.estado || filters.entityType">
+    <div class="filter-row secondary-filter-row">
       <div class="filter-select" *ngIf="filters.entityType === 'ORGANIZACION'">
         <p-select [options]="organizations" [(ngModel)]="filters.organizacionId" (onChange)="applyFilters()"
                   optionLabel="razonSocial" optionValue="id" placeholder="Seleccione Organización" [showClear]="!!filters.organizacionId"
@@ -60,7 +60,7 @@
 
       <div class="filter-select" *ngIf="filters.entityType === 'CONVENIO'">
         <p-select [options]="agreements" [(ngModel)]="filters.convenioId" (onChange)="applyFilters()"
-                  optionLabel="nombre" optionValue="id" placeholder="Seleccione Convenio" [showClear]="!!filters.convenioId"
+                  optionLabel="codigoConvenio" optionValue="id" placeholder="Seleccione Convenio" [showClear]="!!filters.convenioId"
                   styleClass="w-full badi-select" appendTo="body"></p-select>
       </div>
 
@@ -76,10 +76,10 @@
 
       <div class="switch-wrapper">
         <p-toggleswitch [(ngModel)]="filters.mostrarAnulados" (onChange)="applyFilters()" inputId="anuladosSwitch"></p-toggleswitch>
-        <label for="anuladosSwitch" class="switch-label cursor-pointer">Mostrar anulados</label>
+        <label for="anuladosSwitch" class="switch-label cursor-pointer">{{ filters.mostrarAnulados ? 'Ocultar anulados' : 'Mostrar anulados' }}</label>
       </div>
 
-      <button mat-stroked-button color="warn" class="btn-clear" (click)="clearFilters()" *ngIf="filters.search || filters.tipoDocumentoId || filters.estado || filters.entityType || filters.organizacionId || filters.convenioId || fechaDesdeObj || fechaHastaObj || filters.mostrarAnulados">
+      <button type="button" mat-stroked-button color="warn" class="btn-clear" (click)="clearFilters()" *ngIf="hasActiveFilters()">
         <mat-icon>filter_alt_off</mat-icon>
         Limpiar Filtros
       </button>
@@ -110,7 +110,7 @@
     <p><strong>No se encontraron documentos en el Repositorio Global.</strong></p>
     <p class="state-hint">No hay archivos que coincidan con los filtros actuales o el repositorio está vacío.</p>
     <div class="empty-actions">
-      <button mat-stroked-button (click)="clearFilters()" *ngIf="filters.search || filters.tipoDocumentoId || filters.estado || filters.entityType || filters.organizacionId || filters.convenioId || fechaDesdeObj || fechaHastaObj || filters.mostrarAnulados">
+      <button mat-stroked-button (click)="clearFilters()" *ngIf="hasActiveFilters()">
         <mat-icon>filter_alt_off</mat-icon> Limpiar filtros
       </button>
       <button mat-flat-button class="btn-primary" (click)="openUploadDialog()">

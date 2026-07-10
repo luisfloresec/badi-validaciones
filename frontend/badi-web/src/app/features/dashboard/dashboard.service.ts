@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../../core/config/api.config';
 
@@ -56,8 +56,11 @@ export class DashboardService {
 
   constructor(private http: HttpClient) {}
 
-  getSummary(): Observable<DashboardSummary> {
-    return this.http.get<DashboardSummary>(`${this.apiUrl}/summary`);
+  getSummary(startDate?: string, endDate?: string): Observable<DashboardSummary> {
+    let params = new HttpParams();
+    if (startDate) params = params.set('startDate', startDate);
+    if (endDate) params = params.set('endDate', endDate);
+    return this.http.get<DashboardSummary>(`${this.apiUrl}/summary`, { params });
   }
 
   downloadReport(): Observable<Blob> {

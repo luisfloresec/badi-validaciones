@@ -34,19 +34,22 @@ export class DashboardService {
     private readonly pdfGeneratorService: PdfGeneratorService,
   ) {}
 
-  async getSummary() {
+  async getSummary(startDate?: string, endDate?: string) {
     // 1. Manejo preciso de fechas locales sin desfase
     const now = new Date();
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');
     const day = String(now.getDate()).padStart(2, '0');
     const hoyStr = `${year}-${month}-${day}`;
-    const inicioMesStr = `${year}-${month}-01`;
+    let inicioMesStr = `${year}-${month}-01`;
     
     // Calcular fin de mes
     const finMesDate = new Date(year, now.getMonth() + 1, 0);
     const finMesDay = String(finMesDate.getDate()).padStart(2, '0');
-    const finMesStr = `${year}-${month}-${finMesDay}`;
+    let finMesStr = `${year}-${month}-${finMesDay}`;
+
+    if (startDate) inicioMesStr = startDate;
+    if (endDate) finMesStr = endDate;
 
     // Fecha límite para convenios por vencer (30 días en el futuro)
     const fechaVencer = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
@@ -117,12 +120,12 @@ export class DashboardService {
       // Cronograma
       this.scheduledDeliveryRepo.find({
         where: { fechaProgramada: hoyStr as any, estado: In(['Programado', 'Pendiente', 'Reprogramado']) },
-        relations: { convenio: { organizacion: true } },
+        relations: { organizacion: true, convenio: true },
         order: { fechaProgramada: 'ASC' },
       }),
       this.scheduledDeliveryRepo.find({
         where: { fechaProgramada: MoreThanOrEqual(hoyStr as any), estado: In(['Programado', 'Pendiente', 'Reprogramado']) },
-        relations: { convenio: { organizacion: true } },
+        relations: { organizacion: true, convenio: true },
         order: { fechaProgramada: 'ASC' },
         take: 5,
       }),
@@ -135,7 +138,7 @@ export class DashboardService {
 
       // Entregas Realizadas
       this.realizedDeliveryRepo.find({
-        relations: { convenio: { organizacion: true } },
+        relations: { organizacion: true, convenio: true, entregaProgramada: { organizacion: true } },
         order: { fechaRealizacion: 'DESC' },
         take: 5,
       }),
@@ -317,12 +320,16 @@ export class DashboardService {
     this.pdfGeneratorService.drawSectionTitle(doc, 'Últimas Entregas Registradas');
     if (summary.entregas.ultimasEntregas.length > 0) {
       const entregasHeaders = ['Fecha', 'Organización', 'Kilos', 'Estado'];
-      const entregasRows = summary.entregas.ultimasEntregas.map(e => [
-        e.fechaRealizacion ? new Date(e.fechaRealizacion).toLocaleDateString('es-EC') : 'S/F',
-        e.convenio?.organizacion?.razonSocial || e.convenio?.organizacion?.nombreComercial || 'Desconocida',
-        `${e.kilosEntregados} kg`,
-        e.estado
-      ]);
+      const entregasRows = summary.entregas.ultimasEntregas.map((e: any) => {
+        const org = e.organizacion || e.entregaProgramada?.organizacion || e.convenio?.organizacion;
+        const orgName = org?.nombreComercial || org?.razonSocial || 'Desconocida';
+        return [
+          e.fechaRealizacion ? new Date(e.fechaRealizacion).toLocaleDateString('es-EC') : 'S/F',
+          orgName,
+          `${e.kilosEntregados} kg`,
+          e.estado
+        ];
+      });
       this.pdfGeneratorService.drawTable(doc, entregasHeaders, entregasRows, [80, 200, 80, 100]);
     } else {
       this.pdfGeneratorService.drawLongText(doc, 'No existen entregas recientes.');

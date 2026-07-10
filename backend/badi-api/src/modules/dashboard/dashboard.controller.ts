@@ -1,4 +1,4 @@
-import { Controller, Get, Res, StreamableFile } from '@nestjs/common';
+import { Controller, Get, Res, StreamableFile, Query } from '@nestjs/common';
 import type { Response } from 'express';
 import { DashboardService } from './dashboard.service';
 
@@ -7,8 +7,11 @@ export class DashboardController {
   constructor(private readonly dashboardService: DashboardService) {}
 
   @Get('summary')
-  async getSummary() {
-    return this.dashboardService.getSummary();
+  async getSummary(
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string
+  ) {
+    return this.dashboardService.getSummary(startDate, endDate);
   }
 
   @Get('report')

@@ -14,6 +14,8 @@ import { InputIconModule } from 'primeng/inputicon';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { ButtonModule } from 'primeng/button';
+import { DatePickerModule } from 'primeng/datepicker';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { RealizedDeliveriesService, RealizedDelivery } from '../realized-deliveries.service';
 import { AuthService } from '../../../core/auth/auth.service';
@@ -37,7 +39,9 @@ import { AuthService } from '../../../core/auth/auth.service';
     InputIconModule,
     InputTextModule,
     SelectModule,
-    ButtonModule
+    ButtonModule,
+    DatePickerModule,
+    ToggleSwitchModule
   ],
   templateUrl: './realized-deliveries-list.html',
   styleUrls: ['./realized-deliveries-list.scss']
@@ -49,13 +53,9 @@ export class RealizedDeliveriesListComponent implements OnInit {
   isLoading = true;
   error: string | null = null;
   searchTerm = '';
-  filterEstado = 'TODOS';
-
-  estadoOptions = [
-    { label: 'Todos los estados', value: 'TODOS' },
-    { label: 'Registrada', value: 'Registrada' },
-    { label: 'Anulada', value: 'Anulada' }
-  ];
+  showAnuladas = false;
+  fechaDesdeObj: Date | null = null;
+  fechaHastaObj: Date | null = null;
 
   // Estadísticas
   entregasMes = 0;
@@ -132,24 +132,90 @@ export class RealizedDeliveriesListComponent implements OnInit {
     }
   }
 
+  onSearchChange(term: string): void {
+    this.searchTerm = term;
+    this.onSearch();
+  }
+
   onSearch(): void {
     const term = this.searchTerm.toLowerCase().trim();
 
     this.filteredDeliveries = this.deliveries.filter(d => {
-      const matchesEstado = this.filterEstado === 'TODOS' || d.estado === this.filterEstado;
+      const matchesEstado = this.showAnuladas ? true : d.estado !== 'Anulada';
       if (!matchesEstado) return false;
+
+      // Filtro de fechas sobre fechaRealizacion
+      let matchesDate = true;
+      if (this.fechaDesdeObj || this.fechaHastaObj) {
+        if (d.fechaRealizacion) {
+          const initDate = new Date(d.fechaRealizacion);
+          initDate.setHours(0, 0, 0, 0);
+
+          if (this.fechaDesdeObj) {
+            const desde = new Date(this.fechaDesdeObj);
+            desde.setHours(0, 0, 0, 0);
+            if (initDate < desde) matchesDate = false;
+          }
+
+          if (this.fechaHastaObj) {
+            const hasta = new Date(this.fechaHastaObj);
+            hasta.setHours(0, 0, 0, 0);
+            if (initDate > hasta) matchesDate = false;
+          }
+        } else {
+          matchesDate = false;
+        }
+      }
+      if (!matchesDate) return false;
 
       if (!term) return true;
 
-      const orgName = d.organizacion?.razonSocial?.toLowerCase() || '';
-      const orgComercial = d.organizacion?.nombreComercial?.toLowerCase() || '';
-      const convCode = d.convenio?.codigoConvenio?.toLowerCase() || '';
-      return orgName.includes(term) || orgComercial.includes(term) || convCode.includes(term);
+      const orgComercial1 = d.organizacion?.nombreComercial || '';
+      const orgRazon1 = d.organizacion?.razonSocial || '';
+      const orgComercial2 = d.entregaProgramada?.organizacion?.nombreComercial || '';
+      const orgRazon2 = d.entregaProgramada?.organizacion?.razonSocial || '';
+      
+      const convCode1 = d.convenio?.codigoConvenio || 'Sin convenio';
+      const convCode2 = d.entregaProgramada?.convenio?.codigoConvenio || 'Sin convenio';
+
+      const personas = (d.personasAtendidas || 0).toString();
+      const cuota = (d.cuota || 0).toString();
+      const kilos = (d.kilosEntregados || 0).toString();
+      
+      const observaciones = d.observaciones || '';
+      const descripcion = d.entregaProgramada?.descripcion || '';
+      const estadoSeguimiento = d.entregaProgramada?.estadoSeguimiento || '';
+      const estadoD = d.estado || '';
+      const fecha = d.fechaRealizacion || '';
+
+      return orgComercial1.toLowerCase().includes(term) ||
+             orgRazon1.toLowerCase().includes(term) ||
+             orgComercial2.toLowerCase().includes(term) ||
+             orgRazon2.toLowerCase().includes(term) ||
+             convCode1.toLowerCase().includes(term) ||
+             convCode2.toLowerCase().includes(term) ||
+             personas.includes(term) ||
+             cuota.includes(term) ||
+             kilos.includes(term) ||
+             observaciones.toLowerCase().includes(term) ||
+             descripcion.toLowerCase().includes(term) ||
+             estadoSeguimiento.toLowerCase().includes(term) ||
+             estadoD.toLowerCase().includes(term) ||
+             fecha.includes(term);
     });
 
     this.totalItems = this.filteredDeliveries.length;
     this.pageIndex = 0;
     this.updatePagination();
+  }
+
+  hasActiveFilters(): boolean {
+    return !!(
+      this.searchTerm ||
+      this.fechaDesdeObj ||
+      this.fechaHastaObj ||
+      this.showAnuladas
+    );
   }
 
   onPageChange(event: PageEvent): void {
@@ -166,7 +232,9 @@ export class RealizedDeliveriesListComponent implements OnInit {
 
   clearFilters(): void {
     this.searchTerm = '';
-    this.filterEstado = 'TODOS';
+    this.showAnuladas = false;
+    this.fechaDesdeObj = null;
+    this.fechaHastaObj = null;
     this.onSearch();
   }
 
@@ -188,7 +256,8 @@ export class RealizedDeliveriesListComponent implements OnInit {
     this.exportLoading = true;
     this.cdr.detectChanges();
 
-    this.service.exportExcel(this.searchTerm, this.filterEstado).subscribe({
+    const currentEstado = this.showAnuladas ? 'TODOS' : 'Registrada';
+    this.service.exportExcel(this.searchTerm, currentEstado).subscribe({
       next: (blob) => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');

@@ -68,11 +68,11 @@ $divider: #f3f4f6;
   }
 }
 
-// Search bar
-.search-bar {
+// Filter Panel
+.filter-panel {
   display: flex;
-  align-items: center;
-  gap: 20px;
+  flex-direction: column;
+  gap: 16px;
   background: #fff;
   padding: 16px 20px;
   border-radius: 12px;
@@ -80,32 +80,69 @@ $divider: #f3f4f6;
   box-shadow: 0 1px 3px 0 rgba(0,0,0,0.04);
 }
 
+.filter-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.secondary-filter-row {
+  padding-top: 12px;
+  border-top: 1px solid #f1f5f9;
+}
+
 .search-field {
-  width: 420px;
+  flex: 1;
+  min-width: 260px;
+}
+
+.filter-select {
+  flex: 1;
+  min-width: 180px;
+  max-width: 100%;
+
+  ::ng-deep {
+    .p-select {
+      width: 100% !important;
+      .p-select-label {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        padding-right: 28px;
+      }
+    }
+  }
+}
+
+.filter-datepicker {
+  width: 160px;
   max-width: 100%;
 }
 
-::ng-deep {
-  .badi-select {
-    width: 200px;
-  }
+.switch-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: 8px;
 }
 
-.btn-clear-filters {
-  border: 1px solid $g3 !important;
-  color: $g7 !important;
-  font-weight: 500 !important;
-  border-radius: 10px !important;
-  padding: 0 20px !important;
-  height: 40px;
-  background: #fff !important;
-  transition: all 0.2s ease;
+.switch-label {
+  font-size: 14px;
+  color: $g7;
+  font-weight: 500;
+  user-select: none;
+}
 
-  &:hover {
-    background: $g1 !important;
-    border-color: #9ca3af !important;
+.btn-clear {
+  border-radius: 10px !important;
+  height: 40px;
+  font-weight: 500 !important;
+  margin-left: auto;
+
+  mat-icon {
+    margin-right: 6px;
   }
-  mat-icon { margin-right: 6px; }
 }
 
 // States
@@ -230,16 +267,22 @@ $divider: #f3f4f6;
 
 // Responsive
 @media (max-width: 768px) {
-  .search-bar {
+  .page-container {
+    padding: 16px;
+  }
+  .filter-row {
     flex-direction: column;
     align-items: stretch;
     gap: 12px;
   }
-  .search-field {
+  .search-field, .filter-select, .filter-datepicker {
     width: 100%;
   }
   .switch-wrapper {
-    margin-top: 0;
+    margin-left: 0;
+  }
+  .btn-clear {
+    margin-left: 0;
   }
 }
 

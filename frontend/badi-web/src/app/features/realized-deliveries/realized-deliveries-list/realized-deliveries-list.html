@@ -55,25 +55,41 @@
     </div>
   </div>
 
-  <!-- Barra de búsqueda y filtros -->
-  <div class="search-bar" *ngIf="!isLoading && !error && deliveries.length > 0">
-    <p-iconfield class="search-field">
-      <p-inputicon styleClass="pi pi-search"></p-inputicon>
-      <input pInputText type="text"
-             class="w-full"
-             placeholder="Buscar por organización o convenio"
-             [(ngModel)]="searchTerm"
-             (ngModelChange)="onSearch()" />
-      <p-inputicon *ngIf="searchTerm" styleClass="pi pi-times" style="cursor: pointer;" (click)="searchTerm=''; onSearch()"></p-inputicon>
-    </p-iconfield>
-
-    <div class="filter-wrapper">
-      <p-select [(ngModel)]="filterEstado" [options]="estadoOptions" optionLabel="label" optionValue="value" (onChange)="onSearch()" styleClass="badi-select" placeholder="Estado"></p-select>
+  <!-- Barra de Búsqueda y Filtros (Siempre visible para no perder foco) -->
+  <div class="filter-panel">
+    <div class="filter-row">
+      <p-iconfield class="search-field">
+        <p-inputicon styleClass="pi pi-search"></p-inputicon>
+        <input pInputText type="text"
+               class="w-full"
+               placeholder="Buscar por organización, convenio, estado, observaciones..."
+               [ngModel]="searchTerm"
+               (ngModelChange)="onSearchChange($event)" />
+        <p-inputicon *ngIf="searchTerm" styleClass="pi pi-times" style="cursor: pointer;" (click)="searchTerm=''; onSearchChange('')"></p-inputicon>
+      </p-iconfield>
     </div>
 
-    <button mat-stroked-button class="btn-clear-filters" *ngIf="searchTerm || filterEstado !== 'TODOS'" (click)="clearFilters()">
-      <mat-icon>filter_alt_off</mat-icon> Limpiar filtros
-    </button>
+    <div class="filter-row secondary-filter-row">
+      <div class="filter-datepicker">
+        <p-datepicker [(ngModel)]="fechaDesdeObj" (onSelect)="onSearch()" (onClear)="onSearch()"
+                      placeholder="Fecha Desde" dateFormat="yy-mm-dd" [showClear]="!!fechaDesdeObj" styleClass="w-full" appendTo="body"></p-datepicker>
+      </div>
+
+      <div class="filter-datepicker">
+        <p-datepicker [(ngModel)]="fechaHastaObj" (onSelect)="onSearch()" (onClear)="onSearch()"
+                      placeholder="Fecha Hasta" dateFormat="yy-mm-dd" [showClear]="!!fechaHastaObj" styleClass="w-full" appendTo="body"></p-datepicker>
+      </div>
+
+      <div class="switch-wrapper">
+        <p-toggleswitch [(ngModel)]="showAnuladas" (onChange)="onSearch()" inputId="anuladasSwitch"></p-toggleswitch>
+        <label for="anuladasSwitch" class="switch-label cursor-pointer">{{ showAnuladas ? 'Ocultar anuladas' : 'Mostrar anuladas' }}</label>
+      </div>
+
+      <button type="button" mat-stroked-button color="warn" class="btn-clear" (click)="clearFilters()" *ngIf="hasActiveFilters()">
+        <mat-icon>filter_alt_off</mat-icon>
+        Limpiar Filtros
+      </button>
+    </div>
   </div>
 
   <!-- Loading -->

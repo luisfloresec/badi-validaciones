@@ -115,6 +115,70 @@ $st-pend: #d97706;
   &.state-error .state-icon { color: #ef4444; }
 }
 
+/* ── Filtros ────────────────────────────────────────────────────── */
+.dashboard-filters-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.btn-filter-primary,
+.btn-filter-secondary {
+  min-height: 40px;
+  padding: 0 1.1rem;
+  border-radius: 10px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  cursor: pointer;
+  
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.btn-filter-primary {
+  border: none;
+  background: $green;
+  color: #ffffff;
+}
+
+.btn-filter-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(1, 86, 65, 0.25);
+  background: #016b50;
+}
+
+.btn-filter-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-filter-secondary {
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #475569;
+}
+
+.btn-filter-secondary:hover:not(:disabled) {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: #1e293b;
+}
+
+.btn-filter-secondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* ── 1. KPIs ────────────────────────────────────────────────────── */
 .kpi-grid {
   display: grid;
@@ -580,4 +644,14 @@ $st-pend: #d97706;
 @media (max-width: 600px) {
   .page-header-row { flex-direction: column; align-items: stretch; }
   .kpi-grid { grid-template-columns: 1fr; }
+  
+  .dashboard-filters-actions {
+    width: 100%;
+  }
+
+  .btn-filter-primary,
+  .btn-filter-secondary {
+    width: 100%;
+    justify-content: center;
+  }
 }

@@ -285,6 +285,20 @@ export class DocumentsListComponent implements OnInit, OnDestroy {
     this.loadDocuments();
   }
 
+  hasActiveFilters(): boolean {
+    return !!(
+      this.filters.search ||
+      this.filters.tipoDocumentoId ||
+      this.filters.estado ||
+      this.filters.entityType ||
+      this.filters.organizacionId ||
+      this.filters.convenioId ||
+      this.fechaDesdeObj ||
+      this.fechaHastaObj ||
+      this.filters.mostrarAnulados
+    );
+  }
+
   clearFilters() {
     this.filters = {
       page: 1,

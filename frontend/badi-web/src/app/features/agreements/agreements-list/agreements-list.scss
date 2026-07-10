@@ -162,6 +162,84 @@ $border: #e5e7eb;
   }
 }
 
+// Filter Panel
+.filter-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: #fff;
+  padding: 16px 20px;
+  border-radius: 12px;
+  border: 1px solid $border;
+  box-shadow: 0 1px 3px 0 rgba(0,0,0,0.04);
+}
+
+.filter-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.secondary-filter-row {
+  padding-top: 12px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.search-field {
+  flex: 1;
+  min-width: 260px;
+}
+
+.filter-select {
+  flex: 1;
+  min-width: 180px;
+  max-width: 100%;
+
+  ::ng-deep {
+    .p-select {
+      width: 100% !important;
+      .p-select-label {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        padding-right: 28px;
+      }
+    }
+  }
+}
+
+.filter-datepicker {
+  width: 160px;
+  max-width: 100%;
+}
+
+.switch-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: 8px;
+}
+
+.switch-label {
+  font-size: 14px;
+  color: $g7;
+  font-weight: 500;
+  user-select: none;
+}
+
+.btn-clear {
+  border-radius: 10px !important;
+  height: 40px;
+  font-weight: 500 !important;
+  margin-left: auto;
+
+  mat-icon {
+    margin-right: 6px;
+  }
+}
+
+// Table
 .badi-card {
   background: #fff;
   border-radius: 12px;
@@ -307,18 +385,28 @@ $border: #e5e7eb;
 
 // Responsive
 @media (max-width: 768px) {
-  .page-header {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 16px;
+  .page-container {
+    padding: 16px;
   }
   .header-actions {
     width: 100%;
-    justify-content: flex-start;
     button {
       flex: 1;
-      justify-content: center;
     }
+  }
+  .filter-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .search-field, .filter-select, .filter-datepicker {
+    width: 100%;
+  }
+  .switch-wrapper {
+    margin-left: 0;
+  }
+  .btn-clear {
+    margin-left: 0;
   }
 }
 

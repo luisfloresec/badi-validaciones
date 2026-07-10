@@ -135,7 +135,14 @@ export class RealizedDeliveriesService {
 
   async findAll(): Promise<RealizedDelivery[]> {
     return this.realizedDeliveryRepository.find({
-      relations: { organizacion: { segmento: true }, entregaProgramada: true, convenio: { organizacion: true } },
+      relations: {
+        organizacion: { segmento: true },
+        convenio: { organizacion: true },
+        entregaProgramada: {
+          organizacion: true,
+          convenio: true
+        }
+      },
       order: { fechaRealizacion: 'DESC' },
     });
   }

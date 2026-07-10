@@ -49,6 +49,9 @@ export class AuditListComponent implements OnInit {
   modulos: string[] = ['Usuarios', 'Roles', 'Organizaciones', 'Convenios', 'Entregas', 'Cronogramas', 'Grupos Atendidos', 'Representantes', 'Dirigentes', 'Repositorio Global', 'Auth', 'Documentos', 'Tipos Documentales'];
   acciones: string[] = ['CREATE', 'UPDATE', 'DELETE', 'LOGIN', 'LOGOUT', 'SUBIR', 'DESCARGAR', 'ERROR'];
 
+  moduloOptions = this.modulos.map(m => ({ label: m, value: m }));
+  accionOptions = this.acciones.map(a => ({ label: a, value: a }));
+
   // Filtros
   filters = {
     search: '',
@@ -58,6 +61,8 @@ export class AuditListComponent implements OnInit {
     fechaDesde: null as Date | null,
     fechaHasta: null as Date | null
   };
+  
+  userOptions: { label: string, value: string }[] = [];
 
   // Stats
   stats = {
@@ -90,6 +95,10 @@ export class AuditListComponent implements OnInit {
     this.usersService.getAll().subscribe({
       next: (data) => {
         this.users = data || [];
+        this.userOptions = this.users.map(u => ({
+          label: `${u.nombres} ${u.apellidos} (${u.email})`,
+          value: u.id
+        }));
         this.cdr.detectChanges();
       },
       error: (err) => console.error('Error loading users for audit filter:', err)
@@ -183,6 +192,17 @@ export class AuditListComponent implements OnInit {
   applyFilters(): void {
     this.pageIndex = 0;
     this.loadLogs();
+  }
+
+  hasActiveFilters(): boolean {
+    return !!(
+      this.filters.search ||
+      this.filters.userId ||
+      this.filters.modulo ||
+      this.filters.accion ||
+      this.filters.fechaDesde ||
+      this.filters.fechaHasta
+    );
   }
 
   clearFilters(): void {

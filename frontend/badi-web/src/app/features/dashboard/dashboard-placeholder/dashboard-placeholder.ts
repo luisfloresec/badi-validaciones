@@ -1,5 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -14,6 +15,7 @@ import { AuthService } from '../../../core/auth/auth.service';
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     RouterModule,
     MatCardModule,
     MatIconModule,
@@ -31,6 +33,9 @@ export class DashboardPlaceholderComponent implements OnInit {
   currentDateStr = '';
   userFullName = '';
   primaryRole = '';
+
+  filterStartDate: string = '';
+  filterEndDate: string = '';
 
   constructor(
     private dashboardService: DashboardService,
@@ -51,11 +56,18 @@ export class DashboardPlaceholderComponent implements OnInit {
   }
 
   loadSummary(): void {
+    if (this.filterStartDate && this.filterEndDate) {
+      if (new Date(this.filterStartDate) > new Date(this.filterEndDate)) {
+        alert('La fecha inicial no puede ser mayor a la fecha final.');
+        return;
+      }
+    }
+
     this.loading = true;
     this.error = null;
     this.cdr.detectChanges();
     
-    this.dashboardService.getSummary().subscribe({
+    this.dashboardService.getSummary(this.filterStartDate, this.filterEndDate).subscribe({
       next: (data) => {
         this.ngZone.run(() => {
           this.summary = data;
@@ -72,6 +84,21 @@ export class DashboardPlaceholderComponent implements OnInit {
         });
       },
     });
+  }
+
+  applyFilters(): void {
+    this.loadSummary();
+  }
+
+  clearFilters(): void {
+    this.filterStartDate = '';
+    this.filterEndDate = '';
+    this.loadSummary();
+  }
+
+  getOrganizationName(item: any): string {
+    const org = item.organizacion || item.entregaProgramada?.organizacion || item.convenio?.organizacion;
+    return org?.nombreComercial || org?.razonSocial || 'Desconocida';
   }
 
   isAdmin(): boolean {

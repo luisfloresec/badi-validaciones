@@ -13,6 +13,12 @@ import { finalize } from 'rxjs/operators';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { RouterModule } from '@angular/router';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { FormsModule } from '@angular/forms';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
+import { InputTextModule } from 'primeng/inputtext';
+import { DatePickerModule } from 'primeng/datepicker';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
 
 @Component({
   selector: 'app-agreements-list',
@@ -26,16 +32,28 @@ import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
     MatDialogModule,
     MatProgressSpinnerModule,
     MatPaginatorModule,
-    RouterModule
+    RouterModule,
+    FormsModule,
+    IconFieldModule,
+    InputIconModule,
+    InputTextModule,
+    DatePickerModule,
+    ToggleSwitchModule
   ],
   templateUrl: './agreements-list.html',
   styleUrls: ['./agreements-list.scss']
 })
 export class AgreementsListComponent implements OnInit {
   agreements: Agreement[] = [];
+  filteredAgreements: Agreement[] = [];
   paginatedAgreements: Agreement[] = [];
   loading = true;
   error: string | null = null;
+  
+  searchTerm = '';
+  fechaDesdeObj: Date | null = null;
+  fechaHastaObj: Date | null = null;
+  showAnulados = false;
   displayedColumns: string[] = [
     'codigo', 'organizacion', 'tipo', 'estado',
     'fechaInicio', 'fechaActivacion', 'fechaFinEstimada',
@@ -69,18 +87,97 @@ export class AgreementsListComponent implements OnInit {
       .subscribe({
         next: (res) => {
           this.agreements = res;
-          this.totalItems = this.agreements.length;
-          this.pageIndex = 0;
-          this.updatePagination();
+          this.applyFilter();
         },
         error: (err) => {
           this.error = 'Error al cargar convenios';
           this.agreements = [];
+          this.filteredAgreements = [];
           this.totalItems = 0;
           this.updatePagination();
           this.snackBar.open('Error al cargar convenios', 'Cerrar', { duration: 3000 });
         }
       });
+  }
+
+  onSearchChange(term: string): void {
+    this.searchTerm = term;
+    this.applyFilter();
+  }
+
+  applyFilter(): void {
+    const term = this.searchTerm.toLowerCase().trim();
+    
+    this.filteredAgreements = this.agreements.filter(agreement => {
+      // Búsqueda de texto (Fallback seguro para organizacion)
+      const razonSocial = agreement.organizacion?.razonSocial || '';
+      const nombreComercial = agreement.organizacion?.nombreComercial || '';
+      const codigo = agreement.codigoConvenio || '';
+      const tipo = agreement.tipoConvenio?.nombre || '';
+      const estado = agreement.estado || '';
+      const observaciones = agreement.observaciones || '';
+      const motivo = agreement.motivoCambio || '';
+
+      const matchesSearch = !term || (
+        razonSocial.toLowerCase().includes(term) ||
+        nombreComercial.toLowerCase().includes(term) ||
+        codigo.toLowerCase().includes(term) ||
+        tipo.toLowerCase().includes(term) ||
+        estado.toLowerCase().includes(term) ||
+        observaciones.toLowerCase().includes(term) ||
+        motivo.toLowerCase().includes(term)
+      );
+
+      // Filtro de anulados
+      const matchesEstado = this.showAnulados ? true : agreement.estado !== 'Anulado';
+
+      // Filtro de fechas (sobre fechaInicio)
+      let matchesDate = true;
+      if (this.fechaDesdeObj || this.fechaHastaObj) {
+        if (agreement.fechaInicio) {
+          const initDate = new Date(agreement.fechaInicio);
+          initDate.setHours(0, 0, 0, 0);
+
+          if (this.fechaDesdeObj) {
+            const desde = new Date(this.fechaDesdeObj);
+            desde.setHours(0, 0, 0, 0);
+            if (initDate < desde) matchesDate = false;
+          }
+
+          if (this.fechaHastaObj) {
+            const hasta = new Date(this.fechaHastaObj);
+            hasta.setHours(0, 0, 0, 0);
+            if (initDate > hasta) matchesDate = false;
+          }
+        } else {
+          // If the agreement doesn't have a start date but we are filtering by date
+          matchesDate = false;
+        }
+      }
+
+      return matchesSearch && matchesEstado && matchesDate;
+    });
+
+    this.totalItems = this.filteredAgreements.length;
+    this.pageIndex = 0;
+    this.updatePagination();
+  }
+
+  hasActiveFilters(): boolean {
+    return !!(
+      this.searchTerm ||
+      this.fechaDesdeObj ||
+      this.fechaHastaObj ||
+      this.showAnulados
+    );
+  }
+
+  clearFilters(): void {
+    this.searchTerm = '';
+    this.fechaDesdeObj = null;
+    this.fechaHastaObj = null;
+    this.showAnulados = false;
+    this.applyFilter();
   }
 
   onPageChange(event: PageEvent): void {
@@ -91,7 +188,7 @@ export class AgreementsListComponent implements OnInit {
 
   updatePagination(): void {
     const start = this.pageIndex * this.pageSize;
-    this.paginatedAgreements = this.agreements.slice(start, start + this.pageSize);
+    this.paginatedAgreements = this.filteredAgreements.slice(start, start + this.pageSize);
     this.cdr.detectChanges();
   }
 
