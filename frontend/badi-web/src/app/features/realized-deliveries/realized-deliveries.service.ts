@@ -73,6 +73,10 @@ export class RealizedDeliveriesService {
     return this.http.post<RealizedDelivery>(this.apiUrl, data);
   }
 
+  update(id: string, data: Partial<RealizedDelivery>): Observable<RealizedDelivery> {
+    return this.http.patch<RealizedDelivery>(`${this.apiUrl}/${id}`, data);
+  }
+
   findAll(): Observable<RealizedDelivery[]> {
     return this.http.get<RealizedDelivery[]>(this.apiUrl);
   }

@@ -327,14 +327,18 @@ $primary: #0284c7; // Azul primario para links
 }
 
 /* ── Columns ─────────────────────────── */
-.col-org { width: 22%; min-width: 180px; }
-.col-conv { width: 12%; }
-.col-hora { width: 8%; }
-.col-cuota { width: 10%; }
-.col-seg { width: 12%; }
-.col-desc { width: 18%; }
-.col-estado { width: 10%; }
-.col-acciones { width: 8%; min-width: 100px; }
+.col-org { width: 14%; min-width: 140px; }
+.col-grupos { width: 12%; }
+.col-conv { width: 8%; }
+.col-hora { width: 6%; }
+.col-cuota { width: 6%; }
+.col-kilos { width: 6%; }
+.col-usuarios { width: 6%; }
+.col-seg { width: 10%; }
+.col-desc { width: 12%; }
+.col-obs { width: 10%; }
+.col-estado { width: 6%; }
+.col-acciones { width: 4%; min-width: 80px; }
 
 .text-primary { color: $primary !important; }
 .fw-500 { font-weight: 500; }

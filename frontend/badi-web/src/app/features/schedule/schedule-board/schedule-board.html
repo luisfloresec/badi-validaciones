@@ -52,7 +52,9 @@
         </div>
         <div class="day-summary">
           <span class="summary-item"><mat-icon>local_shipping</mat-icon> {{ group.totals.count }} entregas</span>
-          <span class="summary-item" *ngIf="group.totals.cuotaSum > 0"><mat-icon>attach_money</mat-icon> ${{ group.totals.cuotaSum | number:'1.2-2' }}</span>
+          <span class="summary-item" *ngIf="group.totals.cuota > 0"><mat-icon>inventory_2</mat-icon> Cuota: {{ group.totals.cuota }}</span>
+          <span class="summary-item" *ngIf="group.totals.kilos > 0"><mat-icon>scale</mat-icon> Kilos: {{ group.totals.kilos }}</span>
+          <span class="summary-item" *ngIf="group.totals.usuarios > 0"><mat-icon>group</mat-icon> Usuarios: {{ group.totals.usuarios }}</span>
         </div>
       </div>
 
@@ -68,9 +70,12 @@
             <thead>
               <tr>
                 <th class="col-org">Organización</th>
+                <th class="col-grupos">Segmento</th>
                 <th class="col-conv">Convenio</th>
                 <th class="col-hora">Hora</th>
-                <th class="col-cuota">Cuota</th>
+                <th class="col-cuota text-right">Cuota</th>
+                <th class="col-kilos text-right">Kilos</th>
+                <th class="col-usuarios text-right">Usuarios</th>
                 <th class="col-seg">Seguimiento</th>
                 <th class="col-desc">Descripción</th>
                 <th class="col-estado">Estado</th>
@@ -86,41 +91,79 @@
                   {{ getOrgName(row.delivery) }}
                 </td>
 
+                <!-- Segmento -->
+                <td class="col-grupos text-truncate" [title]="getSegmento(row)">
+                  {{ getSegmento(row) }}
+                </td>
+
                 <!-- Convenio -->
                 <td class="col-conv">
                   <span class="conv-badge">{{ getConvenioCode(row.delivery) }}</span>
                 </td>
 
-                <!-- Hora -->
-                <td class="col-hora col-mono">
-                  {{ row.delivery.horaProgramada || '—' }}
-                </td>
-
-                <!-- Cuota (Editable) -->
-                <td class="col-cuota editable-cell" (click)="startEdit(row, 'cuota')">
-                  <div class="cell-content" *ngIf="row.editingField !== 'cuota'">
-                    {{ row.delivery.cuota ? '$' + (row.delivery.cuota | number:'1.2-2') : '—' }}
+                <!-- Hora (Editable siempre) -->
+                <td class="col-hora col-mono"
+                    [ngClass]="{'editable-cell': row.delivery.estado !== 'Cancelado'}" 
+                    (click)="row.delivery.estado !== 'Cancelado' && startEdit(row, 'horaProgramada')">
+                  <div class="cell-content" *ngIf="row.editingField !== 'horaProgramada'">
+                    {{ row.delivery.horaProgramada || '—' }}
                   </div>
-                  <div class="edit-input-wrapper" *ngIf="row.editingField === 'cuota'" (click)="$event.stopPropagation()">
-                    <input type="number" class="inline-input" [(ngModel)]="row.editValue" 
+                  <div class="edit-input-wrapper" *ngIf="row.editingField === 'horaProgramada'" (click)="$event.stopPropagation()">
+                    <input type="time" class="inline-input" [(ngModel)]="row.editValue" 
                            (keydown)="onEditKeydown($event, row)" (blur)="saveEdit(row)" autofocus>
                     <mat-icon class="saving-icon" *ngIf="row.saving">sync</mat-icon>
                   </div>
                 </td>
 
-                <!-- Seguimiento (Editable/Clickable) -->
+                <!-- Cuota (Editable siempre, depende de realizedDelivery para endpoint) -->
+                <td class="col-cuota text-right" 
+                    [ngClass]="{'editable-cell': row.delivery.estado !== 'Cancelado'}" 
+                    (click)="row.delivery.estado !== 'Cancelado' && startEdit(row, 'cuota')">
+                  <div class="cell-content" *ngIf="row.editingField !== 'cuota'">
+                    {{ getCuotaVisual(row) != null ? (getCuotaVisual(row) | number:'1.0-2') : '—' }}
+                  </div>
+                  <div class="edit-input-wrapper" *ngIf="row.editingField === 'cuota'" (click)="$event.stopPropagation()">
+                    <input type="number" class="inline-input text-right" [(ngModel)]="row.editValue" 
+                           (keydown)="onEditKeydown($event, row)" (blur)="saveEdit(row)" autofocus>
+                    <mat-icon class="saving-icon" *ngIf="row.saving">sync</mat-icon>
+                  </div>
+                </td>
+
+                <!-- Kilos (No editable) -->
+                <td class="col-kilos text-right">
+                  {{ getKilosVisual(row) != null ? (getKilosVisual(row) | number:'1.2-2') : '—' }}
+                </td>
+
+                <!-- Usuarios (Editable si realizada) -->
+                <td class="col-usuarios text-right"
+                    [ngClass]="{'editable-cell': row.realizedDelivery && row.delivery.estado !== 'Cancelado'}" 
+                    (click)="row.realizedDelivery && startEdit(row, 'usuarios')">
+                  <div class="cell-content" *ngIf="row.editingField !== 'usuarios'">
+                    {{ getUsuariosVisual(row) != null ? (getUsuariosVisual(row) | number:'1.0-0') : '—' }}
+                  </div>
+                  <div class="edit-input-wrapper" *ngIf="row.editingField === 'usuarios'" (click)="$event.stopPropagation()">
+                    <input type="number" class="inline-input text-right" [(ngModel)]="row.editValue" 
+                           (keydown)="onEditKeydown($event, row)" (blur)="saveEdit(row)" autofocus>
+                    <mat-icon class="saving-icon" *ngIf="row.saving">sync</mat-icon>
+                  </div>
+                </td>
+
+                <!-- Seguimiento (Editable siempre) -->
                 <td class="col-seg">
-                  <div class="seg-badge clickable" [ngClass]="getSeguimientoClass(row.delivery.estadoSeguimiento)" 
+                  <div class="seg-badge clickable" 
+                       [ngClass]="getSeguimientoClass(row.delivery.estadoSeguimiento)" 
                        (click)="cycleSeguimiento(row)"
                        [class.disabled]="row.delivery.estado === 'Cancelado' || row.saving">
                     <span class="seg-dot"></span>
-                    {{ row.delivery.estadoSeguimiento }}
+                    {{ row.delivery.estadoSeguimiento || '—' }}
                     <mat-icon class="spin" *ngIf="row.saving && !row.editingField">sync</mat-icon>
                   </div>
                 </td>
 
-                <!-- Descripción (Editable) -->
-                <td class="col-desc editable-cell" (click)="startEdit(row, 'descripcion')">
+                <!-- Descripción (Editable siempre) -->
+                <td class="col-desc" 
+                    [ngClass]="{'editable-cell': row.delivery.estado !== 'Cancelado'}" 
+                    (click)="row.delivery.estado !== 'Cancelado' && startEdit(row, 'descripcion')">
                   <div class="cell-content text-truncate" *ngIf="row.editingField !== 'descripcion'" [title]="row.delivery.descripcion || '—'">
                     {{ row.delivery.descripcion || '—' }}
                   </div>
@@ -156,7 +199,7 @@
                       </button>
 
                       <button mat-icon-button class="action-btn view-realized-btn" 
-                              *ngIf="row.realizedDeliveryId" 
+                              *ngIf="row.realizedDelivery" 
                               (click)="viewRealizedDelivery(row)" 
                               matTooltip="Ver entrega realizada">
                         <mat-icon>receipt_long</mat-icon>
@@ -170,13 +213,16 @@
                     </button>
                   </div>
                 </td>
+
               </tr>
 
               <!-- Totals Row -->
               <tr class="totals-row" *ngIf="group.deliveries.length > 0">
-                <td colspan="3" class="text-right fw-600">TOTALES DEL DÍA</td>
-                <td class="col-cuota fw-600 text-primary">${{ group.totals.cuotaSum | number:'1.2-2' }}</td>
-                <td colspan="4">
+                <td colspan="4" class="text-right fw-600">TOTALES DEL DÍA</td>
+                <td class="col-cuota text-right fw-600 text-primary">{{ group.totals.cuota > 0 ? (group.totals.cuota | number:'1.0-2') : '—' }}</td>
+                <td class="col-kilos text-right fw-600">{{ group.totals.kilos > 0 ? (group.totals.kilos | number:'1.2-2') : '—' }}</td>
+                <td class="col-usuarios text-right fw-600">{{ group.totals.usuarios > 0 ? (group.totals.usuarios | number:'1.0-0') : '—' }}</td>
+                <td colspan="5">
                   <div class="totals-badges">
                     <span class="tot-badge confirmados" *ngIf="group.totals.confirmados > 0">{{ group.totals.confirmados }} Confir.</span>
                     <span class="tot-badge pendientes" *ngIf="group.totals.pendientes > 0">{{ group.totals.pendientes }} Pend.</span>

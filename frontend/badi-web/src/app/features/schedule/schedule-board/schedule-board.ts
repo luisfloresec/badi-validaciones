@@ -12,6 +12,8 @@ import { ButtonModule } from 'primeng/button';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ScheduleService, ScheduledDelivery } from '../schedule.service';
+import { RealizedDeliveriesService } from '../../realized-deliveries/realized-deliveries.service';
+import { RealizedDelivery } from '../../realized-deliveries/realized-deliveries.service';
 import { ScheduleFormDialogComponent } from '../schedule-form-dialog/schedule-form-dialog';
 import { ScheduleDetailDialogComponent } from '../schedule-detail-dialog/schedule-detail-dialog';
 import { HttpClient } from '@angular/common/http';
@@ -27,7 +29,7 @@ interface DayGroup {
 
 interface BoardRow {
   delivery: ScheduledDelivery;
-  realizedDeliveryId: string | null;
+  realizedDelivery: any | null;
   checkingRealized: boolean;
   // Inline edit state
   editingField: string | null;
@@ -37,10 +39,26 @@ interface BoardRow {
 
 interface DayTotals {
   count: number;
-  cuotaSum: number;
+  cuota: number;
+  kilos: number;
+  usuarios: number;
   confirmados: number;
   pendientes: number;
   detenidos: number;
+}
+
+interface ScheduleUpdatePayload {
+  cuota?: number | null;
+  kilosEstimados?: number | null;
+  descripcion?: string | null;
+  horaProgramada?: string;
+  estadoSeguimiento?: string;
+}
+
+interface RealizedDeliveryUpdatePayload {
+  cuota?: number | null;
+  kilosEntregados?: number;
+  personasAtendidas?: number;
 }
 
 @Component({
@@ -74,6 +92,7 @@ export class ScheduleBoardComponent implements OnInit {
 
   constructor(
     private scheduleService: ScheduleService,
+    private realizedDeliveriesService: RealizedDeliveriesService,
     private dialog: MatDialog,
     private snackBar: MatSnackBar,
     private cdr: ChangeDetectorRef,
@@ -143,7 +162,8 @@ export class ScheduleBoardComponent implements OnInit {
     const to = this.formatDate(this.weekEnd);
 
     this.scheduleService.getAll({ from, to }).subscribe({
-      next: (deliveries) => {
+      next: (allDeliveries) => {
+        const deliveries = allDeliveries.filter(d => d.estado !== 'Cancelado');
         this.buildDayGroups(deliveries);
         this.loading = false;
         this.cdr.detectChanges();
@@ -189,7 +209,7 @@ export class ScheduleBoardComponent implements OnInit {
 
       const rows: BoardRow[] = items.map(d => ({
         delivery: d,
-        realizedDeliveryId: null,
+        realizedDelivery: null,
         checkingRealized: true,
         editingField: null,
         editValue: null,
@@ -201,36 +221,78 @@ export class ScheduleBoardComponent implements OnInit {
         label: this.formatDayLabel(dateKey),
         expanded: true,
         deliveries: rows,
-        totals: this.computeTotals(items)
+        totals: this.calculateDayTotals(rows)
       };
     });
   }
 
-  private computeTotals(items: ScheduledDelivery[]): DayTotals {
-    let cuotaSum = 0;
-    let confirmados = 0;
-    let pendientes = 0;
-    let detenidos = 0;
+  private calculateDayTotals(rows: BoardRow[]): DayTotals {
+    return rows.reduce(
+      (acc, row) => {
+        if (row.delivery.estado !== 'Cancelado') {
+          acc.cuota += this.getCuotaTotalValue(row);
+          acc.kilos += this.getKilosTotalValue(row);
+          acc.usuarios += this.getUsuariosTotalValue(row);
+          acc.count++;
 
-    for (const d of items) {
-      if (d.cuota) cuotaSum += d.cuota;
-      switch (d.estadoSeguimiento) {
-        case 'Confirmado': confirmados++; break;
-        case 'Pendiente': pendientes++; break;
-        case 'Detenido': detenidos++; break;
+          switch (row.delivery.estadoSeguimiento) {
+            case 'Confirmado': acc.confirmados++; break;
+            case 'Pendiente': acc.pendientes++; break;
+            case 'Detenido': acc.detenidos++; break;
+          }
+        }
+        return acc;
+      },
+      { count: 0, cuota: 0, kilos: 0, usuarios: 0, confirmados: 0, pendientes: 0, detenidos: 0 }
+    );
+  }
+
+  private toNumber(value: number | string | null | undefined): number {
+    if (value === null || value === undefined || value === '') return 0;
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+
+  private getCuotaTotalValue(row: BoardRow): number {
+    if (row.realizedDelivery) {
+      const realizedCuota = row.realizedDelivery.cuota;
+      if (realizedCuota !== null && realizedCuota !== undefined) {
+        return this.toNumber(realizedCuota);
       }
     }
+    return this.toNumber(row.delivery.cuota);
+  }
 
-    return { count: items.length, cuotaSum, confirmados, pendientes, detenidos };
+  private getKilosTotalValue(row: BoardRow): number {
+    if (row.realizedDelivery) {
+      return this.toNumber(row.realizedDelivery.kilosEntregados);
+    }
+    const kilosEstimados = row.delivery.kilosEstimados;
+    if (kilosEstimados !== null && kilosEstimados !== undefined) {
+      return this.toNumber(kilosEstimados);
+    }
+    const cuota = this.toNumber(row.delivery.cuota);
+    return cuota > 0 ? Number((cuota / 0.5).toFixed(2)) : 0;
+  }
+
+  private getUsuariosTotalValue(row: BoardRow): number {
+    if (row.realizedDelivery) {
+      return this.toNumber(row.realizedDelivery.personasAtendidas);
+    }
+    return 0;
+  }
+
+  private recalculateAllTotals(): void {
+    this.dayGroups = this.dayGroups.map(group => ({
+      ...group,
+      totals: this.calculateDayTotals(group.deliveries)
+    }));
   }
 
   private checkRealizedDeliveries(): void {
-    const allRows = this.dayGroups.flatMap(g => g.deliveries);
-    const editableRows = allRows.filter(r => r.delivery.estado !== 'Cancelado');
+    const editableRows = this.dayGroups.flatMap(g => g.deliveries);
 
     if (editableRows.length === 0) {
-      allRows.forEach(r => r.checkingRealized = false);
-      this.cdr.detectChanges();
       return;
     }
 
@@ -242,11 +304,10 @@ export class ScheduleBoardComponent implements OnInit {
 
     forkJoin(requests).subscribe(results => {
       results.forEach((result, i) => {
-        editableRows[i].realizedDeliveryId = result ? result.id : null;
+        editableRows[i].realizedDelivery = result;
         editableRows[i].checkingRealized = false;
       });
-      // Mark cancelled as done checking
-      allRows.filter(r => r.delivery.estado === 'Cancelado').forEach(r => r.checkingRealized = false);
+      this.recalculateAllTotals();
       this.cdr.detectChanges();
     });
   }
@@ -269,16 +330,21 @@ export class ScheduleBoardComponent implements OnInit {
 
   startEdit(row: BoardRow, field: string): void {
     if (row.delivery.estado === 'Cancelado') return;
+    
     row.editingField = field;
     switch (field) {
       case 'cuota':
-        row.editValue = row.delivery.cuota ?? null;
+        row.editValue = row.realizedDelivery ? (row.realizedDelivery.cuota != null ? row.realizedDelivery.cuota : null)
+                                             : (row.delivery.cuota != null ? row.delivery.cuota : null);
+        break;
+      case 'usuarios':
+        row.editValue = row.realizedDelivery && row.realizedDelivery.personasAtendidas != null ? row.realizedDelivery.personasAtendidas : null;
         break;
       case 'descripcion':
         row.editValue = row.delivery.descripcion || '';
         break;
-      case 'observaciones':
-        row.editValue = row.delivery.observaciones || '';
+      case 'horaProgramada':
+        row.editValue = row.delivery.horaProgramada || '';
         break;
     }
   }
@@ -289,23 +355,68 @@ export class ScheduleBoardComponent implements OnInit {
     const field = row.editingField;
     const value = row.editValue;
 
-    // Build payload
-    const payload: Record<string, any> = {};
+    // Campos que siempre van a realizedDeliveriesService (si existe entrega realizada)
+    const isRealizedUpdate = row.realizedDelivery && (field === 'cuota' || field === 'usuarios');
+
+    if (isRealizedUpdate) {
+      const payload: RealizedDeliveryUpdatePayload = {};
+      if (field === 'cuota') {
+        const numVal = value !== null && value !== '' ? Number(value) : null;
+        if (numVal === (row.realizedDelivery.cuota ?? null)) { row.editingField = null; return; }
+        payload.cuota = numVal;
+      } else if (field === 'usuarios') {
+        const numVal = value !== null && value !== '' ? Number(value) : 0;
+        if (numVal === (row.realizedDelivery.personasAtendidas ?? null)) { row.editingField = null; return; }
+        payload.personasAtendidas = numVal;
+      }
+
+      row.saving = true;
+      this.realizedDeliveriesService.update(row.realizedDelivery.id, payload).subscribe({
+        next: (updated) => {
+          row.realizedDelivery = updated;
+          row.editingField = null;
+          row.saving = false;
+          this.snackBar.open('Actualizado', 'Cerrar', { duration: 2000 });
+          this.recalculateAllTotals();
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          row.saving = false;
+          const msg = err.error?.message || 'Error al guardar';
+          this.snackBar.open(Array.isArray(msg) ? msg.join('. ') : msg, 'Cerrar', { duration: 4000 });
+          this.cdr.detectChanges();
+        }
+      });
+      return;
+    }
+
+    // Campos que van a scheduleService (horaProgramada, descripcion, y cuota si no hay realizada)
+    const payload: ScheduleUpdatePayload = {};
     switch (field) {
       case 'cuota':
-        const numVal = value !== null && value !== '' ? Number(value) : undefined;
-        if (numVal === row.delivery.cuota) { row.editingField = null; return; }
-        payload['cuota'] = numVal;
+        const numVal = value !== null && value !== '' ? Number(value) : null;
+        if (numVal === (row.delivery.cuota ?? null)) { row.editingField = null; return; }
+        payload.cuota = numVal;
+        if (numVal !== null) {
+          payload.kilosEstimados = Number((numVal / 0.5).toFixed(2));
+        } else {
+          payload.kilosEstimados = null;
+        }
         break;
       case 'descripcion':
-        const descVal = (value as string)?.trim() || undefined;
-        if (descVal === row.delivery.descripcion) { row.editingField = null; return; }
-        payload['descripcion'] = descVal;
+        const descVal = (value as string)?.trim() || null;
+        if (descVal === (row.delivery.descripcion ?? null)) { row.editingField = null; return; }
+        payload.descripcion = descVal;
         break;
-      case 'observaciones':
-        const obsVal = (value as string)?.trim() || undefined;
-        if (obsVal === row.delivery.observaciones) { row.editingField = null; return; }
-        payload['observaciones'] = obsVal;
+      case 'horaProgramada':
+        const horaVal = String(value || '').trim();
+        if (!horaVal) {
+          this.snackBar.open('La hora es obligatoria.', 'Cerrar', { duration: 3000 });
+          row.editingField = null;
+          return;
+        }
+        if (horaVal === (row.delivery.horaProgramada ?? null)) { row.editingField = null; return; }
+        payload.horaProgramada = horaVal;
         break;
     }
 
@@ -316,8 +427,13 @@ export class ScheduleBoardComponent implements OnInit {
         row.editingField = null;
         row.saving = false;
         this.snackBar.open('Actualizado', 'Cerrar', { duration: 2000 });
-        // Recompute totals for the parent day group
-        this.recomputeTotalsForRow(row);
+        if (field === 'horaProgramada') {
+          const group = this.dayGroups.find(g => g.deliveries.includes(row));
+          if (group) {
+            group.deliveries.sort((a, b) => (a.delivery.horaProgramada || '').localeCompare(b.delivery.horaProgramada || ''));
+          }
+        }
+        this.recalculateAllTotals();
         this.cdr.detectChanges();
       },
       error: (err) => {
@@ -348,44 +464,43 @@ export class ScheduleBoardComponent implements OnInit {
   cycleSeguimiento(row: BoardRow): void {
     if (row.delivery.estado === 'Cancelado' || row.saving) return;
 
-    const states = ['Pendiente', 'Confirmado', 'Detenido'];
-    const currentIdx = states.indexOf(row.delivery.estadoSeguimiento);
-    const nextState = states[(currentIdx + 1) % states.length];
+    const current = row.delivery.estadoSeguimiento || 'Pendiente';
+    let next = 'Pendiente';
+    
+    if (current === 'Pendiente') next = 'Confirmado';
+    else if (current === 'Confirmado') next = 'Detenido';
+    else if (current === 'Detenido') next = 'Pendiente';
 
-    const oldState = row.delivery.estadoSeguimiento;
-    row.delivery.estadoSeguimiento = nextState;
+    const previous = current;
+
+    row.delivery.estadoSeguimiento = next;
     row.saving = true;
-
-    this.scheduleService.update(row.delivery.id, { estadoSeguimiento: nextState }).subscribe({
+    
+    this.scheduleService.update(row.delivery.id, { estadoSeguimiento: next }).subscribe({
       next: (updated) => {
         row.delivery = updated;
         row.saving = false;
-        this.snackBar.open(`Seguimiento: ${nextState}`, 'Cerrar', { duration: 2000 });
-        this.recomputeTotalsForRow(row);
+        this.recalculateAllTotals();
+        this.snackBar.open(`Seguimiento: ${next}`, 'Cerrar', { duration: 2000 });
         this.cdr.detectChanges();
       },
       error: () => {
-        row.delivery.estadoSeguimiento = oldState;
+        row.delivery.estadoSeguimiento = previous;
         row.saving = false;
-        this.snackBar.open('Error al actualizar seguimiento', 'Cerrar', { duration: 3000 });
+        this.snackBar.open('Error al actualizar estado de seguimiento', 'Cerrar', { duration: 3000 });
         this.cdr.detectChanges();
       }
     });
   }
 
   private recomputeTotalsForRow(row: BoardRow): void {
-    for (const group of this.dayGroups) {
-      if (group.deliveries.includes(row)) {
-        group.totals = this.computeTotals(group.deliveries.map(r => r.delivery));
-        break;
-      }
-    }
+    this.recalculateAllTotals();
   }
 
   // ── Actions ──────────────────────────
 
   canRegisterDelivery(row: BoardRow): boolean {
-    if (row.checkingRealized || row.realizedDeliveryId) return false;
+    if (row.checkingRealized || row.realizedDelivery) return false;
     if (row.delivery.estado === 'Cancelado') return false;
     const dateStr = row.delivery.fechaProgramada.substring(0, 10);
     return this.todayStr >= dateStr;
@@ -398,8 +513,8 @@ export class ScheduleBoardComponent implements OnInit {
   }
 
   viewRealizedDelivery(row: BoardRow): void {
-    if (row.realizedDeliveryId) {
-      this.router.navigate(['/realized-deliveries', row.realizedDeliveryId]);
+    if (row.realizedDelivery) {
+      this.router.navigate(['/realized-deliveries', row.realizedDelivery.id]);
     }
   }
 
@@ -444,6 +559,11 @@ export class ScheduleBoardComponent implements OnInit {
     return d.organizacion?.razonSocial || d.organizacion?.nombreComercial || 'Organización';
   }
 
+  getSegmento(row: BoardRow): string {
+    const segmento = (row.delivery.organizacion as any)?.segmento;
+    return segmento?.nombre || segmento?.descripcion || '—';
+  }
+
   getConvenioCode(d: ScheduledDelivery): string {
     return d.convenio?.codigoConvenio || 'Sin convenio';
   }
@@ -482,5 +602,33 @@ export class ScheduleBoardComponent implements OnInit {
     const mm = parts[1];
     const yyyy = parts[0];
     return `${dayName} ${dd}/${mm}/${yyyy}`;
+  }
+
+  getKilosVisual(row: BoardRow): number | null {
+    if (row.realizedDelivery?.kilosEntregados != null) {
+      return row.realizedDelivery.kilosEntregados;
+    }
+    if (row.delivery.kilosEstimados != null) {
+      return row.delivery.kilosEstimados;
+    }
+    if (row.delivery.cuota != null) {
+      return row.delivery.cuota / 0.5;
+    }
+    return null;
+  }
+
+  getUsuariosVisual(row: BoardRow): number | null {
+    if (row.realizedDelivery?.personasAtendidas != null) {
+      return row.realizedDelivery.personasAtendidas;
+    }
+    // Users are not derived from cuota when unrealized!
+    return null;
+  }
+
+  getCuotaVisual(row: BoardRow): number | null {
+    if (row.realizedDelivery?.cuota != null) {
+      return row.realizedDelivery.cuota;
+    }
+    return row.delivery.cuota != null ? row.delivery.cuota : null;
   }
 }

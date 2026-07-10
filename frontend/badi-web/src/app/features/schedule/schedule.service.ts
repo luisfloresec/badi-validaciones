@@ -104,7 +104,7 @@ export class ScheduleService {
     return this.http.get<ScheduledDelivery[]>(`${this.apiUrl}/by-agreement/${agreementId}`);
   }
 
-  update(id: string, data: { descripcion?: string; observaciones?: string; estadoSeguimiento?: string; cuota?: number }): Observable<ScheduledDelivery> {
+  update(id: string, data: { descripcion?: string | null; observaciones?: string | null; estadoSeguimiento?: string; cuota?: number | null; kilosEstimados?: number | null }): Observable<ScheduledDelivery> {
     return this.http.patch<ScheduledDelivery>(`${this.apiUrl}/${id}`, data);
   }
 

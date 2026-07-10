@@ -153,6 +153,23 @@ export class RealizedDeliveriesService {
     return delivery;
   }
 
+  async update(id: string, updateData: Partial<RealizedDelivery>): Promise<RealizedDelivery> {
+    const delivery = await this.findOne(id);
+    if (updateData.cuota !== undefined) {
+      delivery.cuota = updateData.cuota;
+      if (updateData.cuota !== null) {
+        delivery.kilosEntregados = Number((updateData.cuota / 0.5).toFixed(2));
+      }
+    }
+    if (updateData.personasAtendidas !== undefined) {
+      delivery.personasAtendidas = updateData.personasAtendidas;
+    }
+    if (updateData.kilosEntregados !== undefined && updateData.cuota === undefined) {
+      delivery.kilosEntregados = updateData.kilosEntregados;
+    }
+    return this.realizedDeliveryRepository.save(delivery);
+  }
+
   async findByAgreement(agreementId: string): Promise<RealizedDelivery[]> {
     return this.realizedDeliveryRepository.find({
       where: { convenio: { id: agreementId } },

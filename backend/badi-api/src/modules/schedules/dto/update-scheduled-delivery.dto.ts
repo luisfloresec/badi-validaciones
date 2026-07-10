@@ -17,4 +17,12 @@ export class UpdateScheduledDeliveryDto {
   @IsNumber()
   @IsOptional()
   cuota?: number;
+
+  @IsNumber()
+  @IsOptional()
+  kilosEstimados?: number;
+
+  @IsString()
+  @IsOptional()
+  horaProgramada?: string;
 }

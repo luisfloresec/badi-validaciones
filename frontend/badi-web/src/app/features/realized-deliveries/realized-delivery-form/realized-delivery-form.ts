@@ -104,6 +104,18 @@ export class RealizedDeliveryFormComponent implements OnInit {
           });
         }
         
+        // Preload operational data from schedule
+        const patchData: any = {};
+        if (schedule.cuota != null) {
+          patchData.cuota = schedule.cuota;
+        }
+        if (schedule.observaciones) {
+          patchData.observaciones = schedule.observaciones;
+        }
+        if (Object.keys(patchData).length > 0) {
+          this.deliveryForm.patchValue(patchData);
+        }
+        
         this.isLoadingContext = false;
         this.cdr.detectChanges();
       },

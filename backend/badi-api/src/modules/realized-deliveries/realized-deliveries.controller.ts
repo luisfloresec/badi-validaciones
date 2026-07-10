@@ -39,6 +39,12 @@ export class RealizedDeliveriesController {
     return this.realizedDeliveriesService.findOne(id);
   }
 
+  @Roles('Administrador', 'Gestión Social')
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateData: any) {
+    return this.realizedDeliveriesService.update(id, updateData);
+  }
+
   @Get('by-agreement/:agreementId')
   findByAgreement(@Param('agreementId') agreementId: string) {
     return this.realizedDeliveriesService.findByAgreement(agreementId);

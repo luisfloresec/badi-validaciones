@@ -131,9 +131,11 @@ export class SchedulesService {
     const query = this.scheduledDeliveryRepository
       .createQueryBuilder('sd')
       .leftJoinAndSelect('sd.organizacion', 'organizacionDirecta')
+      .leftJoinAndSelect('organizacionDirecta.segmento', 'segmentoDirecto')
       .leftJoinAndSelect('sd.convenio', 'convenio')
       .leftJoinAndSelect('convenio.tipoConvenio', 'tipoConvenio')
-      .leftJoinAndSelect('convenio.organizacion', 'organizacion');
+      .leftJoinAndSelect('convenio.organizacion', 'organizacion')
+      .leftJoinAndSelect('organizacion.segmento', 'segmentoConvenio');
 
     if (filters.from) {
       query.andWhere('sd.fecha_programada >= :from', { from: filters.from });
@@ -298,6 +300,15 @@ export class SchedulesService {
     }
     if (updateDto.estadoSeguimiento !== undefined) {
       delivery.estadoSeguimiento = updateDto.estadoSeguimiento;
+    }
+    if (updateDto.horaProgramada !== undefined) {
+      delivery.horaProgramada = updateDto.horaProgramada;
+    }
+    if (updateDto.cuota !== undefined) {
+      delivery.cuota = updateDto.cuota;
+    }
+    if (updateDto.kilosEstimados !== undefined) {
+      delivery.kilosEstimados = updateDto.kilosEstimados;
     }
 
 
