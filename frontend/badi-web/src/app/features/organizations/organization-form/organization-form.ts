@@ -27,6 +27,7 @@ import {
   Province,
   City
 } from '../../../core/services/location.service';
+import { UppercaseDirective } from '../../../shared/directives/uppercase.directive';
 
 // Custom validator for duplicate social networks
 function uniqueSocialNetworkValidator(control: AbstractControl): ValidationErrors | null {
@@ -59,7 +60,8 @@ function uniqueSocialNetworkValidator(control: AbstractControl): ValidationError
     TextareaModule,
     IftaLabelModule,
     MessageModule,
-    FluidModule
+    FluidModule,
+    UppercaseDirective
   ],
   templateUrl: './organization-form.html',
   styleUrl: './organization-form.scss'

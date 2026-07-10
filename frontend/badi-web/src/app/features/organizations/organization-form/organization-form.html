@@ -71,7 +71,7 @@
 
         <div class="field-container col-full">
           <p-iftalabel>
-            <input pInputText formControlName="razonSocial" id="razonSocial" />
+            <input pInputText formControlName="razonSocial" id="razonSocial" appUppercase />
             <label for="razonSocial">Razón social</label>
           </p-iftalabel>
           <small class="field-error" *ngIf="orgForm.get('razonSocial')?.hasError('required') && (orgForm.get('razonSocial')?.touched || formError)">La razón social es obligatoria</small>
@@ -126,14 +126,14 @@
 
         <div class="field-container col-half">
           <p-iftalabel>
-            <input pInputText formControlName="sectorBarrio" id="sectorBarrio" />
+            <input pInputText formControlName="sectorBarrio" id="sectorBarrio" appUppercase />
             <label for="sectorBarrio">Sector / Barrio (Opcional)</label>
           </p-iftalabel>
         </div>
 
         <div class="field-container col-full">
           <p-iftalabel>
-            <input pInputText formControlName="direccion" id="direccion" />
+            <input pInputText formControlName="direccion" id="direccion" appUppercase />
             <label for="direccion">Dirección exacta</label>
           </p-iftalabel>
           <small class="field-error" *ngIf="orgForm.get('direccion')?.hasError('required') && (orgForm.get('direccion')?.touched || formError)">La dirección es obligatoria</small>
@@ -141,7 +141,7 @@
 
         <div class="field-container col-full">
           <p-iftalabel>
-            <input pInputText formControlName="referenciaDireccion" id="referenciaDireccion" />
+            <input pInputText formControlName="referenciaDireccion" id="referenciaDireccion" appUppercase />
             <label for="referenciaDireccion">Referencia de dirección (Opcional)</label>
           </p-iftalabel>
         </div>
