@@ -9,6 +9,11 @@
       <button mat-stroked-button class="btn-toggle" routerLink="/schedule">
         <mat-icon>calendar_month</mat-icon> Vista Calendario
       </button>
+      <button mat-stroked-button class="btn-export" (click)="exportExcel()" [disabled]="exportLoading">
+        <mat-icon *ngIf="!exportLoading">download</mat-icon>
+        <mat-spinner diameter="18" *ngIf="exportLoading"></mat-spinner>
+        <span class="ml-2">{{ exportLoading ? 'Exportando...' : 'Exportar Excel' }}</span>
+      </button>
       <button mat-flat-button class="btn-primary" (click)="openScheduleForm()">
         <mat-icon>add</mat-icon> Programar entrega
       </button>
@@ -233,6 +238,38 @@
             </tbody>
           </table>
         </div>
+      </div>
+    </div>
+
+    <!-- Weekly Summary -->
+    <div class="day-group mt-2" *ngIf="dayGroups.length > 0">
+      <div class="table-wrapper">
+        <table class="board-table">
+          <thead style="visibility: collapse;">
+            <tr>
+              <th class="col-org"></th>
+              <th class="col-grupos"></th>
+              <th class="col-conv"></th>
+              <th class="col-hora"></th>
+              <th class="col-cuota"></th>
+              <th class="col-kilos"></th>
+              <th class="col-usuarios"></th>
+              <th class="col-seg"></th>
+              <th class="col-desc"></th>
+              <th class="col-estado"></th>
+              <th class="col-acciones"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="totals-row">
+              <td colspan="4" class="text-right fw-600 text-primary">TOTAL SEMANAL {{ weekLabel }}</td>
+              <td class="col-cuota text-right fw-600 text-primary">{{ weekTotals.cuota > 0 ? (weekTotals.cuota | number:'1.0-2') : '—' }}</td>
+              <td class="col-kilos text-right fw-600">{{ weekTotals.kilos > 0 ? (weekTotals.kilos | number:'1.2-2') : '—' }}</td>
+              <td class="col-usuarios text-right fw-600">{{ weekTotals.usuarios > 0 ? (weekTotals.usuarios | number:'1.0-0') : '—' }}</td>
+              <td colspan="4"></td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>

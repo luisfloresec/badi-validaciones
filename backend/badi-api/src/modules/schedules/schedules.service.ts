@@ -8,6 +8,9 @@ import { CreateScheduledDeliveryDto } from './dto/create-scheduled-delivery.dto'
 import { UpdateScheduledDeliveryDto } from './dto/update-scheduled-delivery.dto';
 import { RescheduleDeliveryDto } from './dto/reschedule-delivery.dto';
 import { CancelDeliveryDto } from './dto/cancel-delivery.dto';
+import { RealizedDelivery } from '../realized-deliveries/entities/realized-delivery.entity';
+import { ExcelGeneratorService } from '../reports/services/excel-generator.service';
+import * as ExcelJS from 'exceljs';
 
 @Injectable()
 export class SchedulesService {
@@ -18,6 +21,9 @@ export class SchedulesService {
     private agreementsRepository: Repository<Agreement>,
     @InjectRepository(Organization)
     private organizationsRepository: Repository<Organization>,
+    @InjectRepository(RealizedDelivery)
+    private realizedDeliveryRepository: Repository<RealizedDelivery>,
+    private excelGeneratorService: ExcelGeneratorService,
   ) {}
 
   private normalizeDateOnly(value: string | Date): string {
@@ -348,5 +354,199 @@ export class SchedulesService {
     delivery.motivoCancelacion = cancelDto.motivoCancelacion;
 
     return this.scheduledDeliveryRepository.save(delivery);
+  }
+
+  async exportBoardExcel(filters: {
+    from?: string;
+    to?: string;
+    agreementId?: string;
+    organizationId?: string;
+    estado?: string;
+  }): Promise<ExcelJS.Workbook> {
+    const schedules = await this.findAll(filters);
+    
+    // Filter out Cancelados as per rules
+    const validSchedules = schedules.filter(sd => sd.estado !== 'Cancelado');
+    if (validSchedules.length === 0) {
+      return this.excelGeneratorService.generateExcel({
+        title: 'Tablero Operativo - Sin Registros',
+        sheetName: 'Tablero',
+        columns: [{ header: 'Mensaje', key: 'mensaje', width: 50 }],
+        data: [{ mensaje: 'No hay entregas para las fechas seleccionadas' }]
+      });
+    }
+
+    const scheduleIds = validSchedules.map(sd => sd.id);
+    const realizedDeliveries = await this.realizedDeliveryRepository.find({
+      where: { entregaProgramada: { id: In(scheduleIds) } },
+      relations: {
+        entregaProgramada: true
+      }
+    });
+
+    const rdMap = new Map<string, RealizedDelivery>();
+    for (const rd of realizedDeliveries) {
+      rdMap.set(rd.entregaProgramada.id, rd);
+    }
+
+    // Group by Date and Week for Totals
+    const data: any[] = [];
+    let currentTotalCuota = 0;
+    let currentTotalKilos = 0;
+    let currentTotalUsuarios = 0;
+    
+    let weekTotalCuota = 0;
+    let weekTotalKilos = 0;
+    let weekTotalUsuarios = 0;
+    
+    let lastDate = '';
+    let lastWeekMonday = '';
+    let lastWeekSunday = '';
+
+    const getMonday = (dateStr: string) => {
+      const d = new Date(dateStr + 'T12:00:00');
+      const day = d.getDay();
+      const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+      const monday = new Date(d.setDate(diff));
+      return monday.toISOString().slice(0, 10);
+    };
+    const getSunday = (mondayStr: string) => {
+      const d = new Date(mondayStr + 'T12:00:00');
+      const sunday = new Date(d.setDate(d.getDate() + 6));
+      return sunday.toISOString().slice(0, 10);
+    };
+
+    for (let i = 0; i < validSchedules.length; i++) {
+      const sd = validSchedules[i];
+      const dateStr = this.normalizeDateOnly(sd.fechaProgramada);
+      const currentMonday = getMonday(dateStr);
+      
+      if (lastDate && lastDate !== dateStr) {
+        // Push totals row for lastDate
+        data.push({
+          fechaProgramada: 'TOTAL DEL DÍA',
+          organizacion: '',
+          segmento: '',
+          convenio: '',
+          horaProgramada: '',
+          cuota: currentTotalCuota,
+          kilos: currentTotalKilos,
+          usuarios: currentTotalUsuarios,
+          estadoSeguimiento: '',
+          descripcion: '',
+          estado: ''
+        });
+        currentTotalCuota = 0;
+        currentTotalKilos = 0;
+        currentTotalUsuarios = 0;
+      }
+      
+      if (lastWeekMonday && lastWeekMonday !== currentMonday) {
+        // Push totals row for lastWeek
+        data.push({
+          fechaProgramada: `TOTAL SEMANAL ${lastWeekMonday.split('-').reverse().join('/')} - ${lastWeekSunday.split('-').reverse().join('/')}`,
+          organizacion: '',
+          segmento: '',
+          convenio: '',
+          horaProgramada: '',
+          cuota: weekTotalCuota,
+          kilos: weekTotalKilos,
+          usuarios: weekTotalUsuarios,
+          estadoSeguimiento: '',
+          descripcion: '',
+          estado: ''
+        });
+        weekTotalCuota = 0;
+        weekTotalKilos = 0;
+        weekTotalUsuarios = 0;
+      }
+      
+      lastDate = dateStr;
+      lastWeekMonday = currentMonday;
+      lastWeekSunday = getSunday(currentMonday);
+
+      const rd = rdMap.get(sd.id);
+      
+      const cuotaNum = rd && rd.cuota != null ? Number(rd.cuota) : (sd.cuota != null ? Number(sd.cuota) : 0);
+      let kilosNum = 0;
+      if (rd && rd.kilosEntregados != null) {
+        kilosNum = Number(rd.kilosEntregados);
+      } else if (sd.kilosEstimados != null) {
+        kilosNum = Number(sd.kilosEstimados);
+      } else if (cuotaNum > 0) {
+        kilosNum = cuotaNum / 0.5;
+      }
+
+      const usuariosNum = rd && rd.personasAtendidas != null ? Number(rd.personasAtendidas) : 0;
+
+      currentTotalCuota += cuotaNum;
+      currentTotalKilos += kilosNum;
+      currentTotalUsuarios += usuariosNum;
+      weekTotalCuota += cuotaNum;
+      weekTotalKilos += kilosNum;
+      weekTotalUsuarios += usuariosNum;
+
+      data.push({
+        fechaProgramada: dateStr,
+        organizacion: sd.organizacion?.razonSocial || sd.organizacion?.nombreComercial || '—',
+        segmento: sd.organizacion?.segmento?.nombre || sd.organizacion?.segmento?.descripcion || '—',
+        convenio: sd.convenio?.codigoConvenio || '—',
+        horaProgramada: sd.horaProgramada,
+        cuota: cuotaNum,
+        kilos: kilosNum,
+        usuarios: usuariosNum,
+        estadoSeguimiento: sd.estadoSeguimiento,
+        descripcion: sd.descripcion || '',
+        estado: sd.estado
+      });
+    }
+
+    if (lastDate) {
+      data.push({
+        fechaProgramada: 'TOTAL DEL DÍA',
+        organizacion: '',
+        segmento: '',
+        convenio: '',
+        horaProgramada: '',
+        cuota: currentTotalCuota,
+        kilos: currentTotalKilos,
+        usuarios: currentTotalUsuarios,
+        estadoSeguimiento: '',
+        descripcion: '',
+        estado: ''
+      });
+      data.push({
+        fechaProgramada: `TOTAL SEMANAL ${lastWeekMonday.split('-').reverse().join('/')} - ${lastWeekSunday.split('-').reverse().join('/')}`,
+        organizacion: '',
+        segmento: '',
+        convenio: '',
+        horaProgramada: '',
+        cuota: weekTotalCuota,
+        kilos: weekTotalKilos,
+        usuarios: weekTotalUsuarios,
+        estadoSeguimiento: '',
+        descripcion: '',
+        estado: ''
+      });
+    }
+
+    return this.excelGeneratorService.generateExcel({
+      title: 'Tablero Operativo BADI',
+      sheetName: 'Tablero Operativo',
+      columns: [
+        { header: 'Fecha', key: 'fechaProgramada', width: 15 },
+        { header: 'Organización', key: 'organizacion', width: 45 },
+        { header: 'Segmento', key: 'segmento', width: 20 },
+        { header: 'Convenio', key: 'convenio', width: 15 },
+        { header: 'Hora', key: 'horaProgramada', width: 10 },
+        { header: 'Cuota', key: 'cuota', width: 10 },
+        { header: 'Kilos', key: 'kilos', width: 10 },
+        { header: 'Usuarios', key: 'usuarios', width: 10 },
+        { header: 'Seguimiento', key: 'estadoSeguimiento', width: 15 },
+        { header: 'Descripción', key: 'descripcion', width: 30 },
+        { header: 'Estado', key: 'estado', width: 15 }
+      ],
+      data
+    });
   }
 }

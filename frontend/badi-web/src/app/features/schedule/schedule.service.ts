@@ -86,6 +86,16 @@ export class ScheduleService {
     return this.http.get<ScheduledDelivery[]>(this.apiUrl, { params });
   }
 
+  exportBoardExcel(filters?: ScheduleFilters): Observable<Blob> {
+    let params = new HttpParams();
+    if (filters?.from) params = params.set('from', filters.from);
+    if (filters?.to) params = params.set('to', filters.to);
+    if (filters?.agreementId) params = params.set('agreementId', filters.agreementId);
+    if (filters?.organizationId) params = params.set('organizationId', filters.organizationId);
+    if (filters?.estado) params = params.set('estado', filters.estado);
+    return this.http.get(`${this.apiUrl}/board/export/excel`, { params, responseType: 'blob' });
+  }
+
   getStats(): Observable<ScheduleStats> {
     return this.http.get<ScheduleStats>(`${this.apiUrl}/stats`);
   }

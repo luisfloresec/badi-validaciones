@@ -80,6 +80,11 @@ interface RealizedDeliveryUpdatePayload {
 })
 export class ScheduleBoardComponent implements OnInit {
   dayGroups: DayGroup[] = [];
+  weekTotals = {
+    cuota: 0,
+    kilos: 0,
+    usuarios: 0
+  };
   loading = true;
   error: string | null = null;
 
@@ -283,10 +288,15 @@ export class ScheduleBoardComponent implements OnInit {
   }
 
   private recalculateAllTotals(): void {
-    this.dayGroups = this.dayGroups.map(group => ({
-      ...group,
-      totals: this.calculateDayTotals(group.deliveries)
-    }));
+    let wCuota = 0, wKilos = 0, wUsuarios = 0;
+    this.dayGroups = this.dayGroups.map(group => {
+      const totals = this.calculateDayTotals(group.deliveries);
+      wCuota += totals.cuota;
+      wKilos += totals.kilos;
+      wUsuarios += totals.usuarios;
+      return { ...group, totals };
+    });
+    this.weekTotals = { cuota: wCuota, kilos: wKilos, usuarios: wUsuarios };
   }
 
   private checkRealizedDeliveries(): void {
@@ -540,17 +550,47 @@ export class ScheduleBoardComponent implements OnInit {
 
   openScheduleForm(): void {
     const dialogRef = this.dialog.open(ScheduleFormDialogComponent, {
-      width: '560px',
+      width: '600px',
       maxWidth: '95vw',
-      disableClose: true,
-      data: { fecha: new Date() }
+      disableClose: true
     });
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        setTimeout(() => {
-          this.loadData();
-        }, 0);
+        this.snackBar.open('Entrega programada exitosamente', 'Cerrar', { duration: 3000 });
+        this.loadData();
+      }
+    });
+  }
+
+  exportLoading = false;
+
+  exportExcel(): void {
+    this.exportLoading = true;
+    this.cdr.detectChanges();
+
+    const from = this.formatDate(this.weekStart);
+    const to = this.formatDate(this.weekEnd);
+
+    this.scheduleService.exportBoardExcel({ from, to }).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const today = new Date().toISOString().slice(0, 10);
+        a.download = `tablero-operativo-badi-${today}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        this.exportLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error exporting excel:', err);
+        this.snackBar.open('No se pudo exportar el tablero a Excel.', 'Cerrar', { duration: 4000 });
+        this.exportLoading = false;
+        this.cdr.detectChanges();
       }
     });
   }

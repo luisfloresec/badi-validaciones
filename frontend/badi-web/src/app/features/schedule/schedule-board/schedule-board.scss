@@ -86,6 +86,32 @@ $primary: #0284c7; // Azul primario para links
   }
 }
 
+.btn-export {
+  border-radius: 10px !important;
+  color: $green !important;
+  border-color: rgba(1, 86, 65, 0.3) !important;
+  height: 40px;
+  background-color: #fff !important;
+
+  mat-icon {
+    margin-right: 0px;
+    color: $green;
+  }
+  
+  mat-spinner {
+    ::ng-deep circle { stroke: $green !important; }
+  }
+
+  &:hover:not([disabled]) {
+    background-color: $green-bg !important;
+    border-color: $green !important;
+  }
+
+  &[disabled] {
+    opacity: 0.6;
+  }
+}
+
 /* ── Toolbar ─────────────────────────── */
 .board-toolbar {
   display: flex;
