@@ -46,10 +46,19 @@ export class AuditListComponent implements OnInit {
   loading = true;
   error: string | null = null;
 
-  modulos: string[] = ['Usuarios', 'Roles', 'Organizaciones', 'Convenios', 'Entregas', 'Cronogramas', 'Grupos Atendidos', 'Representantes', 'Dirigentes', 'Repositorio Global', 'Auth', 'Documentos', 'Tipos Documentales'];
-  acciones: string[] = ['CREATE', 'UPDATE', 'DELETE', 'LOGIN', 'LOGOUT', 'SUBIR', 'DESCARGAR', 'ERROR'];
+  moduloOptions = [
+    { label: 'Auth / Login', value: 'auth' },
+    { label: 'Usuarios', value: 'usuario' },
+    { label: 'Roles', value: 'rol' },
+    { label: 'Organizaciones', value: 'organizacion' },
+    { label: 'Convenios', value: 'convenio' },
+    { label: 'Entregas Programadas', value: 'entrega_programada' },
+    { label: 'Entregas Realizadas', value: 'entrega_realizada' },
+    { label: 'Documentos', value: 'documento' },
+    { label: 'Tipos Documentales', value: 'tipo_documento' },
+  ];
+  acciones: string[] = ['CREATE', 'UPDATE', 'DELETE', 'LOGIN', 'LOGOUT', 'SUBIR', 'DESCARGAR', 'ERROR', 'FORGOT_PASSWORD', 'RESET_PASSWORD'];
 
-  moduloOptions = this.modulos.map(m => ({ label: m, value: m }));
   accionOptions = this.acciones.map(a => ({ label: a, value: a }));
 
   // Filtros
@@ -235,7 +244,7 @@ export class AuditListComponent implements OnInit {
 
   getResumen(log: AuditLog): string {
     const acc = (log.accion || '').toUpperCase();
-    const ent = log.entidad || log.modulo;
+    const ent = log.entidad || this.formatModulo(log.modulo);
     if (acc.includes('CREATE')) return `Creación en ${ent}`;
     if (acc.includes('UPDATE')) return `Modificación en ${ent}`;
     if (acc.includes('DELETE')) return `Eliminación en ${ent}`;
@@ -244,6 +253,12 @@ export class AuditListComponent implements OnInit {
     if (acc.includes('SUBIR')) return `Carga de archivo en ${ent}`;
     if (acc.includes('DESCARGAR')) return `Descarga en ${ent}`;
     return `Operación ${log.accion} en ${ent}`;
+  }
+
+  formatModulo(modulo: string): string {
+    if (!modulo) return '—';
+    const opt = this.moduloOptions.find(o => o.value === modulo);
+    return opt ? opt.label : modulo;
   }
 
   exportLoading = false;

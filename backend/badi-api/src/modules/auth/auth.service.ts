@@ -73,6 +73,23 @@ export class AuthService {
       roles,
     };
 
+    // Auditoría: Registrar login exitoso
+    const auditLog = this.auditRepository.create({
+      userId: user.id,
+      modulo: 'auth',
+      entidad: 'User',
+      entidadId: user.id,
+      accion: 'LOGIN',
+      datosAnteriores: null,
+      datosNuevos: { email: user.email },
+      resultado: 'EXITO',
+    });
+    try {
+      await this.auditRepository.save(auditLog);
+    } catch (e) {
+      console.error('Error guardando auditoría de login', e);
+    }
+
     return {
       access_token: this.jwtService.sign(payload),
       user: {

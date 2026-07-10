@@ -113,12 +113,12 @@
         </thead>
         <tbody>
           <tr *ngFor="let log of logs">
-            <td class="col-mono">{{ log.fechaHora | date:'dd/MM/yyyy HH:mm:ss' }}</td>
+            <td class="col-mono">{{ log.fechaHora | date:'dd/MM/yyyy HH:mm:ss':'-0500' }}</td>
             <td class="col-primary">{{ log.user ? log.user.nombres + ' ' + log.user.apellidos : 'Sistema / Anónimo' }}</td>
             <td>
               <span class="estado-chip" [ngClass]="getBadgeClass(log.accion)">{{ log.accion }}</span>
             </td>
-            <td><strong>{{ log.modulo }}</strong> <span class="text-muted">/ {{ log.entidad }}</span></td>
+            <td><strong>{{ formatModulo(log.modulo) }}</strong> <span class="text-muted">/ {{ log.entidad }}</span></td>
             <td class="col-mono text-ellipsis" [matTooltip]="log.entidadId || 'N/A'">{{ (log.entidadId && log.entidadId.length > 12) ? (log.entidadId.substring(0,12) + '...') : (log.entidadId || 'N/A') }}</td>
             <td>{{ getResumen(log) }}</td>
             <td class="col-mono">{{ log.userIp || '—' }}</td>
