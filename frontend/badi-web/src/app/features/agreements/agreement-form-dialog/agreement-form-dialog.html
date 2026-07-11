@@ -69,7 +69,7 @@
 
         <div class="field-container col-half">
           <p-iftalabel>
-            <input pInputText formControlName="codigoConvenio" id="codigoConvenio" />
+            <input pInputText formControlName="codigoConvenio" id="codigoConvenio" appUppercase />
             <label for="codigoConvenio">Código de Convenio</label>
           </p-iftalabel>
           <small class="field-hint">Ejemplo: BADI-2026-001</small>
@@ -101,7 +101,7 @@
       <div class="form-row">
         <div class="field-container col-full">
           <p-iftalabel>
-            <textarea pTextarea formControlName="observaciones" id="observaciones" rows="3"></textarea>
+            <textarea pTextarea formControlName="observaciones" id="observaciones" rows="3" appUppercase></textarea>
             <label for="observaciones">Observaciones (Opcional)</label>
           </p-iftalabel>
           <small class="field-hint">Ejemplo: Convenio registrado para entregas mensuales</small>

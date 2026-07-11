@@ -19,6 +19,7 @@ import { IftaLabelModule } from 'primeng/iftalabel';
 import { FluidModule } from 'primeng/fluid';
 import { ButtonModule } from 'primeng/button';
 import { DatePickerModule } from 'primeng/datepicker';
+import { UppercaseDirective } from '../../../shared/directives/uppercase.directive';
 
 @Component({
   selector: 'app-agreement-form-dialog',
@@ -40,7 +41,8 @@ import { DatePickerModule } from 'primeng/datepicker';
     IftaLabelModule,
     FluidModule,
     ButtonModule,
-    DatePickerModule
+    DatePickerModule,
+    UppercaseDirective
   ],
   templateUrl: './agreement-form-dialog.html',
   styleUrls: ['./agreement-form-dialog.scss']
