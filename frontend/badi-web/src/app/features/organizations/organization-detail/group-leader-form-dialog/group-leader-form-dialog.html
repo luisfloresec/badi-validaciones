@@ -22,7 +22,7 @@
       <div class="form-row">
         <div class="field-container col-full">
           <p-iftalabel>
-            <input pInputText formControlName="nombre" id="nombre" />
+            <input pInputText formControlName="nombre" id="nombre" appUppercase />
             <label for="nombre">Nombre del Grupo</label>
           </p-iftalabel>
           <small class="field-hint">Ejemplo: Adultos mayores sector norte</small>
@@ -102,7 +102,7 @@
       <div class="form-row">
         <div class="field-container col-full">
           <p-iftalabel>
-            <textarea pTextarea formControlName="observaciones" id="observaciones" rows="2"></textarea>
+            <textarea pTextarea formControlName="observaciones" id="observaciones" rows="2" appUppercase></textarea>
             <label for="observaciones">Observaciones (Opcional)</label>
           </p-iftalabel>
           <small class="field-hint">Ejemplo: Grupo con atención mensual prioritaria</small>
@@ -130,7 +130,7 @@
           <div class="form-row">
             <div class="field-container col-half">
               <p-iftalabel>
-                <input pInputText formControlName="nombres" id="leader_nombres" />
+                <input pInputText formControlName="nombres" id="leader_nombres" appUppercase />
                 <label for="leader_nombres">Nombres</label>
               </p-iftalabel>
               <small class="field-hint">Ejemplo: María Fernanda</small>
@@ -139,7 +139,7 @@
 
             <div class="field-container col-half">
               <p-iftalabel>
-                <input pInputText formControlName="apellidos" id="leader_apellidos" />
+                <input pInputText formControlName="apellidos" id="leader_apellidos" appUppercase />
                 <label for="leader_apellidos">Apellidos</label>
               </p-iftalabel>
               <small class="field-hint">Ejemplo: Imbaquingo Flores</small>

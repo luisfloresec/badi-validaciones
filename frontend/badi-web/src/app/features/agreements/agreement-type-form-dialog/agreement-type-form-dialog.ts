@@ -14,6 +14,7 @@ import { FluidModule } from 'primeng/fluid';
 import { ButtonModule } from 'primeng/button';
 import { AgreementsService, AgreementType } from '../agreements.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { UppercaseDirective } from '../../../shared/directives/uppercase.directive';
 
 @Component({
   selector: 'app-agreement-type-form-dialog',
@@ -31,7 +32,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
     IftaLabelModule,
     TextareaModule,
     FluidModule,
-    ButtonModule
+    ButtonModule,
+    UppercaseDirective
   ],
   template: `
   <div class="dialog-container">
@@ -52,7 +54,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
         <div class="form-row">
           <div class="field-container col-full">
             <p-iftalabel>
-              <input pInputText formControlName="nombre" id="nombre" />
+              <input pInputText formControlName="nombre" id="nombre" appUppercase />
               <label for="nombre">Nombre</label>
             </p-iftalabel>
             <small class="field-hint">Ejemplo: Convenio Piloto</small>
@@ -64,7 +66,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
         <div class="form-row">
           <div class="field-container col-full">
             <p-iftalabel>
-              <textarea pTextarea formControlName="descripcion" id="descripcion" rows="3" style="resize: vertical; width: 100%;"></textarea>
+              <textarea pTextarea formControlName="descripcion" id="descripcion" rows="3" style="resize: vertical; width: 100%;" appUppercase></textarea>
               <label for="descripcion">Descripción (Opcional)</label>
             </p-iftalabel>
             <small class="field-hint">Describe brevemente la finalidad o modalidad del convenio</small>

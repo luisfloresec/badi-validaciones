@@ -13,6 +13,7 @@ import { FluidModule } from 'primeng/fluid';
 import { ButtonModule } from 'primeng/button';
 import { OrganizationsService } from '../../organizations.service';
 import { API_BASE_URL } from '../../../../core/config/api.config';
+import { UppercaseDirective } from '../../../../shared/directives/uppercase.directive';
 
 export interface RepresentativeDialogData {
   organizationId: string;
@@ -35,7 +36,8 @@ export interface RepresentativeDialogData {
     InputTextModule,
     IftaLabelModule,
     FluidModule,
-    ButtonModule
+    ButtonModule,
+    UppercaseDirective
   ],
   templateUrl: './representative-form-dialog.html',
   styleUrls: ['./representative-form-dialog.scss']

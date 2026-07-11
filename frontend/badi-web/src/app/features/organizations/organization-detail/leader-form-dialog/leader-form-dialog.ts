@@ -14,6 +14,7 @@ import { FluidModule } from 'primeng/fluid';
 import { ButtonModule } from 'primeng/button';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { OrganizationsService } from '../../organizations.service';
+import { UppercaseDirective } from '../../../../shared/directives/uppercase.directive';
 
 export interface LeaderDialogData {
   groupId: string;
@@ -39,7 +40,8 @@ export interface LeaderDialogData {
     IftaLabelModule,
     FluidModule,
     ButtonModule,
-    RadioButtonModule
+    RadioButtonModule,
+    UppercaseDirective
   ],
   templateUrl: './leader-form-dialog.html',
   styleUrls: ['./leader-form-dialog.scss']

@@ -7,6 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatCardModule } from '@angular/material/card';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ButtonModule } from 'primeng/button';
 import { forkJoin, of } from 'rxjs';
@@ -14,6 +15,7 @@ import { catchError } from 'rxjs/operators';
 import { ScheduleService, ScheduledDelivery } from '../schedule.service';
 import { RealizedDeliveriesService } from '../../realized-deliveries/realized-deliveries.service';
 import { RealizedDelivery } from '../../realized-deliveries/realized-deliveries.service';
+import { AgreementsService } from '../../agreements/agreements.service';
 import { ScheduleFormDialogComponent } from '../schedule-form-dialog/schedule-form-dialog';
 import { ScheduleDetailDialogComponent } from '../schedule-detail-dialog/schedule-detail-dialog';
 import { HttpClient } from '@angular/common/http';
@@ -73,6 +75,7 @@ interface RealizedDeliveryUpdatePayload {
     MatTooltipModule,
     MatProgressSpinnerModule,
     MatDialogModule,
+    MatCardModule,
     ButtonModule
   ],
   templateUrl: './schedule-board.html',

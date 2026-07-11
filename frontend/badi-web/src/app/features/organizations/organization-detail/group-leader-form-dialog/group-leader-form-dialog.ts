@@ -20,6 +20,7 @@ import { ButtonModule } from 'primeng/button';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { OrganizationsService } from '../../organizations.service';
+import { UppercaseDirective } from '../../../../shared/directives/uppercase.directive';
 
 export interface GroupLeaderDialogData {
   organizationId: string;
@@ -51,7 +52,8 @@ export interface GroupLeaderDialogData {
     FluidModule,
     ButtonModule,
     RadioButtonModule,
-    MultiSelectModule
+    MultiSelectModule,
+    UppercaseDirective
   ],
   templateUrl: './group-leader-form-dialog.html',
   styleUrls: ['./group-leader-form-dialog.scss']
