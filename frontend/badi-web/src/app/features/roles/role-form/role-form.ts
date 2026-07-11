@@ -12,6 +12,7 @@ import { ButtonModule } from 'primeng/button';
 import { IftaLabelModule } from 'primeng/iftalabel';
 import { finalize } from 'rxjs/operators';
 import { RolesService, Role } from '../roles.service';
+import { UppercaseDirective } from '../../../shared/directives/uppercase.directive';
 
 @Component({
   selector: 'app-role-form',
@@ -26,7 +27,8 @@ import { RolesService, Role } from '../roles.service';
     InputTextModule,
     TextareaModule,
     ButtonModule,
-    IftaLabelModule
+    IftaLabelModule,
+    UppercaseDirective
   ],
   templateUrl: './role-form.html',
   styleUrl: './role-form.scss'

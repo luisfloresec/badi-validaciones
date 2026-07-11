@@ -95,7 +95,7 @@
                   
                   <div class="field-container col-half">
                     <p-iftalabel>
-                      <input pInputText formControlName="nombres" id="nombres" />
+                      <input pInputText formControlName="nombres" id="nombres" appUppercase />
                       <label for="nombres">Nombres</label>
                     </p-iftalabel>
                     <small class="field-error" *ngIf="profileForm.get('nombres')?.hasError('required') && profileForm.get('nombres')?.touched">
@@ -105,7 +105,7 @@
                   
                   <div class="field-container col-half">
                     <p-iftalabel>
-                      <input pInputText formControlName="apellidos" id="apellidos" />
+                      <input pInputText formControlName="apellidos" id="apellidos" appUppercase />
                       <label for="apellidos">Apellidos</label>
                     </p-iftalabel>
                     <small class="field-error" *ngIf="profileForm.get('apellidos')?.hasError('required') && profileForm.get('apellidos')?.touched">

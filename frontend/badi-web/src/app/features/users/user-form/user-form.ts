@@ -14,6 +14,7 @@ import { finalize } from 'rxjs/operators';
 import { UsersService, User } from '../users.service';
 import { RolesService, Role } from '../../roles/roles.service';
 import { passwordStrongValidator, STRONG_PASSWORD_MESSAGE } from '../../../shared/validators/password-strong.validator';
+import { UppercaseDirective } from '../../../shared/directives/uppercase.directive';
 
 @Component({
   selector: 'app-user-form',
@@ -28,7 +29,8 @@ import { passwordStrongValidator, STRONG_PASSWORD_MESSAGE } from '../../../share
     MatProgressSpinnerModule,
     InputTextModule,
     ButtonModule,
-    IftaLabelModule
+    IftaLabelModule,
+    UppercaseDirective
   ],
   templateUrl: './user-form.html',
   styleUrl: './user-form.scss'

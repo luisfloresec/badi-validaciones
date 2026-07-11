@@ -16,7 +16,7 @@
       <div class="form-row">
         <div class="field-container col-full">
           <p-iftalabel>
-            <input pInputText formControlName="nombre" id="nombre" placeholder="Ej: Registro fotográfico" />
+            <input pInputText formControlName="nombre" id="nombre" placeholder="Ej: Registro fotográfico" appUppercase />
             <label for="nombre">Nombre del Tipo Documental</label>
           </p-iftalabel>
           <small class="field-hint">Ingrese un nombre representativo para la categoría</small>
@@ -52,7 +52,7 @@
       <div class="form-row">
         <div class="field-container col-full">
           <p-iftalabel>
-            <textarea pTextarea formControlName="descripcion" id="descripcion" rows="2" placeholder="Describe brevemente el propósito y alcance de este tipo documental"></textarea>
+            <textarea pTextarea formControlName="descripcion" id="descripcion" rows="2" placeholder="Describe brevemente el propósito y alcance de este tipo documental" appUppercase></textarea>
             <label for="descripcion">Descripción</label>
           </p-iftalabel>
         </div>

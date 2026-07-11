@@ -14,7 +14,7 @@
         <!-- Nombre del Rol -->
         <div class="field-container col-full">
           <p-iftalabel>
-            <input pInputText formControlName="nombre" id="nombre" />
+            <input pInputText formControlName="nombre" id="nombre" appUppercase />
             <label for="nombre">Nombre del Rol</label>
           </p-iftalabel>
           <small class="field-error" *ngIf="form.get('nombre')?.hasError('required') && form.get('nombre')?.touched">
@@ -25,7 +25,7 @@
         <!-- Descripción -->
         <div class="field-container col-full">
           <p-iftalabel>
-            <textarea pTextarea formControlName="descripcion" id="descripcion" rows="3"></textarea>
+            <textarea pTextarea formControlName="descripcion" id="descripcion" rows="3" appUppercase></textarea>
             <label for="descripcion">Descripción (Opcional)</label>
           </p-iftalabel>
         </div>

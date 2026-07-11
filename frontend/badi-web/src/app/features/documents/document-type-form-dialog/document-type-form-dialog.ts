@@ -18,6 +18,7 @@ import { ButtonModule } from 'primeng/button';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { DocumentTypesService, DocumentType, CreateDocumentTypeDto } from '../document-types.service';
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
+import { UppercaseDirective } from '../../../shared/directives/uppercase.directive';
 
 const ENTIDADES = ['ORGANIZACION', 'CONVENIO', 'ENTREGA_REALIZADA', 'GENERAL'];
 const EXTENSIONES_COMUNES = ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png', 'webp', 'xls', 'xlsx'];
@@ -41,7 +42,8 @@ const EXTENSIONES_COMUNES = ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png', 'webp',
     TextareaModule,
     IftaLabelModule,
     ButtonModule,
-    ToggleSwitchModule
+    ToggleSwitchModule,
+    UppercaseDirective
   ],
   templateUrl: './document-type-form-dialog.html',
   styleUrls: ['./document-type-form-dialog.scss']

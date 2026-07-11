@@ -19,6 +19,7 @@ import { FluidModule } from 'primeng/fluid';
 import { AuthService, UserProfile } from '../../../core/auth/auth.service';
 import { NotificationService } from '../../../shared/services/notification.service';
 import { passwordStrongValidator, STRONG_PASSWORD_MESSAGE } from '../../../shared/validators/password-strong.validator';
+import { UppercaseDirective } from '../../../shared/directives/uppercase.directive';
 
 @Component({
   selector: 'app-profile-detail',
@@ -38,7 +39,8 @@ import { passwordStrongValidator, STRONG_PASSWORD_MESSAGE } from '../../../share
     IftaLabelModule,
     InputTextModule,
     ButtonModule,
-    FluidModule
+    FluidModule,
+    UppercaseDirective
   ],
   templateUrl: './profile-detail.html',
   styleUrl: './profile-detail.scss'
