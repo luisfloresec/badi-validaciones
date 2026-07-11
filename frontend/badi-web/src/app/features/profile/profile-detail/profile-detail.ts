@@ -159,19 +159,34 @@ export class ProfileDetailComponent implements OnInit, OnDestroy {
   onSaveProfile() {
     if (this.profileForm.invalid) return;
     this.loadingProfile = true;
-    this.cdr.detectChanges();
     
-    this.authService.updateProfile(this.profileForm.value).subscribe({
+    const formVal = this.profileForm.value;
+    const payload = {
+      ...formVal,
+      nombres: formVal.nombres?.toLocaleUpperCase('es-EC'),
+      apellidos: formVal.apellidos?.toLocaleUpperCase('es-EC')
+    };
+
+    this.authService.updateProfile(payload).pipe(
+      finalize(() => {
+        setTimeout(() => {
+          this.loadingProfile = false;
+          this.cdr.detectChanges();
+        }, 0);
+      })
+    ).subscribe({
       next: (profile) => {
         this.userProfile = profile;
         this.notificationService.success('Perfil actualizado correctamente');
-        this.loadingProfile = false;
+        this.profileForm.patchValue({
+          nombres: profile.nombres,
+          apellidos: profile.apellidos
+        }, { emitEvent: false });
         this.cdr.detectChanges();
       },
       error: (err) => {
         const msg = err.error?.message || 'Error al actualizar perfil';
         this.notificationService.error(msg);
-        this.loadingProfile = false;
         this.cdr.detectChanges();
       }
     });

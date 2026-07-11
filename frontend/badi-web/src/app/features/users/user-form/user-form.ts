@@ -115,8 +115,8 @@ export class UserFormComponent implements OnInit {
     const val = this.form.value;
 
     const dto: any = {
-      nombres: val.nombres,
-      apellidos: val.apellidos,
+      nombres: val.nombres?.toLocaleUpperCase('es-EC'),
+      apellidos: val.apellidos?.toLocaleUpperCase('es-EC'),
       email: val.email,
       estado: val.estado,
       requiereCambioPassword: val.requiereCambioPassword,
@@ -127,34 +127,26 @@ export class UserFormComponent implements OnInit {
       dto.password = val.password;
     }
 
-    if (this.mode === 'create') {
-      this.usersService.create(dto)
-        .subscribe({
-          next: () => {
-            this.snackBar.open('Usuario creado exitosamente', 'Cerrar', { duration: 3000 });
-            setTimeout(() => {
-              this.dialogRef.close(true);
-            }, 0);
-          },
-          error: (err) => {
-            this.loading = false;
-            this.snackBar.open(err.error?.message || 'Error al crear el usuario', 'Cerrar', { duration: 3000 });
-          }
-        });
-    } else {
-      this.usersService.update(this.user!.id, dto)
-        .subscribe({
-          next: () => {
-            this.snackBar.open('Usuario actualizado exitosamente', 'Cerrar', { duration: 3000 });
-            setTimeout(() => {
-              this.dialogRef.close(true);
-            }, 0);
-          },
-          error: (err) => {
-            this.loading = false;
-            this.snackBar.open(err.error?.message || 'Error al actualizar el usuario', 'Cerrar', { duration: 3000 });
-          }
-        });
-    }
+    const request$ = this.mode === 'create' 
+      ? this.usersService.create(dto) 
+      : this.usersService.update(this.user!.id, dto);
+
+    request$.pipe(
+      finalize(() => {
+        setTimeout(() => {
+          this.loading = false;
+        }, 0);
+      })
+    ).subscribe({
+      next: () => {
+        this.snackBar.open(`Usuario ${this.mode === 'create' ? 'creado' : 'actualizado'} exitosamente`, 'Cerrar', { duration: 3000 });
+        setTimeout(() => {
+          this.dialogRef.close(true);
+        }, 0);
+      },
+      error: (err) => {
+        this.snackBar.open(err.error?.message || `Error al ${this.mode === 'create' ? 'crear' : 'actualizar'} el usuario`, 'Cerrar', { duration: 3000 });
+      }
+    });
   }
 }
