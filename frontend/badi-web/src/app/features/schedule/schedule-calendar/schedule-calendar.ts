@@ -17,6 +17,7 @@ import interactionPlugin, { DateClickArg } from '@fullcalendar/interaction';
 import { ScheduleService, ScheduleStats, ScheduledDelivery } from '../schedule.service';
 import { ScheduleFormDialogComponent } from '../schedule-form-dialog/schedule-form-dialog';
 import { ScheduleDetailDialogComponent } from '../schedule-detail-dialog/schedule-detail-dialog';
+import { AuthService } from '../../../core/auth/auth.service';
 
 interface StatCard {
   label: string;
@@ -117,7 +118,8 @@ export class ScheduleCalendarComponent implements OnInit {
     private scheduleService: ScheduleService,
     private dialog: MatDialog,
     private snackBar: MatSnackBar,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    public authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -278,6 +280,8 @@ export class ScheduleCalendarComponent implements OnInit {
   }
 
   onDateClick(info: DateClickArg): void {
+    if (!this.authService.canEdit()) return;
+    
     // Parsear la fecha seleccionada en zona local para evitar desfases
     const parts = info.dateStr.split('-');
     const selectedDate = new Date(

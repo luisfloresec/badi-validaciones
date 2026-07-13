@@ -18,7 +18,7 @@
       <button mat-button class="btn-secondary-outlined" routerLink="/agreements">
         <mat-icon>arrow_back</mat-icon> Volver a convenios
       </button>
-      <button mat-flat-button color="primary" class="btn-primary" (click)="openTypeForm()">
+      <button mat-flat-button color="primary" class="btn-primary" (click)="openTypeForm()" *ngIf="authService.canEdit()">
         <mat-icon>add</mat-icon> Nuevo Tipo
       </button>
     </div>
@@ -67,19 +67,20 @@
           <td mat-cell *matCellDef="let element" class="text-center actions-cell">
             <button mat-icon-button color="primary"
                     matTooltip="Editar tipo"
-                    (click)="openTypeForm(element)">
+                    (click)="openTypeForm(element)"
+                    *ngIf="authService.canEdit()">
               <mat-icon>edit</mat-icon>
             </button>
             <button mat-icon-button color="warn"
                     matTooltip="Inactivar tipo"
                     (click)="deactivateType(element)"
-                    *ngIf="element.estado === 'Activo'">
+                    *ngIf="element.estado === 'Activo' && authService.canEdit()">
               <mat-icon>block</mat-icon>
             </button>
             <button mat-icon-button class="btn-action-activate"
                     matTooltip="Reactivar tipo"
                     (click)="activateType(element)"
-                    *ngIf="element.estado === 'Inactivo'">
+                    *ngIf="element.estado === 'Inactivo' && authService.canEdit()">
               <mat-icon>settings_backup_restore</mat-icon>
             </button>
           </td>

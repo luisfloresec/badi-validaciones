@@ -11,7 +11,7 @@
         <mat-icon>category</mat-icon>
         Tipos Documentales
       </button>
-      <button mat-flat-button class="btn-primary" (click)="openUploadDialog()">
+      <button mat-flat-button class="btn-primary" (click)="openUploadDialog()" *ngIf="authService.canEdit()">
         <mat-icon>upload_file</mat-icon>
         Subir documento
       </button>
@@ -113,7 +113,7 @@
       <button mat-stroked-button (click)="clearFilters()" *ngIf="hasActiveFilters()">
         <mat-icon>filter_alt_off</mat-icon> Limpiar filtros
       </button>
-      <button mat-flat-button class="btn-primary" (click)="openUploadDialog()">
+      <button mat-flat-button class="btn-primary" (click)="openUploadDialog()" *ngIf="authService.canEdit()">
         <mat-icon>upload_file</mat-icon> Subir primer documento
       </button>
     </div>
@@ -167,13 +167,13 @@
               <button mat-icon-button class="action-btn" color="primary" (click)="download(doc)" matTooltip="Descargar archivo">
                 <mat-icon>download</mat-icon>
               </button>
-              <button mat-icon-button class="action-btn" color="primary" (click)="openMetadataDialog(doc)" *ngIf="doc.estado === 'Activo'" matTooltip="Editar metadatos">
+              <button mat-icon-button class="action-btn" color="primary" (click)="openMetadataDialog(doc)" *ngIf="doc.estado === 'Activo' && authService.canEdit()" matTooltip="Editar metadatos">
                 <mat-icon>edit_note</mat-icon>
               </button>
-              <button mat-icon-button class="action-btn" color="primary" (click)="openReplaceDialog(doc)" *ngIf="doc.estado === 'Activo'" matTooltip="Reemplazar archivo">
+              <button mat-icon-button class="action-btn" color="primary" (click)="openReplaceDialog(doc)" *ngIf="doc.estado === 'Activo' && authService.canEdit()" matTooltip="Reemplazar archivo">
                 <mat-icon>find_replace</mat-icon>
               </button>
-              <button mat-icon-button class="action-btn" color="warn" (click)="annulDocument(doc)" *ngIf="doc.estado === 'Activo'" matTooltip="Anular documento">
+              <button mat-icon-button class="action-btn" color="warn" (click)="annulDocument(doc)" *ngIf="doc.estado === 'Activo' && authService.canEdit()" matTooltip="Anular documento">
                 <mat-icon>block</mat-icon>
               </button>
             </td>

@@ -18,10 +18,10 @@
       <div class="action-buttons">
         <p-button label="Reporte PDF" icon="pi pi-file-pdf" severity="danger" 
           [loading]="reportLoading" (onClick)="downloadReport()" />
-        <p-button label="Activar convenio" icon="pi pi-check-circle" *ngIf="agreement.estado === 'Registrado'"
+        <p-button label="Activar convenio" icon="pi pi-check-circle" *ngIf="agreement.estado === 'Registrado' && authService.canEdit()"
           (onClick)="activateAgreement()" />
         <p-button label="Editar convenio" icon="pi pi-pencil" [outlined]="true" severity="secondary"
-          *ngIf="agreement.estado === 'Registrado'" (onClick)="openAgreementForm()" />
+          *ngIf="agreement.estado === 'Registrado' && authService.canEdit()" (onClick)="openAgreementForm()" />
       </div>
     </div>
 
@@ -282,7 +282,7 @@
         <mat-icon class="section-icon">calendar_month</mat-icon>
         <h2>Cronograma y entregas</h2>
       </div>
-      <div class="organization-section-action" *ngIf="agreement && agreement.estado === 'Activo'">
+      <div class="organization-section-action" *ngIf="agreement && agreement.estado === 'Activo' && authService.canEdit()">
         <p-button label="Programar" icon="pi pi-plus" size="small" styleClass="organization-action-button-p"
           (onClick)="openScheduleForm()" />
       </div>
@@ -300,7 +300,7 @@
         <mat-icon>event_busy</mat-icon>
         <p class="mt-2">Aún no existen entregas programadas para este convenio.</p>
         <p-button label="Programar primera entrega" icon="pi pi-plus" size="small"
-          styleClass="organization-action-button-p mt-3" *ngIf="agreement && agreement.estado === 'Activo'"
+          styleClass="organization-action-button-p mt-3" *ngIf="agreement && agreement.estado === 'Activo' && authService.canEdit()"
           (onClick)="openScheduleForm()" />
       </div>
 
@@ -334,7 +334,7 @@
 
   <!-- Acciones administrativas -->
   <div class="organization-section-card admin-card mb-4"
-    *ngIf="agreement.estado === 'Activo' || agreement.estado === 'Registrado'">
+    *ngIf="(agreement.estado === 'Activo' || agreement.estado === 'Registrado') && authService.canEdit()">
     <div class="organization-section-header">
       <div class="organization-section-title">
         <mat-icon class="section-icon color-warn">admin_panel_settings</mat-icon>

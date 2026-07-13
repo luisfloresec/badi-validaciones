@@ -15,6 +15,7 @@ import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialo
 import { ScheduleService, ScheduledDelivery } from '../../schedule/schedule.service';
 import { ScheduleFormDialogComponent } from '../../schedule/schedule-form-dialog/schedule-form-dialog';
 import { DocumentSectionComponent } from '../../documents/document-section/document-section';
+import { AuthService } from '../../../core/auth/auth.service';
 
 @Component({
   selector: 'app-agreement-detail',
@@ -50,7 +51,8 @@ export class AgreementDetailComponent implements OnInit {
     private scheduleService: ScheduleService,
     private cdr: ChangeDetectorRef,
     private snackBar: MatSnackBar,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    public authService: AuthService
   ) {}
 
   ngOnInit(): void {

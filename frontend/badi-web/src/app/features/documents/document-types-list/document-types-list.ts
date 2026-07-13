@@ -14,6 +14,7 @@ import { ButtonModule } from 'primeng/button';
 import { DocumentTypesService, DocumentType } from '../document-types.service';
 import { DocumentTypeFormDialogComponent } from '../document-type-form-dialog/document-type-form-dialog';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog';
+import { AuthService } from '../../../core/auth/auth.service';
 
 @Component({
   selector: 'app-document-types-list',
@@ -46,7 +47,8 @@ export class DocumentTypesListComponent implements OnInit {
     private documentTypesService: DocumentTypesService,
     private dialog: MatDialog,
     private snackBar: MatSnackBar,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    public authService: AuthService
   ) {}
 
   ngOnInit(): void {

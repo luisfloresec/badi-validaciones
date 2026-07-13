@@ -9,9 +9,10 @@ import { AgreementsService, AgreementType } from '../agreements.service';
 import { AgreementTypeFormDialogComponent } from '../agreement-type-form-dialog/agreement-type-form-dialog';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { finalize } from 'rxjs/operators';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { RouterModule } from '@angular/router';
+import { AuthService } from '../../../core/auth/auth.service';
+import { finalize } from 'rxjs/operators';
 
 @Component({
   selector: 'app-agreement-types-list',
@@ -39,7 +40,8 @@ export class AgreementTypesListComponent implements OnInit {
     private agreementsService: AgreementsService,
     private dialog: MatDialog,
     private snackBar: MatSnackBar,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    public authService: AuthService
   ) {}
 
   ngOnInit(): void {

@@ -21,7 +21,7 @@
           <mat-icon>arrow_back</mat-icon>
           Volver al repositorio
         </button>
-        <button mat-flat-button class="btn-primary" (click)="openForm()">
+        <button mat-flat-button class="btn-primary" (click)="openForm()" *ngIf="authService.canEdit()">
           <mat-icon>add</mat-icon>
           Nuevo tipo documental
         </button>
@@ -49,7 +49,7 @@
     <mat-icon class="state-icon">category</mat-icon>
     <p><strong>No hay tipos documentales registrados.</strong></p>
     <p class="state-hint">Crea el primer tipo documental para comenzar a organizar el repositorio.</p>
-    <button mat-flat-button class="btn-primary mt-3" (click)="openForm()">
+    <button mat-flat-button class="btn-primary mt-3" (click)="openForm()" *ngIf="authService.canEdit()">
       <mat-icon>add</mat-icon> Nuevo tipo documental
     </button>
   </div>
@@ -98,16 +98,16 @@
               </span>
             </td>
             <td class="text-center col-actions">
-              <button mat-icon-button color="primary" matTooltip="Editar tipo documental" (click)="openForm(t)">
+              <button mat-icon-button color="primary" matTooltip="Editar tipo documental" (click)="openForm(t)" *ngIf="authService.canEdit()">
                 <mat-icon>edit</mat-icon>
               </button>
               <button mat-icon-button color="warn" matTooltip="Desactivar tipo documental"
-                      *ngIf="t.estado === 'Activo'"
+                      *ngIf="t.estado === 'Activo' && authService.canEdit()"
                       (click)="deactivate(t)">
                 <mat-icon>block</mat-icon>
               </button>
               <button mat-icon-button color="primary" matTooltip="Reactivar tipo documental"
-                      *ngIf="t.estado !== 'Activo'"
+                      *ngIf="t.estado !== 'Activo' && authService.canEdit()"
                       (click)="activate(t)">
                 <mat-icon>restore</mat-icon>
               </button>

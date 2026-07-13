@@ -20,6 +20,7 @@ import { ScheduleFormDialogComponent } from '../schedule-form-dialog/schedule-fo
 import { ScheduleDetailDialogComponent } from '../schedule-detail-dialog/schedule-detail-dialog';
 import { HttpClient } from '@angular/common/http';
 import { API_BASE_URL } from '../../../core/config/api.config';
+import { AuthService } from '../../../core/auth/auth.service';
 
 interface DayGroup {
   dateKey: string;       // YYYY-MM-DD
@@ -105,7 +106,8 @@ export class ScheduleBoardComponent implements OnInit {
     private snackBar: MatSnackBar,
     private cdr: ChangeDetectorRef,
     private router: Router,
-    private http: HttpClient
+    private http: HttpClient,
+    public authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -342,7 +344,7 @@ export class ScheduleBoardComponent implements OnInit {
   // ── Inline Edit ──────────────────────
 
   startEdit(row: BoardRow, field: string): void {
-    if (row.delivery.estado === 'Cancelado') return;
+    if (!this.authService.canEdit() || row.delivery.estado === 'Cancelado') return;
     
     row.editingField = field;
     switch (field) {
@@ -475,7 +477,7 @@ export class ScheduleBoardComponent implements OnInit {
   // ── Seguimiento Quick Change ─────────
 
   cycleSeguimiento(row: BoardRow): void {
-    if (row.delivery.estado === 'Cancelado' || row.saving) return;
+    if (!this.authService.canEdit() || row.delivery.estado === 'Cancelado' || row.saving) return;
 
     const current = row.delivery.estadoSeguimiento || 'Pendiente';
     let next = 'Pendiente';
@@ -513,6 +515,7 @@ export class ScheduleBoardComponent implements OnInit {
   // ── Actions ──────────────────────────
 
   canRegisterDelivery(row: BoardRow): boolean {
+    if (!this.authService.canEdit()) return false;
     if (row.checkingRealized || row.realizedDelivery) return false;
     if (row.delivery.estado === 'Cancelado') return false;
     const dateStr = row.delivery.fechaProgramada.substring(0, 10);

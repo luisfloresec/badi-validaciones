@@ -13,7 +13,7 @@
       <button mat-button class="btn-secondary-outlined" routerLink="/agreements/types">
         <mat-icon>category</mat-icon> Tipos de Convenio
       </button>
-      <button mat-flat-button color="primary" class="btn-primary" (click)="openAgreementForm()">
+      <button mat-flat-button color="primary" class="btn-primary" (click)="openAgreementForm()" *ngIf="authService.canEdit()">
         <mat-icon>add</mat-icon> Registrar Convenio
       </button>
     </div>
@@ -134,14 +134,14 @@
             <button mat-icon-button class="text-muted"
                     matTooltip="Editar convenio"
                     (click)="openAgreementForm(element)"
-                    *ngIf="element.estado === 'Registrado'">
+                    *ngIf="element.estado === 'Registrado' && authService.canEdit()">
               <mat-icon>edit</mat-icon>
             </button>
             <!-- Anular: si Registrado o Activo -->
             <button mat-icon-button color="warn"
                     matTooltip="Anular convenio"
                     (click)="deactivateAgreement(element)"
-                    *ngIf="element.estado === 'Registrado' || element.estado === 'Activo'">
+                    *ngIf="(element.estado === 'Registrado' || element.estado === 'Activo') && authService.canEdit()">
               <mat-icon>block</mat-icon>
             </button>
             <!-- Histórico: indicador para finalizados/anulados -->

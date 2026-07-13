@@ -19,6 +19,7 @@ import { finalize } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { API_BASE_URL } from '../../../core/config/api.config';
+import { AuthService } from '../../../core/auth/auth.service';
 
 @Component({
   selector: 'app-schedule-detail-dialog',
@@ -63,7 +64,8 @@ export class ScheduleDetailDialogComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) public data: { id: string },
     private cdr: ChangeDetectorRef,
     private router: Router,
-    private http: HttpClient
+    private http: HttpClient,
+    public authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -130,6 +132,7 @@ export class ScheduleDetailDialogComponent implements OnInit {
   }
 
   get isEditable(): boolean {
+    if (!this.authService.canEdit()) return false;
     return (this.delivery?.estado === 'Programado' || this.delivery?.estado === 'Reprogramado') && !this.realizedDeliveryId;
   }
 
@@ -145,6 +148,7 @@ export class ScheduleDetailDialogComponent implements OnInit {
   }
 
   get canRegisterDelivery(): boolean {
+    if (!this.authService.canEdit()) return false;
     if (!this.isEditable || !this.delivery?.fechaProgramada || this.realizedDeliveryId) return false;
 
     const todayStr = this.todayLocalDate();
@@ -207,6 +211,7 @@ export class ScheduleDetailDialogComponent implements OnInit {
   isSeguimientoDropdownOpen = false;
 
   toggleSeguimientoDropdown(event?: Event): void {
+    if (!this.authService.canEdit()) return;
     if (event) {
       event.stopPropagation();
     }

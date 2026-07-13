@@ -113,6 +113,10 @@ export class AuthService {
     return this.hasAnyRole('Administrador', 'Gestión Social');
   }
 
+  isAuditor(): boolean {
+    return this.hasAnyRole('Auditor', 'AUDITOR');
+  }
+
   getInitials(): string {
     const user = this.getCurrentUser();
     if (!user) return '??';
