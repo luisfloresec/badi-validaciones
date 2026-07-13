@@ -303,7 +303,7 @@ export class OrganizationsPlaceholderComponent implements OnInit {
     this.exportLoading = true;
     this.cdr.detectChanges();
 
-    const currentEstado = this.showInactive ? 'TODOS' : 'Activa';
+    const currentEstado = this.showInactive ? 'TODOS' : '';
     this.orgService.exportExcel(this.searchTerm, currentEstado, this.filterTipo).subscribe({
       next: (blob) => {
         const url = window.URL.createObjectURL(blob);

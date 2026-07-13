@@ -815,9 +815,8 @@ export class OrganizationsService {
   }
 
   async exportToExcel(searchTerm?: string, estado?: string, tipoOrganizacion?: string): Promise<ExcelJS.Workbook> {
-    // Para exportar con filtros variados, obtenemos TODAS las organizaciones (includeInactive = true)
-    // y aplicamos los filtros manualmente en memoria, tal como lo hace el frontend.
-    let orgs = await this.findAll(true);
+    const includeInactive = estado === 'TODOS' || estado === 'Inactiva';
+    let orgs = await this.findAll(includeInactive);
 
     if (searchTerm) {
       const term = searchTerm.toLowerCase().trim();
