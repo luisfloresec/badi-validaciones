@@ -7,4 +7,4 @@
  *
  * Para desarrollo local, dejar como está:
  */
-export const API_BASE_URL = 'http://localhost:3000';
+export const API_BASE_URL = 'https://badi-validaciones.onrender.com';
