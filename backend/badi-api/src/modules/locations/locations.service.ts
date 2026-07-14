@@ -4,17 +4,17 @@ import { Repository } from 'typeorm';
 import { Province } from './entities/province.entity';
 import { City } from './entities/city.entity';
 
-/** Datos de seed para Imbabura */
+/** Datos de seed para provincias base del sistema */
 const SEED_DATA: Array<{ nombre: string; codigo: string; ciudades: string[] }> = [
   {
-    nombre: 'Imbabura',
+    nombre: 'IMBABURA',
     codigo: '10',
-    ciudades: ['Ibarra', 'Otavalo', 'Cotacachi', 'Antonio Ante', 'Pimampiro', 'Urcuquí'],
+    ciudades: ['IBARRA', 'OTAVALO', 'COTACACHI', 'ANTONIO ANTE', 'PIMAMPIRO', 'URCUQUÍ'],
   },
   {
-    nombre: 'Pichincha',
+    nombre: 'PICHINCHA',
     codigo: '17',
-    ciudades: ['Quito', 'Rumiñahui', 'Cayambe', 'Pedro Moncayo', 'Mejía', 'Puerto Quito'],
+    ciudades: ['QUITO', 'RUMIÑAHUI', 'CAYAMBE', 'PEDRO MONCAYO', 'MEJÍA', 'PUERTO QUITO'],
   },
 ];
 
@@ -33,10 +33,14 @@ export class LocationsService implements OnModuleInit {
     await this.seedLocations();
   }
 
-  /** Inserta provincias y ciudades iniciales de forma idempotente. */
+  /** Inserta provincias y ciudades iniciales de forma idempotente (case-insensitive). */
   async seedLocations(): Promise<void> {
     for (const item of SEED_DATA) {
-      let province = await this.provinceRepo.findOne({ where: { nombre: item.nombre } });
+      // Búsqueda case-insensitive para evitar duplicar registros con diferente capitalización
+      let province = await this.provinceRepo
+        .createQueryBuilder('p')
+        .where('UPPER(TRIM(p.nombre)) = :nombre', { nombre: item.nombre.trim().toUpperCase() })
+        .getOne();
 
       if (!province) {
         province = this.provinceRepo.create({
@@ -48,9 +52,13 @@ export class LocationsService implements OnModuleInit {
       }
 
       for (const ciudadNombre of item.ciudades) {
-        const existingCity = await this.cityRepo.findOne({
-          where: { nombre: ciudadNombre, provincia: { id: province.id } },
-        });
+        // Búsqueda case-insensitive por nombre y provincia
+        const existingCity = await this.cityRepo
+          .createQueryBuilder('c')
+          .where('c.id_provincia = :provId', { provId: province.id })
+          .andWhere('UPPER(TRIM(c.nombre)) = :nombre', { nombre: ciudadNombre.trim().toUpperCase() })
+          .getOne();
+
         if (!existingCity) {
           const city = this.cityRepo.create({
             nombre: ciudadNombre,
@@ -62,6 +70,7 @@ export class LocationsService implements OnModuleInit {
       }
     }
   }
+
 
   /** Devuelve todas las provincias activas, ordenadas por nombre. */
   async getProvinces(): Promise<Province[]> {
